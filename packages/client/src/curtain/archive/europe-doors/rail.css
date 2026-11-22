@@ -1,0 +1,393 @@
+/* 'rail' (Europe) curtain: art-deco carriage doors. See RailCurtain.tsx. All motion is transform/opacity. */
+.ttb-curtain .rc-root {
+  --rc-brass: linear-gradient(135deg, #f6e3a6 0%, #d4ad57 30%, #a07a32 55%, #e9cf86 75%, #8a6527 100%);
+  --rc-brass-solid: #c9a24e;
+  --rc-wood: #4a1d15;
+  --rc-enamel: #1f4a3a;
+  --rc-cream: #f2ead6;
+  --rc-oxblood: #7b1e2b;
+  /* plaque width: everything on the plaque scales from it, phone to 4K */
+  --pw: min(88vw, max(500px, 40vw), 115vh);
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  font-family: "Josefin Sans", "Futura", "Century Gothic", sans-serif;
+}
+.ttb-curtain .rc-root > * { position: absolute; inset: 0; }
+
+/* what sits behind the doors: dark while closed (no seam hairline), gold light while they part */
+.ttb-curtain .rc-backing { background: #120b08; }
+.ttb-curtain .rc-light {
+  opacity: 0;
+  background:
+    radial-gradient(ellipse 22% 70% at 50% 50%, #fffbe9 0%, #ffe7a3 25%, rgba(240, 190, 90, .75) 50%, rgba(184, 144, 58, 0) 78%),
+    radial-gradient(ellipse 70% 90% at 50% 55%, rgba(255, 214, 130, .55), rgba(184, 144, 58, 0) 70%);
+  transform: scaleX(.06);
+  will-change: transform, opacity;
+}
+
+/* ---------- doors ---------- */
+.ttb-curtain .rc-stage { perspective: max(1300px, 120vmax); perspective-origin: 50% 50%; will-change: transform; }
+.ttb-curtain .rc-door {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 50%;
+  overflow: hidden;
+  backface-visibility: hidden;
+  will-change: transform, opacity;
+  background:
+    repeating-linear-gradient(91deg, rgba(0, 0, 0, .10) 0 2px, rgba(255, 255, 255, .025) 2px 5px, rgba(0, 0, 0, 0) 5px 11px),
+    linear-gradient(90deg, #3a150f 0%, #5e261b 35%, #4a1d15 60%, #331310 100%);
+}
+.ttb-curtain .rc-door-l { left: 0; transform-origin: 0 50%; }
+.ttb-curtain .rc-door-r { left: 50%; transform-origin: 100% 50%; }
+.ttb-curtain .rc-face { position: absolute; inset: 0; }
+.ttb-curtain .rc-door-r .rc-face { transform: scaleX(-1); }
+/* lacquer gloss */
+.ttb-curtain .rc-face::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(115deg, rgba(255, 235, 200, 0) 20%, rgba(255, 235, 200, .09) 38%, rgba(255, 235, 200, 0) 52%);
+}
+
+/* brass-framed inner panel: chevron bands top and bottom, green enamel with a sunburst in between */
+.ttb-curtain .rc-frame {
+  position: absolute;
+  inset: max(14px, 4vmin) max(14px, 3.4vmin) max(14px, 4vmin) max(18px, 5vmin);
+  display: flex;
+  flex-direction: column;
+  border: max(2px, .35vmin) solid var(--rc-brass-solid);
+  outline: 1px solid rgba(233, 207, 134, .55);
+  outline-offset: max(4px, .8vmin);
+  box-shadow: inset 0 0 0 max(3px, .6vmin) #2a0f0b, inset 0 0 0 calc(max(3px, .6vmin) + 1px) rgba(233, 207, 134, .5), 0 0 2vmin rgba(0, 0, 0, .5);
+  animation: rc-frame-in 1s cubic-bezier(.2, .7, .2, 1) both;
+}
+.ttb-curtain .rc-chev {
+  flex: 0 0 max(18px, 5vmin);
+  --c: #c9a24e;
+  --s: max(14px, 3.6vmin);
+  background:
+    linear-gradient(135deg, var(--c) 25%, transparent 25%) calc(var(--s) / -2) 0,
+    linear-gradient(225deg, var(--c) 25%, transparent 25%) calc(var(--s) / -2) 0,
+    linear-gradient(315deg, var(--c) 25%, transparent 25%),
+    linear-gradient(45deg, var(--c) 25%, transparent 25%),
+    #2a0f0b;
+  background-size: var(--s) var(--s);
+  opacity: .85;
+  position: relative;
+  overflow: hidden;
+}
+.ttb-curtain .rc-chev-top { border-bottom: max(2px, .3vmin) solid var(--rc-brass-solid); }
+.ttb-curtain .rc-chev-bot { border-top: max(2px, .3vmin) solid var(--rc-brass-solid); transform: scaleY(-1); }
+.ttb-curtain .rc-enamel {
+  position: relative;
+  flex: 1;
+  overflow: hidden;
+  background: radial-gradient(ellipse 120% 60% at 100% 50%, #2c6150 0%, var(--rc-enamel) 45%, #12302a 100%);
+  box-shadow: inset 0 0 4vmin rgba(0, 0, 0, .55);
+}
+.ttb-curtain .rc-sun {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transform-origin: 100% 50%;
+  animation: rc-sun-in 1.4s cubic-bezier(.2, .8, .2, 1) .25s both;
+}
+
+/* brass seam strip, handle and hinges (in face coordinates: seam on the right) */
+.ttb-curtain .rc-seam {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: max(4px, .9vmin);
+  background: linear-gradient(90deg, #6e4f1c, #f0d68e 45%, #a07a32);
+  box-shadow: -1px 0 3px rgba(0, 0, 0, .6);
+}
+.ttb-curtain .rc-handle {
+  position: absolute;
+  right: max(16px, 4.2vmin);
+  top: 70%;
+  width: max(8px, 1.5vmin);
+  height: max(56px, 15vmin);
+  border-radius: 999px;
+  background: linear-gradient(90deg, #7d5a22, #f6e3a6 40%, #c9a24e 60%, #6e4f1c);
+  box-shadow: 0 .6vmin 1.2vmin rgba(0, 0, 0, .6), 0 0 0 max(2px, .35vmin) #2a0f0b;
+  animation: rc-fade-in .8s ease 1s both;
+}
+.ttb-curtain .rc-hinge {
+  position: absolute;
+  left: 0;
+  width: max(8px, 1.6vmin);
+  height: max(36px, 8vmin);
+  transform: translateY(-50%);
+  border-radius: 0 3px 3px 0;
+  background: linear-gradient(90deg, #6e4f1c, #e9cf86 50%, #8a6527);
+  box-shadow: 1px 0 4px rgba(0, 0, 0, .6);
+}
+.ttb-curtain .rc-shade { position: absolute; inset: 0; background: #0b0605; opacity: 0; pointer-events: none; }
+
+/* ---------- plaque (one copy per door, centred on the seam, so it splits as the doors part) ---------- */
+.ttb-curtain .rc-plaque {
+  position: absolute;
+  top: 50%;
+  width: var(--pw);
+  padding: calc(var(--pw) * .014);
+  border-radius: calc(var(--pw) * .03);
+  background: var(--rc-brass);
+  box-shadow: 0 calc(var(--pw) * .02) calc(var(--pw) * .06) rgba(0, 0, 0, .65);
+  transform: translate(-50%, -50%);
+  overflow: hidden;
+  animation: rc-plaque-in 1s cubic-bezier(.2, .8, .25, 1.05) .6s both;
+  will-change: transform, opacity;
+}
+.ttb-curtain .rc-door-l .rc-plaque { left: 100%; }
+.ttb-curtain .rc-door-r .rc-plaque { left: 0; }
+/* brass gleam sweeping across */
+.ttb-curtain .rc-plaque::after {
+  content: "";
+  position: absolute;
+  inset: -20% auto -20% 0;
+  width: 30%;
+  background: linear-gradient(100deg, rgba(255, 250, 225, 0), rgba(255, 250, 225, .55), rgba(255, 250, 225, 0));
+  transform: translateX(-120%) skewX(-12deg);
+  animation: rc-gleam 1.1s ease-in-out 2.3s both;
+}
+.ttb-curtain .rc-plaque-in {
+  border-radius: calc(var(--pw) * .02);
+  padding: calc(var(--pw) * .035) calc(var(--pw) * .06) calc(var(--pw) * .04);
+  background:
+    radial-gradient(ellipse 80% 70% at 50% 35%, #fbf6e7 0%, var(--rc-cream) 60%, #e3d6b4 100%);
+  border: calc(var(--pw) * .005) solid var(--rc-oxblood);
+  box-shadow: inset 0 0 0 calc(var(--pw) * .008) var(--rc-cream), inset 0 0 0 calc(var(--pw) * .011) var(--rc-brass-solid);
+  text-align: center;
+  color: #1f2a24;
+}
+.ttb-curtain .rc-wheel {
+  display: block;
+  width: calc(var(--pw) * .2);
+  margin: 0 auto calc(var(--pw) * .012);
+  color: var(--rc-oxblood);
+  overflow: visible;
+}
+.ttb-curtain .rc-wheel-spin { transform-origin: 50px 25px; animation: rc-spin 1.6s cubic-bezier(.2, .7, .3, 1) .9s both; }
+.ttb-curtain .rc-kicker {
+  font-family: "Barlow Condensed", "Arial Narrow", sans-serif;
+  font-weight: 600;
+  font-size: calc(var(--pw) * .026);
+  letter-spacing: .32em;
+  text-transform: uppercase;
+  color: #4a5a50;
+  animation: rc-rise .8s ease 1.25s both;
+}
+.ttb-curtain .rc-title {
+  margin: calc(var(--pw) * .014) 0 calc(var(--pw) * .012);
+  font-weight: 700;
+  font-size: calc(var(--pw) * .068);
+  line-height: 1.05;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  text-wrap: balance;
+  color: var(--rc-oxblood);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, .6);
+  animation: rc-title-in 1.1s cubic-bezier(.2, .8, .2, 1) 1.45s both;
+}
+.ttb-curtain .rc-rule {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: calc(var(--pw) * .02);
+  margin-bottom: calc(var(--pw) * .016);
+  animation: rc-rule-in .8s ease 1.9s both;
+}
+.ttb-curtain .rc-rule span { height: calc(var(--pw) * .004); width: 28%; background: var(--rc-brass-solid); }
+.ttb-curtain .rc-rule i {
+  width: calc(var(--pw) * .018);
+  height: calc(var(--pw) * .018);
+  background: var(--rc-oxblood);
+  transform: rotate(45deg);
+}
+.ttb-curtain .rc-sub {
+  font-family: "Barlow Condensed", "Arial Narrow", sans-serif;
+  font-weight: 500;
+  font-size: calc(var(--pw) * .03);
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: #1f4a3a;
+  animation: rc-rise .8s ease 2.15s both;
+}
+
+/* ---------- brass catch across the seam ---------- */
+.ttb-curtain .rc-latch { inset: auto; left: 50%; top: calc(70% + max(28px, 7.5vmin)); width: 0; height: 0; animation: rc-fade-in .7s ease 1.1s both; }
+.ttb-curtain .rc-latch-boss,
+.ttb-curtain .rc-latch-bar { position: absolute; left: 0; top: 0; transform: translate(-50%, -50%); }
+.ttb-curtain .rc-latch-boss {
+  width: max(22px, 5.4vmin);
+  height: max(22px, 5.4vmin);
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff3c4, #d4ad57 40%, #7d5a22 100%);
+  box-shadow: 0 .5vmin 1.2vmin rgba(0, 0, 0, .7), 0 0 0 max(2px, .4vmin) #2a0f0b;
+}
+.ttb-curtain .rc-latch-bar {
+  width: max(64px, 17vmin);
+  height: max(7px, 1.5vmin);
+  border-radius: 999px;
+  background: linear-gradient(180deg, #f6e3a6, #c9a24e 50%, #6e4f1c);
+  box-shadow: 0 .4vmin .8vmin rgba(0, 0, 0, .6);
+  will-change: transform;
+}
+
+/* ---------- steam ---------- */
+.ttb-curtain .rc-steam { overflow: hidden; }
+.ttb-curtain .rc-puff {
+  position: absolute;
+  bottom: -28vmin;
+  width: 60vmin;
+  height: 60vmin;
+  margin-left: -30vmin;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 252, 244, .9) 0%, rgba(245, 238, 225, .55) 35%, rgba(240, 232, 218, 0) 68%);
+  opacity: 0;
+  will-change: transform, opacity;
+}
+.ttb-curtain .rc-puff-0 { left: 50%; }
+.ttb-curtain .rc-puff-1 { left: 38%; width: 70vmin; height: 70vmin; }
+.ttb-curtain .rc-puff-2 { left: 62%; width: 72vmin; height: 72vmin; }
+.ttb-curtain .rc-puff-3 { left: 24%; }
+.ttb-curtain .rc-puff-4 { left: 76%; }
+.ttb-curtain .rc-puff-5 { left: 46%; width: 85vmin; height: 85vmin; }
+.ttb-curtain .rc-puff-6 { left: 10%; width: 50vmin; height: 50vmin; }
+.ttb-curtain .rc-puff-7 { left: 90%; width: 50vmin; height: 50vmin; }
+
+.ttb-curtain .rc-vignette { background: radial-gradient(ellipse 75% 75% at 50% 50%, rgba(0, 0, 0, 0) 55%, rgba(8, 4, 3, .55) 100%); }
+
+/* closed-phase glints: a sheen across the chevron inlays, a flare at the sunburst's heart */
+.ttb-curtain .rc-chev::after {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 35%;
+  background: linear-gradient(100deg, rgba(255, 246, 210, 0), rgba(255, 246, 210, .75), rgba(255, 246, 210, 0));
+  transform: translateX(-110%);
+  animation: rc-sweep 1.3s ease-in-out .7s both;
+}
+.ttb-curtain .rc-chev-bot::after { animation-delay: .95s; }
+.ttb-curtain .rc-glint {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 45% 30% at 100% 50%, rgba(255, 244, 200, .8), rgba(240, 200, 110, .25) 45%, rgba(240, 200, 110, 0) 75%);
+  transform-origin: 100% 50%;
+  opacity: 0;
+  animation: rc-glint 1.4s ease-in-out 1.5s both;
+}
+/* the line of light that cracks open at the seam before the doors move */
+.ttb-curtain .rc-root > .rc-crack {
+  inset: 0 auto 0 50%;
+  width: max(36px, 9vmin);
+  margin-left: min(-18px, -4.5vmin);
+  background: linear-gradient(90deg, rgba(255, 220, 140, 0), rgba(255, 236, 180, .55) 40%, #fffbea 50%, rgba(255, 236, 180, .55) 60%, rgba(255, 220, 140, 0));
+  opacity: 0;
+  transform: scaleY(0);
+  will-change: transform, opacity;
+}
+
+/* ---------- opening (OPEN_MS 5.2 s; everything opaque gone by ~4.9 s) ----------
+ * 0.05 catch turns + settle · 0.5-1.0 held breath · 0.9 light cracks at the seam · 1.0 plaque splits ·
+ * 1.4-4.3 doors swing (ease-in, overshoot, settle) · 1.4-4.9 steam · 1.2-4.8 golden light · backing gone by 3.3
+ */
+.ttb-curtain .rc-open .rc-latch-bar { animation: rc-unlatch .6s linear .05s both; }
+.ttb-curtain .rc-open .rc-latch { animation: rc-fade-out .3s ease .78s both; }
+.ttb-curtain .rc-open .rc-crack { animation: rc-crack 1.7s ease-out .9s both; }
+.ttb-curtain .rc-open .rc-door-l .rc-plaque { animation: rc-split-l .55s cubic-bezier(.3, 0, .2, 1) 1s both; }
+.ttb-curtain .rc-open .rc-door-r .rc-plaque { animation: rc-split-r .55s cubic-bezier(.3, 0, .2, 1) 1s both; }
+.ttb-curtain .rc-open .rc-door-l { animation: rc-swing-l 2.9s linear 1.4s both; }
+.ttb-curtain .rc-open .rc-door-r { animation: rc-swing-r 2.9s linear 1.4s both; }
+.ttb-curtain .rc-open .rc-shade { animation: rc-shade 2.2s ease-in 1.4s both; }
+.ttb-curtain .rc-open .rc-stage { animation: rc-dolly 3.7s cubic-bezier(.45, 0, .2, 1) 1s both; }
+.ttb-curtain .rc-open .rc-backing { animation: rc-fade-out 1.4s ease-in-out 1.9s both; }
+.ttb-curtain .rc-open .rc-light { animation: rc-light 3.6s cubic-bezier(.3, 0, .3, 1) 1.2s both; }
+.ttb-curtain .rc-open .rc-vignette { animation: rc-fade-out 1.4s ease 2.6s both; }
+.ttb-curtain .rc-open .rc-puff { animation: rc-puff 3s cubic-bezier(.2, .6, .3, 1) both; }
+.ttb-curtain .rc-open .rc-puff-0 { animation-delay: 1.4s; }
+.ttb-curtain .rc-open .rc-puff-1 { animation-delay: 1.5s; }
+.ttb-curtain .rc-open .rc-puff-2 { animation-delay: 1.56s; }
+.ttb-curtain .rc-open .rc-puff-3 { animation-delay: 1.7s; }
+.ttb-curtain .rc-open .rc-puff-4 { animation-delay: 1.65s; }
+.ttb-curtain .rc-open .rc-puff-5 { animation-delay: 1.8s; }
+.ttb-curtain .rc-open .rc-puff-6 { animation-delay: 1.9s; }
+.ttb-curtain .rc-open .rc-puff-7 { animation-delay: 1.85s; }
+
+/* ---------- keyframes ---------- */
+@keyframes rc-fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes rc-fade-out { from { opacity: 1; } to { opacity: 0; } }
+@keyframes rc-frame-in { from { opacity: 0; transform: scale(.97); } to { opacity: 1; transform: none; } }
+@keyframes rc-sun-in { from { opacity: 0; transform: scale(.55) rotate(-6deg); } to { opacity: 1; transform: none; } }
+@keyframes rc-sweep { from { transform: translateX(-110%); } to { transform: translateX(320%); } }
+@keyframes rc-glint {
+  0% { opacity: 0; transform: scale(.6); }
+  40% { opacity: 1; transform: scale(1.05); }
+  100% { opacity: 0; transform: scale(1.3); }
+}
+@keyframes rc-plaque-in {
+  from { opacity: 0; transform: translate(-50%, -46%) scale(.86); }
+  to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+@keyframes rc-gleam { from { transform: translateX(-120%) skewX(-12deg); } to { transform: translateX(400%) skewX(-12deg); } }
+@keyframes rc-spin { from { transform: rotate(-200deg); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes rc-rise { from { opacity: 0; transform: translateY(40%); } to { opacity: 1; transform: none; } }
+@keyframes rc-title-in { from { opacity: 0; transform: translateY(18%) scale(1.06); } to { opacity: 1; transform: none; } }
+@keyframes rc-rule-in { from { opacity: 0; transform: scaleX(.2); } to { opacity: 1; transform: none; } }
+@keyframes rc-unlatch {
+  0% { transform: translate(-50%, -50%) rotate(0); animation-timing-function: cubic-bezier(.5, 0, .7, .4); }
+  12% { transform: translate(-50%, -50%) rotate(6deg); animation-timing-function: cubic-bezier(.3, 0, .2, 1); }
+  60% { transform: translate(-50%, -50%) rotate(-98deg); animation-timing-function: ease-in-out; }
+  80% { transform: translate(-50%, -50%) rotate(-87deg); animation-timing-function: ease-in-out; }
+  100% { transform: translate(-50%, -50%) rotate(-90deg); }
+}
+@keyframes rc-crack {
+  0% { opacity: 0; transform: scaleY(0); }
+  25% { opacity: 1; transform: scaleY(1); }
+  45% { opacity: 1; transform: scaleY(1) scaleX(1.6); }
+  100% { opacity: 0; transform: scaleY(1) scaleX(4); }
+}
+@keyframes rc-split-l {
+  0% { transform: translate(-50%, -50%); }
+  30% { transform: translate(-49.6%, -50%); }
+  100% { transform: translate(-53.5%, -50.6%) rotate(-1deg); }
+}
+@keyframes rc-split-r {
+  0% { transform: translate(-50%, -50%); }
+  30% { transform: translate(-50.4%, -50%); }
+  100% { transform: translate(-46.5%, -50.6%) rotate(1deg); }
+}
+/* weight: a slow ease-in start, a swing past open, a settle back; fades once edge-on */
+@keyframes rc-swing-l {
+  0% { transform: rotateY(0); opacity: 1; animation-timing-function: cubic-bezier(.6, 0, .55, 1); }
+  60% { transform: rotateY(104deg); opacity: 1; animation-timing-function: ease-in-out; }
+  80% { transform: rotateY(96deg); animation-timing-function: ease-in-out; }
+  100% { transform: rotateY(100deg); opacity: 0; }
+}
+@keyframes rc-swing-r {
+  0% { transform: rotateY(0); opacity: 1; animation-timing-function: cubic-bezier(.6, 0, .55, 1); }
+  60% { transform: rotateY(-104deg); opacity: 1; animation-timing-function: ease-in-out; }
+  80% { transform: rotateY(-96deg); animation-timing-function: ease-in-out; }
+  100% { transform: rotateY(-100deg); opacity: 0; }
+}
+@keyframes rc-shade { from { opacity: 0; } to { opacity: .7; } }
+@keyframes rc-dolly { from { transform: scale(1); } to { transform: scale(1.14); } }
+@keyframes rc-light {
+  0% { opacity: 0; transform: scaleX(.04); }
+  15% { opacity: .9; transform: scaleX(.12); }
+  45% { opacity: 1; transform: scaleX(1.4); }
+  65% { opacity: .85; }
+  100% { opacity: 0; transform: scaleX(2.8); }
+}
+@keyframes rc-puff {
+  0% { opacity: 0; transform: translateY(10%) scale(.5); }
+  25% { opacity: .9; }
+  60% { opacity: .55; }
+  100% { opacity: 0; transform: translateY(-60vh) scale(1.8); }
+}

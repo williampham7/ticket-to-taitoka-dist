@@ -1,0 +1,195 @@
+/* HSR theme (screens). Scope every rule under [data-theme="hsr"]. */
+
+/* ---------- Frame: a pale concourse with a flat white card ---------- */
+[data-theme="hsr"] .hsr-frame { background: #e9edf2; }
+[data-theme="hsr"] .hsr-frame-wash {
+  background:
+    radial-gradient(ellipse 70% 60% at 50% 50%, rgba(241,243,245,.88), rgba(241,243,245,.55) 70%, rgba(226,231,238,.7)),
+    linear-gradient(180deg, rgba(255,255,255,.35), rgba(255,255,255,0) 40%);
+  backdrop-filter: blur(1.5px) saturate(.7);
+}
+[data-theme="hsr"] .hsr-menu-card {
+  box-shadow: 0 1px 2px rgba(20,33,61,.06), 0 24px 60px -18px rgba(20,33,61,.28);
+}
+/* the train's livery along the card's top edge: CR red with a thin rail-blue line */
+[data-theme="hsr"] .hsr-livery {
+  position: relative; z-index: 1; height: 6px;
+  background: linear-gradient(180deg, var(--color-poster) 0 4px, #fff 4px 5px, var(--color-rail) 5px 6px);
+}
+[data-theme="hsr"] .hsr-zh { font-family: var(--font-zh); }
+[data-theme="hsr"] .hsr-train-no {
+  font-family: var(--font-ui); font-weight: 700; font-size: 12px; letter-spacing: .04em; line-height: 18px;
+  color: #fff; background: var(--color-rail); border-radius: 6px; padding: 0 7px;
+}
+[data-theme="hsr"] .hsr-kicker {
+  font-family: var(--font-display); font-weight: 600; font-size: 13px; letter-spacing: .2em;
+  text-transform: uppercase; color: var(--color-muted);
+}
+
+/* ---------- Home hero ---------- */
+[data-theme="hsr"] .hsr-hero { border-bottom: 1px solid var(--color-line); overflow: hidden; }
+[data-theme="hsr"] .hsr-train { animation: hsr-train-in 1100ms cubic-bezier(.16,.84,.3,1) both; }
+[data-theme="hsr"] .hsr-speedlines { animation: hsr-speed 1800ms ease-in-out 900ms infinite alternate; }
+@keyframes hsr-train-in { from { transform: translateX(-90px); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes hsr-speed { from { transform: translateX(0); opacity: 1; } to { transform: translateX(-14px); opacity: .55; } }
+
+/* ---------- Buttons, links, inputs ---------- */
+[data-theme="hsr"] .hsr-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: .5em;
+  border-radius: 12px; padding: 12px 22px; min-height: 48px;
+  font-family: var(--font-display); font-weight: 700; font-size: 17px; letter-spacing: .07em; text-transform: uppercase;
+  transition: background-color .15s, border-color .15s, color .15s, box-shadow .15s, transform .1s;
+}
+[data-theme="hsr"] .hsr-btn:enabled:active { transform: translateY(1px); }
+[data-theme="hsr"] .hsr-btn-primary {
+  background: var(--color-poster); color: #fff;
+  box-shadow: 0 1px 2px rgba(155,12,35,.3), 0 8px 18px -8px rgba(200,16,46,.55);
+}
+[data-theme="hsr"] .hsr-btn-primary:enabled:hover { background: var(--color-poster-dark); }
+[data-theme="hsr"] .hsr-btn-primary:disabled { background: #c3cad6; color: #f4f6f9; box-shadow: none; }
+[data-theme="hsr"] .hsr-btn-secondary {
+  background: transparent; color: var(--color-ink); border: 1.5px solid var(--color-ink);
+  padding: 10.5px 20.5px;
+}
+[data-theme="hsr"] .hsr-btn-secondary:hover { background: rgba(20,33,61,.05); }
+[data-theme="hsr"] .hsr-btn:focus-visible { outline: none; box-shadow: 0 0 0 3px #fff, 0 0 0 6px rgba(29,95,191,.55); }
+
+[data-theme="hsr"] .hsr-link {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-weight: 600; font-size: 15px; color: var(--color-rail);
+}
+[data-theme="hsr"] .hsr-link::after { content: "→"; transition: transform .15s; }
+[data-theme="hsr"] .hsr-link:hover::after { transform: translateX(3px); }
+[data-theme="hsr"] .hsr-link:hover { color: #164a96; }
+
+[data-theme="hsr"] .hsr-input {
+  border-radius: 10px; border: 1px solid var(--color-line-strong); background: #fff;
+  padding: 9px 13px; font-size: 16px; color: var(--color-ink);
+  transition: border-color .15s, box-shadow .15s;
+}
+[data-theme="hsr"] .hsr-input:hover { border-color: #8a98ad; }
+[data-theme="hsr"] .hsr-input:focus { outline: none; border-color: var(--color-rail); box-shadow: 0 0 0 4px rgba(29,95,191,.16); }
+[data-theme="hsr"] .hsr-label { font-size: 13px; font-weight: 600; letter-spacing: .02em; color: var(--color-muted); }
+
+/* segmented control (player count) */
+[data-theme="hsr"] .hsr-seg { display: inline-flex; gap: 3px; padding: 3px; border-radius: 12px; background: var(--color-panel-2); border: 1px solid var(--color-line); }
+[data-theme="hsr"] .hsr-seg > button {
+  width: 44px; height: 36px; border-radius: 9px;
+  font-family: var(--font-display); font-weight: 700; font-size: 18px; color: var(--color-muted);
+  transition: background-color .15s, color .15s, box-shadow .15s;
+}
+[data-theme="hsr"] .hsr-seg > button:hover { color: var(--color-ink); background: rgba(255,255,255,.7); }
+[data-theme="hsr"] .hsr-seg > button[aria-checked="true"] { background: var(--color-ink); color: #fff; box-shadow: 0 2px 6px rgba(20,33,61,.25); }
+
+/* colour swatches */
+[data-theme="hsr"] .hsr-swatch {
+  height: 30px; width: 30px; border-radius: 9999px; border: 2px solid #fff;
+  box-shadow: 0 0 0 1px rgba(20,33,61,.18);
+  transition: transform .12s, box-shadow .12s;
+}
+[data-theme="hsr"] .hsr-swatch:enabled:hover { transform: scale(1.08); box-shadow: 0 0 0 1px rgba(20,33,61,.4); }
+[data-theme="hsr"] .hsr-swatch[aria-checked="true"] { transform: scale(1.06); box-shadow: 0 0 0 2px var(--color-ink), 0 3px 8px rgba(20,33,61,.25); }
+[data-theme="hsr"] .hsr-swatch:disabled { opacity: .18; }
+
+/* ---------- Seat cards: a boarding-pass strip per player ---------- */
+[data-theme="hsr"] .hsr-seat {
+  position: relative; display: flex; align-items: center; gap: 14px;
+  border: 1px solid var(--color-line); border-radius: 14px; background: #fff;
+  padding: 10px 14px 10px 18px; overflow: hidden;
+}
+[data-theme="hsr"] .hsr-seat::before {
+  content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 6px; background: var(--seat, var(--color-line-strong));
+}
+[data-theme="hsr"] .hsr-seat-no {
+  display: grid; place-items: center; flex-shrink: 0; width: 42px;
+  font-family: var(--font-display); font-weight: 700; line-height: 1; color: var(--color-ink);
+  border-right: 1px dashed var(--color-line-strong); padding-right: 12px;
+}
+[data-theme="hsr"] .hsr-seat-no small { font-size: 10px; letter-spacing: .14em; color: var(--color-muted); font-weight: 600; }
+[data-theme="hsr"] .hsr-seat-no b { font-size: 22px; }
+[data-theme="hsr"] .hsr-seat-open { background: transparent; border-style: dashed; color: var(--color-muted); }
+[data-theme="hsr"] .hsr-tag {
+  border-radius: 6px; padding: 1px 7px; font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase;
+}
+
+/* QR panel */
+[data-theme="hsr"] .hsr-qr { border: 1px solid var(--color-line); border-radius: 16px; background: #fff; padding: 12px; box-shadow: 0 6px 18px -10px rgba(20,33,61,.3); }
+[data-theme="hsr"] .hsr-url {
+  border: 1px solid var(--color-line); background: var(--color-panel-2); border-radius: 10px;
+  padding: 8px 12px; font-size: 14.5px; font-weight: 600; color: var(--color-rail);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Audio buttons ---------- */
+[data-theme="hsr"] .hsr-audio-btn {
+  background: rgba(255,255,255,.9); border-color: var(--color-line); border-radius: 10px;
+  box-shadow: 0 1px 2px rgba(20,33,61,.08);
+}
+[data-theme="hsr"] .hsr-audio-btn:hover, [data-theme="hsr"] .hsr-audio-btn[aria-expanded="true"] { border-color: var(--color-rail); color: var(--color-rail); }
+
+/* ---------- Pass-and-play curtain: a station platform screen door ---------- */
+[data-theme="hsr"] .hsr-curtain {
+  background: #0b1730; color: #fff; overflow: hidden;
+}
+/* two glass door leaves meeting in the middle, closing as the curtain comes down */
+[data-theme="hsr"] .hsr-door {
+  position: absolute; top: 0; bottom: 0; width: 50%;
+  background:
+    linear-gradient(90deg, rgba(255,255,255,.035), rgba(255,255,255,0) 30%),
+    linear-gradient(180deg, #11234a 0%, #0c1a38 55%, #0a1630 100%);
+}
+/* each leaf's tall glass window */
+[data-theme="hsr"] .hsr-door::before {
+  content: ""; position: absolute; top: 16%; bottom: 14%; left: 16%; right: 16%;
+  border-radius: 14px; border: 1px solid rgba(255,255,255,.07);
+  background: linear-gradient(160deg, rgba(120,160,230,.08), rgba(255,255,255,0) 45%);
+}
+/* the passenger information screen hung over the closed doors */
+[data-theme="hsr"] .hsr-screen {
+  position: relative; border-radius: 20px; background: #060e22;
+  border: 1px solid rgba(255,255,255,.1);
+  box-shadow: 0 30px 80px -20px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.06);
+}
+[data-theme="hsr"] .hsr-screen::before {
+  content: ""; position: absolute; left: 24px; right: 24px; top: 0; height: 3px; border-radius: 0 0 3px 3px;
+  background: linear-gradient(90deg, var(--color-poster) 0 70%, var(--color-rail) 70%);
+}
+[data-theme="hsr"] .hsr-door-l { left: 0; border-right: 1px solid rgba(255,255,255,.12); animation: hsr-door-l 420ms cubic-bezier(.2,.8,.2,1) both; }
+[data-theme="hsr"] .hsr-door-r { right: 0; border-left: 1px solid rgba(0,0,0,.4); animation: hsr-door-r 420ms cubic-bezier(.2,.8,.2,1) both; }
+@keyframes hsr-door-l { from { transform: translateX(-30%); } to { transform: none; } }
+@keyframes hsr-door-r { from { transform: translateX(30%); } to { transform: none; } }
+/* the LED strip above the doors */
+[data-theme="hsr"] .hsr-platform-led {
+  position: absolute; left: 0; right: 0; top: 0; display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 12px 20px; background: #050c1c; border-bottom: 1px solid rgba(255,255,255,.08);
+  font-family: var(--font-display); font-weight: 600; font-size: 14px; letter-spacing: .18em; text-transform: uppercase; color: #ffb21a;
+}
+[data-theme="hsr"] .hsr-platform-led .zh { font-family: var(--font-zh); letter-spacing: .3em; }
+[data-theme="hsr"] .hsr-platform-dot { width: 8px; height: 8px; border-radius: 9999px; background: #2ee66b; box-shadow: 0 0 8px #2ee66b; display: inline-block; }
+/* platform edge: the yellow tactile strip */
+[data-theme="hsr"] .hsr-platform {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 26px;
+  background:
+    radial-gradient(circle, rgba(0,0,0,.18) 2px, transparent 2.5px) 0 0 / 10px 10px,
+    #f2b705;
+  border-top: 4px solid #0a1630;
+  box-shadow: 0 -1px 0 rgba(255,255,255,.1);
+}
+[data-theme="hsr"] .hsr-board-zh { font-family: var(--font-zh); font-weight: 700; letter-spacing: .08em; }
+[data-theme="hsr"] .hsr-recap { border: 1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.05); border-radius: 14px; }
+[data-theme="hsr"] .hsr-last-turn {
+  display: inline-flex; align-items: center; gap: 8px; border-radius: 9999px; padding: 4px 14px;
+  background: var(--color-poster); color: #fff;
+  font-family: var(--font-display); font-weight: 700; font-size: 17px; letter-spacing: .1em; text-transform: uppercase;
+}
+[data-theme="hsr"] .hsr-curtain .hsr-btn:focus-visible { box-shadow: 0 0 0 3px #0b1730, 0 0 0 6px rgba(255,178,26,.8); }
+
+@media (prefers-reduced-motion: reduce) {
+  [data-theme="hsr"] .hsr-train, [data-theme="hsr"] .hsr-speedlines,
+  [data-theme="hsr"] .hsr-door-l, [data-theme="hsr"] .hsr-door-r { animation: none; }
+}
+
+[data-theme="hsr"] .hsr-audio-panel { background: #fff; border-radius: 12px; box-shadow: 0 10px 30px -10px rgba(20,33,61,.35); }
+[data-theme="hsr"] .volume-range::-webkit-slider-thumb { background: #fff; border-color: var(--color-poster); box-shadow: 0 1px 3px rgba(20,33,61,.3); }
+[data-theme="hsr"] .volume-range::-moz-range-thumb { background: #fff; border-color: var(--color-poster); }
+[data-theme="hsr"] .volume-range::-webkit-slider-runnable-track { background: linear-gradient(to right, var(--color-poster) var(--fill), var(--color-line) var(--fill)); }

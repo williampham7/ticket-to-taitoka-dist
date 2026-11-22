@@ -1,0 +1,443 @@
+/* 'vintage' (USA) curtain: through the depot doors into the new world. See VintageCurtain.tsx.
+ * All motion is transform/opacity. Base styles are the settled closed state (so reduced motion shows a still card). */
+.ttb-curtain .vd-root {
+  /* doorway width (the doorway box is 1 x 1.8 of it) and ticket width; everything scales from these */
+  --dw: min(56vw, 40vh);
+  --tw: min(90vw, max(440px, 34vw), 100vh);
+  --vd-cream: #f3e6c4;
+  --vd-red: #a3262a;
+  --vd-navy: #1c2c52;
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+.ttb-curtain .vd-fill { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+
+/* ---------- beyond the doors: soft light, then the board coming into focus ---------- */
+.ttb-curtain .vd-focus { position: absolute; inset: 0; }
+.ttb-curtain .vd-glow {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: radial-gradient(ellipse 70% 80% at 50% calc(48% + .25 * var(--dw)), #fffaf0 0%, #ffecc0 28%, #f6c983 62%, #dd9a58 100%);
+  will-change: opacity;
+}
+/* slow, faint rays turning in the light */
+.ttb-curtain .vd-glow-rays {
+  position: absolute;
+  inset: -60%;
+  background: repeating-conic-gradient(from 0deg, rgba(255, 252, 236, 0) 0deg 7deg, rgba(255, 252, 236, .55) 10deg, rgba(255, 252, 236, 0) 13deg 18deg);
+  opacity: .35;
+  filter: blur(8px);
+  animation: vd-spin 80s linear infinite;
+}
+/* the light whitens as it floods in */
+.ttb-curtain .vd-glow::after { content: ""; position: absolute; inset: 0; background: #fffdf4; opacity: 0; }
+
+/* ---------- decor ---------- */
+.ttb-curtain .vd-wclouds { animation: vd-wdrift 26s ease-in-out infinite alternate; }
+.ttb-curtain .vd-whazeband { animation: vd-whaze 18s ease-in-out infinite alternate; }
+.ttb-curtain .vd-wtrain { transform: translate(-14px, 63.4px); animation: vd-wtrain 22s linear -9s infinite; }
+.ttb-curtain .vd-wsteam circle { transform-box: fill-box; transform-origin: center; animation: vd-wsteam 1.4s ease-out infinite; }
+.ttb-curtain .vd-wsteam circle:nth-child(2) { animation-delay: -.45s; }
+.ttb-curtain .vd-wsteam circle:nth-child(3) { animation-delay: -.9s; }
+.ttb-curtain .vd-winbeam { mix-blend-mode: screen; animation: vd-fade-in 2s ease .5s both; }
+.ttb-curtain .vd-minute { transform: rotate(52deg); }
+.ttb-curtain .vd-second { animation: vd-tick 60s steps(60) infinite; }
+
+/* ---------- inside: the camera dollies from the door centre ---------- */
+.ttb-curtain .vd-stage {
+  position: absolute;
+  inset: 0;
+  transform-origin: 50% calc(48% + .25 * var(--dw));
+  will-change: transform, opacity;
+}
+.ttb-curtain .vd-box {
+  position: absolute;
+  left: calc(50% - var(--dw) / 2);
+  top: calc(48% - .9 * var(--dw));
+  width: var(--dw);
+  height: calc(1.8 * var(--dw));
+}
+.ttb-curtain .vd-wall { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; display: block; }
+.ttb-curtain .vd-shafts { mix-blend-mode: screen; pointer-events: none; }
+.ttb-curtain .vd-halo,
+.ttb-curtain .vd-bulb { animation: vd-lamp-on 1.3s linear .15s both, vd-flicker 5s linear 1.5s infinite; }
+.ttb-curtain .vd-dim { opacity: 0; }
+.ttb-curtain .vd-fan { animation: vd-fade-in 1.4s ease .4s both; }
+.ttb-curtain .vd-star { transform-box: fill-box; transform-origin: center; }
+
+.ttb-curtain .vd-pool { opacity: .14; animation: vd-fade-in 1.6s ease .6s both; }
+.ttb-curtain .vd-pool-seam { opacity: .55; animation: vd-fade-in 1s ease .7s both, vd-breathe 3.4s ease-in-out 1.7s infinite; }
+.ttb-curtain .vd-sill { opacity: .8; animation: vd-fade-in 1s ease .6s both, vd-breathe 3.4s ease-in-out 1.6s infinite; }
+.ttb-curtain .vd-fanbeams { opacity: .13; filter: blur(1.5px); animation: vd-fade-in 1.6s ease .9s both, vd-shimmer 6s ease-in-out 2.5s infinite; }
+.ttb-curtain .vd-doorbeams { opacity: 0; filter: blur(2px); }
+.ttb-curtain .vd-motes { opacity: .7; animation: vd-fade-in 2s ease 1s both; }
+.ttb-curtain .vd-motes circle { transform-box: fill-box; transform-origin: center; animation: vd-mote 7s ease-in-out infinite alternate; }
+
+/* the doors */
+.ttb-curtain .vd-doors {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 27.7778%;
+  bottom: 0;
+  perspective: calc(var(--dw) * 3.2);
+}
+.ttb-curtain .vd-leaf { position: absolute; top: 0; bottom: 0; width: 50%; will-change: transform, opacity; }
+.ttb-curtain .vd-leaf svg { width: 100%; height: 100%; display: block; }
+.ttb-curtain .vd-leaf-l { left: 0; transform-origin: 0 50%; }
+.ttb-curtain .vd-leaf-r { left: 50%; transform-origin: 100% 50%; }
+.ttb-curtain .vd-leaf-shade { opacity: 0; }
+.ttb-curtain .vd-gold { font-family: "Alfa Slab One", Georgia, serif; letter-spacing: .04em; }
+.ttb-curtain .vd-gold-small { font-family: "Oswald", "Arial Narrow", sans-serif; font-weight: 500; }
+.ttb-curtain .vd-sheen { transform: translateX(-40px); animation: vd-sheen 1.5s ease-in-out 1.7s both; }
+.ttb-curtain .vd-leaf-r .vd-sheen { animation-delay: 1.85s; }
+/* sunrise leaking through the seam between the leaves */
+.ttb-curtain .vd-seamlight {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: calc(var(--dw) * .05);
+  margin-left: calc(var(--dw) * -.025);
+  background: linear-gradient(90deg, rgba(255, 210, 130, 0), rgba(255, 228, 160, .55) 42%, #fff7dc 50%, rgba(255, 228, 160, .55) 58%, rgba(255, 210, 130, 0));
+  opacity: .45;
+  transform: scaleX(.5);
+  animation: vd-fade-in 1s ease .6s both;
+  will-change: transform, opacity;
+}
+
+/* ---------- the ticket ---------- */
+.ttb-curtain .vd-ticket {
+  position: absolute;
+  left: 50%;
+  top: 60%;
+  width: var(--tw);
+  transform: translate(-50%, -50%) rotate(-1.5deg);
+  filter: drop-shadow(0 calc(var(--tw) * .02) calc(var(--tw) * .03) rgba(0, 0, 0, .6));
+  animation: vd-ticket-in 1.15s cubic-bezier(.2, .8, .25, 1) .55s both;
+  will-change: transform, opacity;
+}
+.ttb-curtain .vd-ticket-jolt { position: relative; }
+.ttb-curtain .vd-whole { position: relative; }
+.ttb-curtain .vd-half { position: absolute; inset: 0; opacity: 0; will-change: transform, opacity; }
+.ttb-curtain .vd-face {
+  --n: calc(var(--tw) * .028);
+  position: relative;
+  padding: calc(var(--tw) * .022);
+  border-radius: calc(var(--tw) * .006);
+  background:
+    radial-gradient(ellipse 60% 80% at 30% 20%, rgba(255, 255, 255, .35), rgba(255, 255, 255, 0) 70%),
+    radial-gradient(ellipse 80% 60% at 90% 100%, rgba(160, 110, 50, .18), rgba(160, 110, 50, 0) 70%),
+    var(--vd-cream);
+  /* notched railroad-ticket corners */
+  -webkit-mask:
+    radial-gradient(circle at 0 0, transparent var(--n), #000 calc(var(--n) + .5px)) top left / 51% 51% no-repeat,
+    radial-gradient(circle at 100% 0, transparent var(--n), #000 calc(var(--n) + .5px)) top right / 51% 51% no-repeat,
+    radial-gradient(circle at 0 100%, transparent var(--n), #000 calc(var(--n) + .5px)) bottom left / 51% 51% no-repeat,
+    radial-gradient(circle at 100% 100%, transparent var(--n), #000 calc(var(--n) + .5px)) bottom right / 51% 51% no-repeat;
+  mask:
+    radial-gradient(circle at 0 0, transparent var(--n), #000 calc(var(--n) + .5px)) top left / 51% 51% no-repeat,
+    radial-gradient(circle at 100% 0, transparent var(--n), #000 calc(var(--n) + .5px)) top right / 51% 51% no-repeat,
+    radial-gradient(circle at 0 100%, transparent var(--n), #000 calc(var(--n) + .5px)) bottom left / 51% 51% no-repeat,
+    radial-gradient(circle at 100% 100%, transparent var(--n), #000 calc(var(--n) + .5px)) bottom right / 51% 51% no-repeat;
+  overflow: hidden;
+}
+/* gleam across the card stock */
+.ttb-curtain .vd-face::after {
+  content: "";
+  position: absolute;
+  inset: -20% auto -20% 0;
+  width: 26%;
+  background: linear-gradient(100deg, rgba(255, 252, 235, 0), rgba(255, 252, 235, .7), rgba(255, 252, 235, 0));
+  transform: translateX(-140%) skewX(-14deg);
+  animation: vd-gleam 1.1s ease-in-out 2.6s both;
+}
+.ttb-curtain .vd-face-in {
+  position: relative;
+  padding: 0 calc(var(--tw) * .05) calc(var(--tw) * .045);
+  border: calc(var(--tw) * .0055) solid var(--vd-red);
+  box-shadow: inset 0 0 0 calc(var(--tw) * .006) var(--vd-cream), inset 0 0 0 calc(var(--tw) * .009) var(--vd-red);
+  text-align: center;
+  color: var(--vd-navy);
+}
+.ttb-curtain .vd-band {
+  display: flex;
+  justify-content: space-between;
+  margin: calc(var(--tw) * .012) calc(var(--tw) * -.038) 0;
+  padding: calc(var(--tw) * .009) calc(var(--tw) * .03);
+  background: var(--vd-navy);
+  color: var(--vd-cream);
+  font-family: "Oswald", "Arial Narrow", sans-serif;
+  font-weight: 500;
+  font-size: calc(var(--tw) * .021);
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  animation: vd-wipe .7s ease .95s both;
+}
+.ttb-curtain .vd-kicker {
+  margin-top: calc(var(--tw) * .032);
+  font-family: "Libre Baskerville", Georgia, serif;
+  font-style: italic;
+  font-size: calc(var(--tw) * .025);
+  color: #5a4632;
+  animation: vd-rise .8s ease 1.2s both;
+}
+.ttb-curtain .vd-title {
+  margin: calc(var(--tw) * .012) 0 calc(var(--tw) * .014);
+  font-family: "Alfa Slab One", Georgia, serif;
+  font-size: calc(var(--tw) * .064);
+  line-height: 1.05;
+  letter-spacing: .02em;
+  text-transform: uppercase;
+  text-wrap: balance;
+  color: var(--vd-navy);
+  text-shadow: calc(var(--tw) * .003) calc(var(--tw) * .003) 0 rgba(163, 38, 42, .45);
+  animation: vd-title-in 1.1s cubic-bezier(.2, .8, .2, 1) 1.4s both;
+}
+.ttb-curtain .vd-rule {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: calc(var(--tw) * .018);
+  margin-bottom: calc(var(--tw) * .014);
+  color: var(--vd-red);
+  font-style: normal;
+  animation: vd-rule-in .8s ease 1.85s both;
+}
+.ttb-curtain .vd-rule span { height: calc(var(--tw) * .004); width: 24%; background: var(--vd-red); }
+.ttb-curtain .vd-rule i { font-style: normal; font-size: calc(var(--tw) * .03); line-height: 1; }
+.ttb-curtain .vd-sub {
+  font-family: "Oswald", "Arial Narrow", sans-serif;
+  font-weight: 500;
+  font-size: calc(var(--tw) * .026);
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--vd-red);
+  animation: vd-rise .8s ease 2.05s both;
+}
+.ttb-curtain .vd-perf {
+  position: absolute;
+  left: 50%;
+  width: calc(var(--tw) * .008);
+  margin-left: calc(var(--tw) * -.004);
+  background: radial-gradient(circle, rgba(60, 30, 12, .4) 45%, transparent 50%) 0 0 / 100% calc(var(--tw) * .013) repeat-y;
+}
+.ttb-curtain .vd-perf-b { bottom: calc(var(--tw) * .008); height: calc(var(--tw) * .032); }
+.ttb-curtain .vd-perf-t { top: calc(var(--tw) * .05); height: calc(var(--tw) * .02); }
+.ttb-curtain .vd-stamp {
+  position: absolute;
+  right: calc(var(--tw) * .045);
+  bottom: calc(var(--tw) * .03);
+  width: calc(var(--tw) * .14);
+  height: calc(var(--tw) * .14);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: calc(var(--tw) * .005) solid currentColor;
+  box-shadow: inset 0 0 0 calc(var(--tw) * .004) transparent, inset 0 0 0 calc(var(--tw) * .007) currentColor;
+  color: rgba(163, 38, 42, .72);
+  font-family: "Oswald", "Arial Narrow", sans-serif;
+  text-transform: uppercase;
+  line-height: 1;
+  mix-blend-mode: multiply;
+  transform: rotate(-16deg);
+  animation: vd-stamp .5s cubic-bezier(.5, 0, .3, 1.4) 2.3s both;
+}
+.ttb-curtain .vd-stamp b { font-weight: 700; font-size: calc(var(--tw) * .024); letter-spacing: .08em; }
+.ttb-curtain .vd-stamp small { margin-top: calc(var(--tw) * .006); font-size: calc(var(--tw) * .012); letter-spacing: .1em; }
+/* the conductor's punch: a star clipped from the card */
+.ttb-curtain .vd-punch,
+.ttb-curtain .vd-chad {
+  position: absolute;
+  left: calc(var(--tw) * .07);
+  bottom: calc(var(--tw) * .05);
+  width: calc(var(--tw) * .042);
+  height: calc(var(--tw) * .042);
+  clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+  opacity: 0;
+}
+.ttb-curtain .vd-punch { background: #1a0d06; }
+.ttb-curtain .vd-chad { background: var(--vd-cream); }
+
+/* ---------- framing ---------- */
+.ttb-curtain .vd-bloom {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  background: radial-gradient(ellipse 70% 70% at 50% 55%, #fffbea 0%, #ffe6a6 35%, rgba(255, 196, 110, .6) 65%, rgba(255, 170, 90, 0) 100%);
+  will-change: opacity;
+}
+.ttb-curtain .vd-vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 80% 75% at 50% 52%, rgba(0, 0, 0, 0) 50%, rgba(6, 3, 2, .7) 100%);
+}
+.ttb-curtain .vd-bar { position: absolute; left: 0; right: 0; height: 4.5vh; background: #050302; will-change: transform; }
+.ttb-curtain .vd-bar-t { top: 0; animation: vd-bar-t .9s cubic-bezier(.2, .7, .2, 1) .1s both; }
+.ttb-curtain .vd-bar-b { bottom: 0; animation: vd-bar-b .9s cubic-bezier(.2, .7, .2, 1) .1s both; }
+.ttb-curtain .vd-fadein { position: absolute; inset: 0; background: #050302; opacity: 0; animation: vd-fade-out 1.1s ease .05s both; }
+
+/* ---------- opening (OPEN_MS 5.2 s; everything opaque gone by ~4.9 s) ----------
+ * 0.00 punch · 0.30 the ticket tears and falls · 0.45 the latch gives · 0.8-3.4 doors swing, sunlight floods in ·
+ * 1.0 the room dims as the eye adjusts · 1.3-3.1 the light whitens · 1.5-4.4 the camera dollies through the doorway ·
+ * 2.6-4.1 warm bloom · 3.2-4.8 the light dissolves · 3.15-5.0 the board comes into focus (blur + sepia -> sharp colour)
+ */
+.ttb-curtain .vd-open .vd-ticket-jolt { animation: vd-jolt .3s ease-out .02s both; }
+.ttb-curtain .vd-open .vd-punch { animation: vd-show .01s linear .05s both; }
+.ttb-curtain .vd-open .vd-chad { animation: vd-chad .9s cubic-bezier(.4, 0, .9, .6) .05s both; }
+.ttb-curtain .vd-open .vd-whole { animation: vd-fade-out .01s linear .3s both; }
+.ttb-curtain .vd-open .vd-half-l { animation: vd-show .01s linear .3s both, vd-fall-l 1.35s linear .3s both; }
+.ttb-curtain .vd-open .vd-half-r { animation: vd-show .01s linear .3s both, vd-fall-r 1.35s linear .34s both; }
+
+.ttb-curtain .vd-open .vd-leaf-l { animation: vd-swing-l 3s linear .45s both; }
+.ttb-curtain .vd-open .vd-leaf-r { animation: vd-swing-r 3s linear .45s both; }
+.ttb-curtain .vd-open .vd-leaf-shade { animation: vd-to .5 1.8s ease .8s both; }
+.ttb-curtain .vd-open .vd-seamlight { animation: vd-seam 1.4s ease-out .4s both; }
+.ttb-curtain .vd-open .vd-sill { animation: vd-fade-out 1s ease .9s both; }
+.ttb-curtain .vd-open .vd-pool-seam { animation: vd-fade-out 1s ease .9s both; }
+.ttb-curtain .vd-open .vd-pool { animation: vd-pool 2.4s ease .7s both; }
+.ttb-curtain .vd-open .vd-doorbeams { animation: vd-beams 3.6s ease .8s both; }
+.ttb-curtain .vd-open .vd-fanbeams { animation: vd-beams 3.6s ease .6s both; }
+.ttb-curtain .vd-open .vd-fan { animation: vd-fan 2s ease .6s both; }
+.ttb-curtain .vd-open .vd-dim { animation: vd-dim 2.2s ease-in-out 1s both; }
+
+.ttb-curtain .vd-open .vd-stage { animation: vd-dolly 2.9s cubic-bezier(.62, 0, .3, 1) 1.5s both, vd-fade-out .5s ease 3.75s both; }
+.ttb-curtain .vd-open .vd-glow::after { animation: vd-whiten 1.8s ease-in 1.3s both; }
+.ttb-curtain .vd-open .vd-glow { animation: vd-fade-out 1.6s cubic-bezier(.4, 0, .6, 1) 3.2s both; }
+.ttb-curtain .vd-open .vd-focus { animation: vd-focus 1.85s cubic-bezier(.3, 0, .2, 1) 3.15s both; }
+.ttb-curtain .vd-open .vd-bar-t { animation: vd-bar-out-t 1.1s ease-in-out 1.3s both; }
+.ttb-curtain .vd-open .vd-bar-b { animation: vd-bar-out-b 1.1s ease-in-out 1.3s both; }
+.ttb-curtain .vd-open .vd-vignette { animation: vd-fade-out 1.2s ease 3.3s both; }
+.ttb-curtain .vd-open .vd-bloom { animation: vd-bloom 1.5s ease-in-out 2.6s both; }
+
+/* ---------- keyframes ---------- */
+@keyframes vd-fade-in { from { opacity: 0; } }
+@keyframes vd-fade-out { from { opacity: 1; } to { opacity: 0; } }
+@keyframes vd-show { from { opacity: 0; } to { opacity: 1; } }
+@keyframes vd-to { from { opacity: 0; } to { opacity: .5; } }
+@keyframes vd-breathe { 50% { opacity: .55; } }
+@keyframes vd-shimmer { 50% { opacity: .2; } }
+@keyframes vd-spin { to { transform: rotate(360deg); } }
+@keyframes vd-lamp-on {
+  0% { opacity: 0; }
+  10% { opacity: .8; }
+  16% { opacity: .1; }
+  30% { opacity: .9; }
+  36% { opacity: .3; }
+  60%, 100% { opacity: 1; }
+}
+@keyframes vd-flicker {
+  0%, 40%, 44%, 72%, 100% { opacity: 1; }
+  42% { opacity: .82; }
+  73% { opacity: .9; }
+}
+@keyframes vd-mote {
+  from { transform: translate(0, 0); }
+  to { transform: translate(3px, -6px); }
+}
+@keyframes vd-sheen { from { transform: translateX(-40px); } to { transform: translateX(60px); } }
+@keyframes vd-ticket-in {
+  0% { opacity: 0; transform: translate(-50%, 70vh) rotate(-14deg); }
+  65% { opacity: 1; transform: translate(-50%, -53%) rotate(.8deg); }
+  100% { opacity: 1; transform: translate(-50%, -50%) rotate(-1.5deg); }
+}
+@keyframes vd-wipe { from { opacity: 0; clip-path: inset(0 50% 0 50%); } to { opacity: 1; clip-path: inset(0 0 0 0); } }
+@keyframes vd-rise { from { opacity: 0; transform: translateY(40%); } }
+/* transform/opacity/filter only: animating letter-spacing reflowed the title (it wrapped to two lines and snapped
+ * back), which changed the ticket's height and made the centred ticket jump */
+@keyframes vd-title-in { from { opacity: 0; transform: translateY(16%) scale(1.12, 1.08); filter: blur(3px); } }
+@keyframes vd-rule-in { from { opacity: 0; transform: scaleX(.2); } }
+@keyframes vd-stamp {
+  0% { opacity: 0; transform: rotate(-24deg) scale(2.2); }
+  100% { opacity: 1; transform: rotate(-16deg) scale(1); }
+}
+@keyframes vd-gleam { from { transform: translateX(-140%) skewX(-14deg); } to { transform: translateX(480%) skewX(-14deg); } }
+@keyframes vd-bar-t { from { transform: translateY(-100%); } }
+@keyframes vd-bar-b { from { transform: translateY(100%); } }
+@keyframes vd-bar-out-t { to { transform: translateY(-100%); } }
+@keyframes vd-bar-out-b { to { transform: translateY(100%); } }
+
+@keyframes vd-jolt {
+  0% { transform: none; }
+  30% { transform: translateY(1.2%) scale(.975); }
+  100% { transform: none; }
+}
+@keyframes vd-chad {
+  0% { opacity: 1; transform: translate(0, 0) rotate(0); }
+  100% { opacity: 0; transform: translate(-30%, 900%) rotate(400deg); }
+}
+/* the halves pull apart at the perforation, hang a beat, then drop away */
+@keyframes vd-fall-l {
+  0% { transform: none; animation-timing-function: cubic-bezier(.2, .7, .3, 1); }
+  20% { transform: translate(-3%, -1.5%) rotate(-3deg); animation-timing-function: cubic-bezier(.55, 0, .85, .4); }
+  85% { opacity: 1; }
+  100% { opacity: 0; transform: translate(-22%, 85vh) rotate(-26deg); }
+}
+@keyframes vd-fall-r {
+  0% { transform: none; animation-timing-function: cubic-bezier(.2, .7, .3, 1); }
+  20% { transform: translate(3%, -2%) rotate(3.5deg); animation-timing-function: cubic-bezier(.55, 0, .85, .4); }
+  85% { opacity: 1; }
+  100% { opacity: 0; transform: translate(20%, 85vh) rotate(31deg); }
+}
+/* the latch gives (a small rebound), then the weight of the door: slow start, past open, settle; fades once edge-on */
+@keyframes vd-swing-l {
+  0% { transform: rotateY(0); animation-timing-function: ease-out; }
+  5% { transform: rotateY(-2deg); animation-timing-function: ease-in-out; }
+  11% { transform: rotateY(0); animation-timing-function: cubic-bezier(.55, 0, .5, 1); }
+  62% { transform: rotateY(108deg); opacity: 1; animation-timing-function: ease-in-out; }
+  80% { transform: rotateY(99deg); animation-timing-function: ease-in-out; }
+  100% { transform: rotateY(103deg); opacity: 0; }
+}
+@keyframes vd-swing-r {
+  0% { transform: rotateY(0); animation-timing-function: ease-out; }
+  5% { transform: rotateY(2deg); animation-timing-function: ease-in-out; }
+  11% { transform: rotateY(0); animation-timing-function: cubic-bezier(.55, 0, .5, 1); }
+  62% { transform: rotateY(-108deg); opacity: 1; animation-timing-function: ease-in-out; }
+  80% { transform: rotateY(-99deg); animation-timing-function: ease-in-out; }
+  100% { transform: rotateY(-103deg); opacity: 0; }
+}
+@keyframes vd-seam {
+  0% { opacity: .45; transform: scaleX(.5); }
+  25% { opacity: 1; transform: scaleX(1.4); }
+  100% { opacity: 0; transform: scaleX(9); }
+}
+@keyframes vd-pool { from { opacity: .14; } to { opacity: 1; } }
+@keyframes vd-beams {
+  0% { opacity: 0; }
+  50% { opacity: .85; }
+  80% { opacity: .7; }
+  100% { opacity: 0; }
+}
+@keyframes vd-fan { to { opacity: 1; } }
+@keyframes vd-dim { from { opacity: 0; } to { opacity: .6; } }
+@keyframes vd-dolly { from { transform: scale(1); } to { transform: scale(var(--zoom)); } }
+@keyframes vd-bloom {
+  0% { opacity: 0; }
+  40% { opacity: .92; }
+  100% { opacity: 0; }
+}
+@keyframes vd-wdrift { to { transform: translateX(8px); } }
+@keyframes vd-whaze { from { transform: translateX(-14px); } to { transform: translateX(14px); } }
+@keyframes vd-wtrain { from { transform: translate(-14px, 63.4px); } to { transform: translate(84px, 63.4px); } }
+@keyframes vd-wsteam {
+  0% { opacity: 0; transform: scale(.4); }
+  25% { opacity: .7; }
+  100% { opacity: 0; transform: translate(-2px, -2px) scale(1.7); }
+}
+@keyframes vd-tick { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes vd-whiten { from { opacity: 0; } to { opacity: .6; } }
+/* the board seen through the light: blurred, sepia-washed and over-bright, settling into sharp colour */
+@keyframes vd-focus {
+  from {
+    -webkit-backdrop-filter: blur(18px) sepia(.8) brightness(1.4) saturate(.7);
+    backdrop-filter: blur(18px) sepia(.8) brightness(1.4) saturate(.7);
+  }
+  to {
+    -webkit-backdrop-filter: blur(0px) sepia(0) brightness(1) saturate(1);
+    backdrop-filter: blur(0px) sepia(0) brightness(1) saturate(1);
+  }
+}

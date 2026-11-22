@@ -1,0 +1,17 @@
+{
+  "name": "@boboland/shared",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "dependencies": {
+    "boardgame.io": "0.50.2",
+    "graphology": "^0.26.0",
+    "graphology-shortest-path": "^2.1.0"
+  },
+  "devDependencies": {
+    "graphology-types": "^0.24.8",
+    "@types/node": "^22.10.0"
+  }
+}

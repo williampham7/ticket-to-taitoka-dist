@@ -1,0 +1,59 @@
+/*
+ * Modern high-speed-rail theme (China build: VITE_THEME=hsr sets <html data-theme="hsr">).
+ * Tailwind's @theme tokens are CSS variables, so overriding them here restyles every bg-paper / text-ink /
+ * font-display ... in the app. Fonts are only downloaded by browsers that actually use them (this theme).
+ * Theme-specific component styles live here too, always scoped under [data-theme=hsr].
+ */
+@import "@fontsource/inter/400.css";
+@import "@fontsource/inter/500.css";
+@import "@fontsource/inter/600.css";
+@import "@fontsource/inter/700.css";
+@import "@fontsource/barlow-condensed/500.css";
+@import "@fontsource/barlow-condensed/600.css";
+@import "@fontsource/barlow-condensed/700.css";
+@import "@fontsource/noto-sans-sc/chinese-simplified-500.css";
+@import "@fontsource/noto-sans-sc/chinese-simplified-700.css";
+/* one file per area, so parallel work never collides */
+@import "./hsr/map.css";
+@import "./hsr/cards.css";
+@import "./hsr/fx.css";
+@import "./hsr/screens.css";
+
+:root[data-theme="hsr"] {
+  --color-paper: #f1f3f5;
+  --color-panel: #ffffff;
+  --color-panel-2: #eef2f7;
+  --color-table: #e2e7ee;
+  --color-ticket: #e6f0fb;
+  --color-ink: #14213d;
+  --color-muted: #5f6d85;
+  --color-line: #d5dce6;
+  --color-line-strong: #a8b4c6;
+  --color-poster: #c8102e;
+  --color-poster-dark: #9b0c23;
+  --color-mustard: #f2a900;
+  --color-sea: #bfe3e1;
+  /* rail blue, for HSR-only accents */
+  --color-rail: #1d5fbf;
+  --font-display: "Barlow Condensed", "Noto Sans SC", "Arial Narrow", sans-serif;
+  --font-ui: "Inter", "Noto Sans SC", system-ui, sans-serif;
+  --font-serif: "Inter", "Noto Sans SC", system-ui, sans-serif;
+  /* Chinese text: use font-family: var(--font-zh) */
+  --font-zh: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+
+[data-theme="hsr"] body { letter-spacing: 0.005em; }
+/* Barlow Condensed is lighter and narrower than Alfa Slab One: give display text weight and a little air. */
+[data-theme="hsr"] .font-display { font-weight: 700; letter-spacing: 0.02em; }
+
+[data-theme="hsr"] .turn-pulse { animation-name: turn-pulse-hsr; }
+@keyframes turn-pulse-hsr {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(200,16,46,.5); }
+  50% { box-shadow: 0 0 0 9px rgba(200,16,46,0); }
+}
+[data-theme="hsr"] .ticket-scroll::-webkit-scrollbar-thumb { background: #b9c4d3; }
+[data-theme="hsr"] .ticket-scroll::-webkit-scrollbar-thumb:hover { background: #8a98ad; }
+[data-theme="hsr"] .final-ribbon { background: repeating-linear-gradient(135deg, #c8102e 0 14px, #b00d28 14px 28px); color: #fff; }
+@media print {
+  html[data-theme="hsr"], html[data-theme="hsr"] body { background: #f1f3f5 !important; }
+}

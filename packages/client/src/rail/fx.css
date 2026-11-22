@@ -1,0 +1,20 @@
+/* Rail theme (fx and banners). Scope every rule under [data-theme="rail"]. */
+
+/* route claimed: an enamel plate in the claimer's colour, rimmed in cream and brass */
+[data-theme="rail"] [data-testid="claim-banner"] {
+  border: 0; border-radius: 8px;
+  box-shadow: inset 0 0 0 3px rgba(0,0,0,.18), inset 0 0 0 5px #f2ead6, 0 0 0 2px #0f241c, 0 12px 30px rgba(20,30,24,.45);
+  text-shadow: 0 1px 2px rgba(0,0,0,.45);
+}
+/* short notices on the map */
+[data-theme="rail"] [data-testid="banner"] {
+  border: 0; border-radius: 4px; background: var(--rail-paper), #fbf6e6;
+  box-shadow: 0 0 0 2px #1f4a3a, 0 0 0 3px #b8903a, 0 8px 20px rgba(20,30,24,.3);
+}
+/* the final-round splash: a brass plate on green */
+[data-theme="rail"] [data-testid="final-splash"] > div {
+  border: 0; border-radius: 10px; background: linear-gradient(180deg, #ecd58e, #d2ac55);
+  box-shadow: inset 0 0 0 4px #ecd58e, inset 0 0 0 6px #1f4a3a, 0 0 0 2px #0f241c, 0 20px 60px rgba(20,30,24,.5);
+}
+[data-theme="rail"] [data-testid="final-round"] { border-color: #1f4a3a; }
+[data-theme="rail"] [data-testid="board-view-bar"] { border-color: #1f4a3a; box-shadow: 0 0 0 1px #b8903a, 0 10px 30px rgba(20,30,24,.3); }

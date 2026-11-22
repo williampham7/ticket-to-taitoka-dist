@@ -1,0 +1,17 @@
+/* Tailwind token overrides: cream paper, deep green, oxblood, brass. */
+:root[data-theme="rail"] {
+  --color-paper: #f2ead6;
+  --color-panel: #f9f4e6;
+  --color-panel-2: #ece3cb;
+  --color-table: #1f4a3a;
+  --color-ticket: #f6efd9;
+  --color-ink: #1f2a24;
+  --color-muted: #6a7468;
+  --color-line: #d8ccab;
+  --color-line-strong: #a89c78;
+  --color-poster: #7b1e2b;
+  --color-poster-dark: #5a1520;
+  --color-mustard: #b8903a;
+  --color-sea: #b7cfc6;
+  --color-rail: #1f4a3a;
+}

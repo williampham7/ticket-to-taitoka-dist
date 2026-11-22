@@ -1,0 +1,174 @@
+/* HSR theme (cards). Scope every rule under [data-theme="hsr"]. */
+
+/* ---- train cards ----------------------------------------------------------------------------- */
+[data-theme="hsr"] .hsr-card {
+  box-shadow: 0 1px 2px rgba(20,33,61,.18), 0 3px 8px rgba(20,33,61,.14), inset 0 0 0 1px rgba(20,33,61,.16);
+}
+[data-theme="hsr"] .hsr-card[data-hsr-card="white"] { box-shadow: 0 1px 2px rgba(20,33,61,.18), 0 3px 8px rgba(20,33,61,.14), inset 0 0 0 1px rgba(20,33,61,.26); }
+[data-theme="hsr"] .hsr-card-sheen {
+  background:
+    linear-gradient(160deg, rgba(255,255,255,.26) 0%, rgba(255,255,255,0) 40%),
+    linear-gradient(0deg, rgba(0,0,0,.10) 0%, rgba(0,0,0,0) 28%);
+}
+[data-theme="hsr"] .hsr-card-back { background: linear-gradient(160deg, #24457d 0%, #14213d 72%); }
+/* the colour you just drew lifts in your hand, with a CR-red ring instead of the vintage mustard */
+[data-theme="hsr"] .drawn-flash { animation-name: drawn-flash-hsr; }
+@keyframes drawn-flash-hsr { 0%, 100% { box-shadow: 0 0 0 0 rgba(200,16,46,0); transform: none; } 30% { box-shadow: 0 0 0 4px #c8102e; transform: translateY(-10px); } }
+
+/* ---- destination tickets: China Railway stock ------------------------------------------------- */
+[data-theme="hsr"] .hsr-ticket {
+  --t-ink: #14213d; --t-en: #3d4b66; --t-dim: #5f7493; --t-rail: #1d5fbf; --t-serial: #c8102e; --t-rule: rgba(29,95,191,.32);
+  color: var(--t-ink);
+  background:
+    repeating-linear-gradient(120deg, rgba(29,95,191,.045) 0 1px, transparent 1px 5px),
+    linear-gradient(180deg, #e8f2fc 0%, #d5e6f7 100%);
+  box-shadow: inset 0 0 0 1px rgba(29,95,191,.28), 0 1px 2px rgba(20,33,61,.12), 0 3px 8px rgba(20,33,61,.12);
+  transition: box-shadow 150ms ease, background-color 150ms ease;
+}
+/* a pale band along the bottom, like the magnetic stripe side of a real ticket */
+[data-theme="hsr"] .hsr-ticket::before {
+  content: ""; position: absolute; inset: auto 0 0 0; height: 3px; background: rgba(29,95,191,.18); pointer-events: none;
+}
+[data-theme="hsr"] .hsr-ticket .hsr-t-zh { color: var(--t-ink); }
+[data-theme="hsr"] .hsr-ticket .hsr-t-en { color: var(--t-en); }
+[data-theme="hsr"] .hsr-ticket .hsr-t-dim { color: var(--t-dim); }
+[data-theme="hsr"] .hsr-ticket .hsr-t-train { color: var(--t-rail); }
+[data-theme="hsr"] .hsr-ticket .hsr-t-arrow { color: var(--t-rail); }
+[data-theme="hsr"] .hsr-ticket .hsr-t-serial { color: var(--t-serial); }
+[data-theme="hsr"] .hsr-ticket .hsr-t-points { color: var(--t-ink); }
+[data-theme="hsr"] .hsr-ticket .hsr-t-neg { color: #c8102e; }
+[data-theme="hsr"] .hsr-ticket .hsr-t-ok { color: #16804a; }
+[data-theme="hsr"] .hsr-ticket .hsr-t-stub { border-color: var(--t-rule); }
+[data-theme="hsr"] .hsr-ticket .hsr-ticket-qr { box-shadow: inset 0 0 0 1px rgba(20,33,61,.12); }
+[data-theme="hsr"] .hsr-ticket .hsr-keep { color: var(--t-dim); background: rgba(255,255,255,.6); }
+[data-theme="hsr"] .hsr-ticket .hsr-keep-on { color: #fff; background: #c8102e; }
+
+/* selected: a crisp CR-red ring and a lift */
+[data-theme="hsr"] .hsr-ticket.hsr-selected {
+  box-shadow: inset 0 0 0 2px #c8102e, 0 0 0 1px #c8102e, 0 6px 14px rgba(200,16,46,.28);
+}
+[data-theme="hsr"] .hsr-check { background: #c8102e; color: #fff; box-shadow: 0 1px 3px rgba(20,33,61,.3); }
+
+/* connected: soft green stock with a green rim */
+[data-theme="hsr"] .hsr-ticket.hsr-done {
+  --t-rule: rgba(22,128,74,.4);
+  background:
+    repeating-linear-gradient(120deg, rgba(22,128,74,.05) 0 1px, transparent 1px 5px),
+    linear-gradient(180deg, #e7f6ee 0%, #cdebdb 100%);
+  box-shadow: inset 0 0 0 2px #1f9d55, 0 1px 2px rgba(20,33,61,.12), 0 3px 8px rgba(20,33,61,.12);
+}
+[data-theme="hsr"] .hsr-ticket.hsr-done::before { background: rgba(22,128,74,.22); }
+[data-theme="hsr"] .hsr-ticket.hsr-failed { --t-ink: #47536b; --t-en: #6a7790; filter: saturate(.55); }
+
+[data-theme="hsr"] .hsr-stamp { background: rgba(255,255,255,.9); box-shadow: 0 1px 3px rgba(20,33,61,.18); }
+[data-theme="hsr"] .hsr-stamp-ok { color: #16804a; border-color: #1f9d55; }
+[data-theme="hsr"] .hsr-stamp-no { color: #c8102e; border-color: #c8102e; }
+
+/* business class: deep CR red, a gold foil stripe, and a sheen that sweeps across on hover */
+[data-theme="hsr"] .hsr-ticket.hsr-biz {
+  --t-ink: #ffffff; --t-en: rgba(255,240,236,.86); --t-dim: rgba(255,226,220,.78); --t-rail: #f6d27a; --t-serial: #ffd58a;
+  --t-rule: rgba(246,210,122,.55);
+  background:
+    linear-gradient(115deg, rgba(255,255,255,0) 30%, rgba(255,236,190,.38) 45%, rgba(255,255,255,0) 60%) no-repeat -160% 0 / 60% 100%,
+    repeating-linear-gradient(120deg, rgba(255,255,255,.04) 0 1px, transparent 1px 5px),
+    linear-gradient(160deg, #b8122f 0%, #8e0b22 62%, #6f0819 100%);
+  box-shadow: inset 0 0 0 1px rgba(246,210,122,.65), 0 1px 2px rgba(20,33,61,.18), 0 3px 9px rgba(111,8,25,.3);
+  transition: background-position 700ms ease, box-shadow 150ms ease;
+}
+[data-theme="hsr"] :hover > .hsr-ticket.hsr-biz,
+[data-theme="hsr"] .hsr-ticket.hsr-biz:hover { background-position: 260% 0, 0 0, 0 0; }
+[data-theme="hsr"] .hsr-ticket.hsr-biz::before { background: linear-gradient(90deg, #b8862b, #f8e08e 50%, #c9973a); height: 2px; }
+[data-theme="hsr"] .hsr-ticket.hsr-biz .hsr-ticket-qr { box-shadow: 0 0 0 1px rgba(246,210,122,.8); }
+[data-theme="hsr"] .hsr-foil {
+  background: linear-gradient(90deg, #a87a26 0%, #f8e08e 35%, #fff4c8 50%, #e2b955 65%, #a87a26 100%);
+  opacity: .95;
+}
+[data-theme="hsr"] .hsr-ticket.hsr-biz.hsr-selected {
+  box-shadow: inset 0 0 0 2px #f6d27a, 0 0 0 2px #c8102e, 0 6px 14px rgba(200,16,46,.35);
+}
+[data-theme="hsr"] .hsr-ticket.hsr-biz.hsr-done {
+  background:
+    repeating-linear-gradient(120deg, rgba(255,255,255,.04) 0 1px, transparent 1px 5px),
+    linear-gradient(160deg, #b8122f 0%, #8e0b22 62%, #6f0819 100%);
+  box-shadow: inset 0 0 0 2px #3ddc84, 0 0 0 1px #1f9d55, 0 3px 9px rgba(111,8,25,.3);
+}
+[data-theme="hsr"] .hsr-ticket.hsr-biz .hsr-t-ok { color: #7cf0b0; }
+[data-theme="hsr"] .hsr-ticket.hsr-biz .hsr-t-neg { color: #ffd58a; }
+[data-theme="hsr"] .hsr-ticket.hsr-biz.hsr-failed { filter: saturate(.6) brightness(.92); }
+@media (prefers-reduced-motion: reduce) {
+  [data-theme="hsr"] .hsr-ticket.hsr-biz { transition: none; }
+}
+
+/* ---- turn announcement: a station departure display -------------------------------------------- */
+[data-theme="hsr"] .hsr-board {
+  background: linear-gradient(180deg, #3a4150 0%, #22262f 100%);
+  box-shadow: 0 18px 44px rgba(10,16,30,.45), 0 2px 0 rgba(255,255,255,.08) inset, 0 0 0 1px rgba(0,0,0,.5);
+}
+[data-theme="hsr"] .hsr-board-led {
+  background: radial-gradient(120% 140% at 50% 0%, #121722 0%, #07090e 70%);
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,.8), inset 0 2px 10px rgba(0,0,0,.8);
+}
+/* the LED matrix: a fine grid of dark gaps laid over the glowing text */
+[data-theme="hsr"] .hsr-board-led::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background-image: radial-gradient(circle at 50% 50%, transparent 0 .85px, rgba(4,6,10,.62) 1.15px);
+  background-size: 3px 3px;
+}
+/* a faint glass reflection across the top */
+[data-theme="hsr"] .hsr-board-led::before {
+  content: ""; position: absolute; inset: 0 0 55% 0; pointer-events: none; z-index: 1;
+  background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,0));
+}
+[data-theme="hsr"] .hsr-led-amber { color: #ffb21e; text-shadow: 0 0 6px rgba(255,170,20,.55); }
+[data-theme="hsr"] .hsr-led-green { color: #42f58d; text-shadow: 0 0 6px rgba(66,245,141,.5); }
+[data-theme="hsr"] .hsr-led { text-shadow: 0 0 6px currentColor, 0 0 1px currentColor; }
+[data-theme="hsr"] .hsr-led-dot { box-shadow: 0 0 10px currentColor; }
+[data-theme="hsr"] .hsr-board-rule { height: 1px; background: repeating-linear-gradient(90deg, rgba(255,178,30,.45) 0 3px, transparent 3px 6px); }
+/* the name flips in like a split-flap row; the hint types itself out; the clock's colon blinks */
+@keyframes hsr-flip { 0% { transform: translateY(70%); opacity: 0; } 100% { transform: none; opacity: 1; } }
+[data-theme="hsr"] .hsr-flip > * { animation: hsr-flip 380ms 180ms cubic-bezier(.2,.9,.3,1) both; }
+@keyframes hsr-type { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+[data-theme="hsr"] .hsr-ticker-run { animation: hsr-type 900ms 450ms steps(36) both; }
+@keyframes hsr-blink { 0%, 49% { opacity: .85; } 50%, 100% { opacity: .35; } }
+[data-theme="hsr"] .hsr-led-blink { animation: hsr-blink 1s steps(1) infinite; }
+
+/* ---- status pill and banners ------------------------------------------------------------------- */
+@keyframes hsr-status-dot { 0%, 100% { box-shadow: 0 0 0 0 rgba(255,255,255,.7); } 60% { box-shadow: 0 0 0 5px rgba(255,255,255,0); } }
+[data-theme="hsr"] .hsr-status-dot { animation: hsr-status-dot 1.6s ease-out infinite; }
+[data-theme="hsr"] .hsr-claim-banner {
+  box-shadow: 0 12px 32px rgba(20,33,61,.32), inset 0 0 0 1.5px rgba(255,255,255,.55);
+  text-shadow: 0 1px 2px rgba(20,33,61,.45);
+}
+[data-theme="hsr"] .hsr-claim-banner svg { color: #14213d; filter: drop-shadow(0 1px 1px rgba(20,33,61,.4)); }
+
+/* the ticket pile */
+[data-theme="hsr"] .hsr-pile { transition: box-shadow 150ms ease; }
+[data-theme="hsr"] button:not([aria-disabled=true]):hover > .hsr-pile { box-shadow: inset 0 0 0 1.5px #1d5fbf, 0 4px 12px rgba(20,33,61,.18); }
+
+/* HSR versions of the vintage golden-ticket classes (anything still using them reads as China Railway stock) */
+[data-theme="hsr"] .gold-ticket {
+  background: repeating-linear-gradient(120deg, rgba(29,95,191,.045) 0 1px, transparent 1px 5px), linear-gradient(180deg, #e8f2fc 0%, #d5e6f7 100%);
+  border-color: rgba(29,95,191,.35);
+}
+[data-theme="hsr"] .gold-ticket.gold-done { background: linear-gradient(180deg, #e7f6ee 0%, #cdebdb 100%); border-color: #1f9d55; }
+[data-theme="hsr"] .gold-rule { border-color: rgba(29,95,191,.25); }
+[data-theme="hsr"] .gold-ticket.gold-selected { border-color: #c8102e; }
+
+@media (prefers-reduced-motion: reduce) {
+  [data-theme="hsr"] .hsr-flip > *, [data-theme="hsr"] .hsr-ticker-run, [data-theme="hsr"] .hsr-led-blink,
+  [data-theme="hsr"] .hsr-status-dot, [data-theme="hsr"] .drawn-flash { animation: none; }
+}
+
+/* ---- panels ---------------------------------------------------------------------------------- */
+/* the ticket chooser asks for attention with a soft CR-red halo instead of the vintage golden glow */
+[data-theme="hsr"] .chooser-glow { animation-name: chooser-glow-hsr; }
+@keyframes chooser-glow-hsr {
+  0%, 100% { box-shadow: 0 12px 32px rgba(20,33,61,.22), 0 0 0 0 rgba(200,16,46,0); }
+  50% { box-shadow: 0 12px 32px rgba(20,33,61,.22), 0 0 0 5px rgba(200,16,46,.18); }
+}
+[data-theme="hsr"] .hsr-claim-head { background: linear-gradient(180deg, #eef4fc 0%, #ffffff 100%); }
+[data-theme="hsr"] .hsr-ticket.hsr-biz .hsr-keep { color: #fff; background: rgba(255,255,255,.2); }
+[data-theme="hsr"] .hsr-ticket.hsr-biz .hsr-keep-on { color: #7a0a1c; background: #f6d27a; }
+@media (prefers-reduced-motion: reduce) {
+  [data-theme="hsr"] .chooser-glow { animation: none; }
+}

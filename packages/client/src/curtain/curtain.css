@@ -1,0 +1,23 @@
+/* Shared shell for the themed enter-the-game curtains (see EnterCurtain.tsx). */
+.ttb-curtain {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  pointer-events: none;
+  overflow: hidden;
+}
+/* reduced motion: no theatrics, just a short fade */
+.ttb-curtain.is-reduced * { animation: none !important; transition: none !important; }
+.ttb-curtain.is-reduced { transition: opacity 0.35s ease; }
+.ttb-curtain.is-reduced.is-opening { opacity: 0; }
+/* dip to dark between the waiting room and the intro (see dipToDark in EnterCurtain.tsx) */
+.ttb-dip {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  pointer-events: none;
+  background: #050302;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+.ttb-dip.is-down { opacity: 1; transition: opacity 0.45s ease-in; }

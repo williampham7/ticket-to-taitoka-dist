@@ -1,0 +1,8 @@
+/* HSR theme (map). Scope every rule under [data-theme="hsr"]. */
+
+/* A softer claim glow under the EMU, so the train and its player-colour stripe stay readable (blue players especially);
+   it swells only as the train arrives. */
+@media (prefers-reduced-motion: no-preference) {
+  [data-theme="hsr"] .claim-flash { animation-name: claim-flash-hsr; }
+}
+@keyframes claim-flash-hsr { 0% { opacity: 0; } 12% { opacity: .38; } 70% { opacity: .42; } 82% { opacity: .7; } 100% { opacity: 0; } }

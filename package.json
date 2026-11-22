@@ -1,0 +1,27 @@
+{
+  "name": "ticket-to-boboland",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "packages/shared",
+    "packages/server",
+    "packages/client"
+  ],
+  "scripts": {
+    "test": "vitest run",
+    "dev": "concurrently -k -n server,client \"npm run dev -w @boboland/server\" \"npm run dev -w @boboland/client\"",
+    "build": "npm run build -w @boboland/client",
+    "start": "npm run start -w @boboland/server",
+    "start:open": "npm run start -w @boboland/server -- --open",
+    "play": "npm run build && npm run start:open",
+    "play:online": "npm run build && npm run online -w @boboland/server",
+    "typecheck": "tsc -p packages/shared && tsc -p packages/server && tsc -p packages/client",
+    "e2e": "npm run build && playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.65.1",
+    "concurrently": "^10.0.7",
+    "typescript": "~5.9.3",
+    "vitest": "^5.1.0"
+  }
+}

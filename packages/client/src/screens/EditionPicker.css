@@ -1,0 +1,111 @@
+/*
+ * Edition picker (first screen). Every card carries its own edition's colours and type, set here with fixed
+ * values instead of the theme tokens, so the page looks the same under data-theme vintage, hsr or rail.
+ */
+.ep {
+  height: 100%;
+  overflow-y: auto;
+  padding: 40px 16px 48px;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 0%, rgba(255, 255, 255, .07), transparent 70%),
+    #2b3138;
+  color: #f1ede4;
+  font-family: "Barlow Condensed", "Oswald", "Arial Narrow", sans-serif;
+  letter-spacing: normal;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.ep-head { width: 100%; max-width: 1040px; margin-bottom: 28px; }
+.ep-title { font-family: "Josefin Sans", "Futura", "Century Gothic", sans-serif; font-weight: 600; font-size: 40px; line-height: 1.05; }
+.ep-sub { margin-top: 8px; font-family: "Inter", system-ui, sans-serif; font-size: 16px; line-height: 1.5; color: #c5c9cd; }
+
+.ep-grid { width: 100%; max-width: 1040px; display: grid; gap: 16px; grid-template-columns: 1fr; }
+
+.ep-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: 128px 1fr;
+  min-height: 168px;
+  text-align: left;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform .18s ease, box-shadow .18s ease;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, .35);
+}
+.ep-card:hover { transform: translateY(-3px); box-shadow: 0 16px 32px rgba(0, 0, 0, .45); }
+.ep-card:active { transform: translateY(0); }
+.ep-card:focus-visible { outline: 3px solid #ffd166; outline-offset: 4px; }
+.ep-art { display: block; position: relative; overflow: hidden; }
+.ep-art svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.ep-text { display: flex; flex-direction: column; align-items: flex-start; padding: 16px 18px; min-width: 0; }
+
+@media (min-width: 720px) {
+  .ep { padding: 64px 32px; }
+  .ep-head { margin-top: auto; }
+  .ep-grid { margin-bottom: auto; }
+  .ep-title { font-size: 52px; }
+  .ep-head { margin-bottom: 36px; }
+  .ep-grid { grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  .ep-card { grid-template-columns: 1fr; grid-template-rows: auto 1fr; min-height: 0; }
+  .ep-art { aspect-ratio: 4 / 3; }
+  .ep-text { padding: 20px 22px 22px; }
+}
+
+/* USA: faded travel poster. Cream paper, dark brown ink, signal red, slab-serif display. */
+.ep-usa { background: #efe2c4; color: #3b2a1e; border: 3px solid #3b2a1e; border-radius: 6px; }
+.ep-usa-to { font-family: "Libre Baskerville", Georgia, serif; font-style: italic; font-size: 15px; color: #5b4636; }
+.ep-usa-name { font-family: "Alfa Slab One", Georgia, serif; font-size: 34px; line-height: 1.05; color: #b23a2e; }
+.ep-usa-line { margin-top: 6px; font-family: "Libre Baskerville", Georgia, serif; font-style: italic; font-size: 14px; line-height: 1.45; color: #5b4636; }
+.ep-usa-label {
+  margin-top: auto; padding: 4px 12px 3px; transform: rotate(-3deg);
+  font-family: "Alfa Slab One", Georgia, serif; font-size: 16px; letter-spacing: .08em; color: #b23a2e;
+  border: 2px solid #b23a2e; border-radius: 4px;
+}
+.ep-usa .ep-text { gap: 2px; }
+.ep-usa:focus-visible { outline-color: #b23a2e; }
+
+/* China: modern high-speed rail. Cool white, navy, China Railway red, condensed sans, a departure-board pill. */
+.ep-china { background: #ffffff; color: #14213d; border-radius: 18px; border: 1px solid #d5dce6; }
+.ep-china::before {
+  content: ""; position: absolute; left: 0; right: 0; top: 0; height: 5px; z-index: 1;
+  background: linear-gradient(#c8102e 0 60%, #1d5fbf 60% 100%);
+}
+.ep-china-to { font-family: "Barlow Condensed", sans-serif; font-weight: 600; font-size: 15px; letter-spacing: .24em; text-transform: uppercase; color: #3d4b66; }
+.ep-china-name { font-family: "Barlow Condensed", sans-serif; font-weight: 700; font-size: 40px; line-height: .95; letter-spacing: .02em; text-transform: uppercase; color: #c8102e; }
+.ep-china-zh { margin-top: 4px; font-family: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif; font-weight: 700; font-size: 15px; letter-spacing: .3em; }
+.ep-china-line { margin-top: 6px; font-family: "Inter", system-ui, sans-serif; font-size: 13.5px; line-height: 1.45; color: #3d4b66; }
+.ep-china-label {
+  margin-top: auto; display: inline-flex; align-items: center; gap: 8px; padding: 5px 12px 5px 6px; border-radius: 999px;
+  background: #14213d; color: #ffb21a; font-family: "Barlow Condensed", sans-serif; font-weight: 600; font-size: 16px; letter-spacing: .08em;
+}
+.ep-china-no { padding: 1px 6px; border-radius: 999px; background: #c8102e; color: #fff; font-size: 13px; }
+.ep-china .ep-text { gap: 1px; padding-top: 18px; }
+.ep-china:focus-visible { outline-color: #1d5fbf; }
+
+/* Europe: 1930s continental railway. Green enamel, brass rules, cream capitals, an oxblood enamel plate. */
+.ep-europe { background: #1f4a3a; color: #f2ead6; border: 2px solid #b8903a; border-radius: 3px; box-shadow: inset 0 0 0 4px #1f4a3a, inset 0 0 0 5px rgba(184, 144, 58, .6), 0 10px 24px rgba(0, 0, 0, .35); }
+.ep-europe:hover { box-shadow: inset 0 0 0 4px #1f4a3a, inset 0 0 0 5px rgba(184, 144, 58, .6), 0 16px 32px rgba(0, 0, 0, .45); }
+.ep-europe-to { font-family: "Josefin Sans", "Futura", sans-serif; font-weight: 600; font-size: 14px; letter-spacing: .3em; text-transform: uppercase; color: #d9c48f; }
+.ep-europe-name { font-family: "Josefin Sans", "Futura", sans-serif; font-weight: 700; font-size: 36px; line-height: 1.05; letter-spacing: .08em; text-transform: uppercase; color: #f2ead6; }
+.ep-europe-line { margin-top: 6px; font-family: "Josefin Sans", "Futura", sans-serif; font-style: italic; font-size: 15px; line-height: 1.4; color: #d9cfb6; }
+.ep-europe-label {
+  margin-top: auto; padding: 5px 14px 3px; border: 2px solid #b8903a; border-radius: 2px; background: #7b1e2b; color: #f2ead6;
+  font-family: "Josefin Sans", "Futura", sans-serif; font-weight: 700; font-size: 14px; letter-spacing: .22em; text-transform: uppercase;
+}
+.ep-europe .ep-text { gap: 2px; }
+.ep-europe .ep-art { border-right: 2px solid #b8903a; }
+@media (min-width: 720px) { .ep-europe .ep-art { border-right: 0; border-bottom: 2px solid #b8903a; } }
+.ep-europe:focus-visible { outline-color: #d9c48f; }
+
+/* A small answer to hovering: the smoke drifts, the train pulls forward, the sunburst turns. */
+.ep-usa-smoke, .ep-china-train, .ep-china-speed, .ep-europe-burst { transition: transform .5s ease; transform-box: view-box; }
+.ep-europe-burst { transform-origin: 120px 92px; }
+.ep-usa:hover .ep-usa-smoke { transform: translate(-6px, -4px); }
+.ep-china:hover .ep-china-train { transform: translateX(8px); }
+.ep-china:hover .ep-china-speed { transform: translateX(-10px); }
+.ep-europe:hover .ep-europe-burst { transform: rotate(10deg); }
+@media (prefers-reduced-motion: reduce) {
+  .ep-card, .ep-usa-smoke, .ep-china-train, .ep-china-speed, .ep-europe-burst { transition: none; }
+  .ep-card:hover { transform: none; }
+}

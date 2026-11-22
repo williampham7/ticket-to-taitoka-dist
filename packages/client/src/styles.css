@@ -1,0 +1,237 @@
+@import "tailwindcss";
+@import "@fontsource/alfa-slab-one/400.css";
+@import "@fontsource/oswald/400.css";
+@import "@fontsource/oswald/500.css";
+@import "@fontsource/oswald/600.css";
+@import "@fontsource/libre-baskerville/400-italic.css";
+
+@theme {
+  --color-paper: #efe2c4;
+  --color-panel: #f5ecd7;
+  --color-panel-2: #ece0c4;
+  --color-table: #e6d7b8;
+  --color-ticket: #f8f0dc;
+  --color-ink: #3b2a1e;
+  --color-muted: #7a6650;
+  --color-line: #d6c39c;
+  --color-line-strong: #b79f74;
+  --color-poster: #b23a2e;
+  --color-poster-dark: #8e2d24;
+  --color-mustard: #e3b23c;
+  --color-sea: #a9c3bd;
+  --font-display: "Alfa Slab One", Georgia, serif;
+  --font-ui: "Oswald", "Arial Narrow", sans-serif;
+  --font-serif: "Libre Baskerville", Georgia, serif;
+}
+
+html, body, #root { height: 100%; }
+body {
+  margin: 0;
+  background: var(--color-table);
+  color: var(--color-ink);
+  font-family: var(--font-ui);
+  -webkit-font-smoothing: antialiased;
+}
+/* A game, not a document: rapid clicks on cards and buttons must never highlight text. */
+body { -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
+input, textarea, .select-text { -webkit-user-select: text; user-select: text; }
+button { cursor: pointer; }
+button:disabled { cursor: not-allowed; }
+:focus-visible { outline: 3px solid var(--color-poster); outline-offset: 2px; }
+
+/* volume slider: a poster-red fill on a thin ink track, with a round brass-coloured handle */
+.volume-range { -webkit-appearance: none; appearance: none; height: 16px; background: transparent; cursor: pointer; }
+.volume-range::-webkit-slider-runnable-track {
+  height: 5px; border-radius: 3px;
+  background: linear-gradient(to right, var(--color-poster) var(--fill), var(--color-line-strong) var(--fill));
+}
+.volume-range::-moz-range-track { height: 5px; border-radius: 3px; background: var(--color-line-strong); }
+.volume-range::-moz-range-progress { height: 5px; border-radius: 3px; background: var(--color-poster); }
+.volume-range::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none; width: 14px; height: 14px; margin-top: -4.5px;
+  border-radius: 50%; background: var(--color-mustard); border: 2px solid var(--color-ink);
+}
+.volume-range::-moz-range-thumb { width: 12px; height: 12px; border-radius: 50%; background: var(--color-mustard); border: 2px solid var(--color-ink); }
+.volume-range:focus-visible { outline-offset: 4px; }
+
+/* whose turn it is now: drops in, holds, fades */
+@keyframes turn-banner {
+  0% { transform: translate(-50%, -24px) scale(.85); opacity: 0; }
+  10% { transform: translate(-50%, 4px) scale(1.04); opacity: 1; }
+  16% { transform: translate(-50%, 0) scale(1); }
+  82% { transform: translate(-50%, 0) scale(1); opacity: 1; }
+  100% { transform: translate(-50%, -10px) scale(.97); opacity: 0; }
+}
+.turn-banner { animation: turn-banner 2400ms cubic-bezier(.2,.9,.3,1) both; }
+
+/* emote reactions pop up over a player's chip in the top bar, then float away */
+@keyframes emote-pop {
+  0% { transform: translate(-50%, 6px) scale(.4); opacity: 0; }
+  12% { transform: translate(-50%, 0) scale(1.25); opacity: 1; }
+  22% { transform: translate(-50%, 0) scale(1); }
+  80% { transform: translate(-50%, 0) scale(1); opacity: 1; }
+  100% { transform: translate(-50%, 14px) scale(.9); opacity: 0; }
+}
+.emote-pop { animation: emote-pop 2800ms cubic-bezier(.2,.9,.3,1.2) both; }
+@keyframes fade-only { 0% { opacity: 0; } 10% { opacity: 1; } 85% { opacity: 1; } 100% { opacity: 0; } }
+
+/* Claimed train cars drop into their slots (≤ 235ms for a 6-car route). */
+@keyframes car-drop {
+  from { transform: translateY(-14px) scale(1.25); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+.car-drop { animation: car-drop 340ms cubic-bezier(.2,.9,.3,1.35) both; }
+
+@keyframes ring-in { from { opacity: 0; transform-box: fill-box; } to { opacity: 1; } }
+.ring-in { animation: ring-in 140ms ease-out both; }
+
+/* cities on a hovered destination ticket: one ring ripples outward from the city, over and over */
+@keyframes target-ping { from { transform: scale(1); opacity: 1; } to { transform: scale(2.3); opacity: 0; } }
+.target-ping { transform-box: fill-box; transform-origin: center; animation: target-ping 1.2s cubic-bezier(.2,.6,.3,1) infinite; }
+
+@keyframes card-in { from { transform: translateY(10px) scale(.96); opacity: 0; } to { transform: none; opacity: 1; } }
+.card-in { animation: card-in 180ms ease-out both; }
+
+@keyframes pop { 0% { transform: scale(1); } 40% { transform: scale(1.18); } 100% { transform: scale(1); } }
+.pop { animation: pop 220ms ease-out; }
+
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+.fade-in { animation: fade-in 180ms ease-out both; }
+
+/* Everyone sees a freshly claimed route light up in the claimer's colour. */
+@keyframes claim-flash { 0% { opacity: 0; } 12% { opacity: .9; } 70% { opacity: .75; } 100% { opacity: 0; } }
+.claim-flash { animation: claim-flash 1400ms ease-out both; }
+
+/* Your turn: the status pill and your chip breathe. */
+@keyframes turn-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(178,58,46,.55); }
+  50% { box-shadow: 0 0 0 9px rgba(178,58,46,0); }
+}
+.turn-pulse { animation: turn-pulse 1.6s ease-in-out infinite; }
+
+/* New face-up card dealt into an empty slot. */
+@keyframes deal-in {
+  from { transform: translate(-70px, -10px) rotate(-8deg) scale(.7); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+.deal-in { animation: deal-in 320ms cubic-bezier(.2,.8,.3,1.1) both; }
+
+/* market reshuffle: old cards flip and sweep away to the discard side, then the new five deal in */
+@keyframes reshuffle-out {
+  0% { transform: none; opacity: 1; }
+  35% { transform: rotateY(90deg) scale(.95); opacity: 1; }
+  100% { transform: translate(-60px, -14px) rotate(-10deg) scale(.6); opacity: 0; }
+}
+.reshuffle-out { animation: reshuffle-out 700ms ease-in both; }
+@keyframes reshuffle-pulse { 50% { opacity: .45; } }
+.reshuffle-label { animation: reshuffle-pulse 700ms ease-in-out infinite; }
+
+/* the row of destination tickets scrolls sideways once it is full, with a slim scrollbar */
+.ticket-scroll { overflow-x: scroll; overflow-y: hidden; }
+.ticket-scroll::-webkit-scrollbar { height: 8px; }
+.ticket-scroll::-webkit-scrollbar-track { background: transparent; }
+.ticket-scroll::-webkit-scrollbar-thumb { background: #cdb88f; border-radius: 4px; }
+.ticket-scroll::-webkit-scrollbar-thumb:hover { background: #a98e5f; }
+
+/* The colour you just drew blinks in your hand. */
+@keyframes drawn-flash { 0%, 100% { box-shadow: 0 0 0 0 rgba(227,178,60,0); transform: none; } 30% { box-shadow: 0 0 0 5px #e3b23c; transform: translateY(-10px); } }
+.drawn-flash { animation: drawn-flash 1300ms ease-out; }
+
+@keyframes bubble-in { from { transform: translateY(6px) scale(.95); opacity: 0; } to { transform: none; opacity: 1; } }
+.bubble-in { animation: bubble-in 140ms ease-out both; }
+
+@keyframes banner-in { 0% { transform: translate(-50%, -14px); opacity: 0; } 12% { transform: translate(-50%, 0); opacity: 1; } 85% { opacity: 1; } 100% { opacity: 0; } }
+.banner-in { animation: banner-in 2600ms ease-out both; }
+
+@keyframes podium-rise { from { transform: translateY(40px); opacity: 0; } to { transform: none; opacity: 1; } }
+.podium-rise { animation: podium-rise 500ms cubic-bezier(.2,.8,.3,1.1) both; }
+
+/* Route-claim celebration */
+@keyframes steam-puff { 0% { transform: translate(0,0) scale(.4); opacity: .9; } 100% { transform: translate(-22px,-26px) scale(1.8); opacity: 0; } }
+.steam-puff { transform-box: fill-box; transform-origin: center; animation: steam-puff 480ms ease-out infinite; }
+@keyframes burst-ring { 0% { transform: scale(.4); opacity: 0; } 15% { opacity: 1; } 100% { transform: scale(4.2); opacity: 0; } }
+.burst-ring { transform-box: fill-box; transform-origin: center; animation: burst-ring 800ms ease-out both; }
+@keyframes burst-spark { 0% { transform: translate(0,0) scale(.3); opacity: 0; } 15% { opacity: 1; } 100% { transform: translate(var(--dx), var(--dy)) scale(1) rotate(160deg); opacity: 0; } }
+.burst-spark { animation: burst-spark 850ms cubic-bezier(.2,.8,.3,1) both; }
+@keyframes claim-banner {
+  0% { transform: translate(-50%, -30px) scale(.8); opacity: 0; }
+  10% { transform: translate(-50%, 0) scale(1.06); opacity: 1; }
+  16% { transform: translate(-50%, 0) scale(1); }
+  85% { opacity: 1; }
+  100% { transform: translate(-50%, -8px); opacity: 0; }
+}
+.claim-banner { animation: claim-banner 3000ms ease-out both; }
+
+/* Final round */
+.final-ribbon { background: repeating-linear-gradient(135deg, #f2c230 0 14px, #e9b51f 14px 28px); }
+@keyframes final-splash { 0% { opacity: 0; transform: scale(.6) rotate(-4deg); } 12% { opacity: 1; transform: scale(1.08) rotate(1deg); } 20% { transform: scale(1) rotate(0); } 82% { opacity: 1; } 100% { opacity: 0; transform: scale(.96); } }
+.final-splash > div { animation: final-splash 3200ms ease-out both; }
+
+/* Destination tickets are golden tickets: warm gold card stock with a soft sheen that glints on hover. */
+.gold-ticket {
+  background:
+    linear-gradient(115deg, rgba(255,255,255,0) 30%, rgba(255,250,225,.75) 45%, rgba(255,255,255,0) 60%) no-repeat -160% 0 / 60% 100%,
+    linear-gradient(135deg, #fbf2d2 0%, #f3dfa0 42%, #fbefc4 58%, #ecd18a 100%);
+  border-color: #c39a3e;
+  transition: background-position 700ms ease;
+}
+.gold-ticket.gold-done { background: linear-gradient(135deg, #f1f2d6 0%, #dfe5b4 45%, #eef0d2 60%, #d6dea6 100%); }
+:hover > .gold-ticket, .gold-ticket:hover { background-position: 260% 0, 0 0; }
+.gold-rule { border-color: rgba(195,154,62,.55); }
+.gold-ticket.gold-selected { border-color: var(--color-poster); }
+
+/* The ticket chooser gently asks for attention: a slow golden glow, and a small breathing dot. */
+@keyframes chooser-glow {
+  0%, 100% { box-shadow: 0 10px 30px rgba(60,40,20,.3), 0 0 0 0 rgba(227,178,60,.0); }
+  50% { box-shadow: 0 10px 30px rgba(60,40,20,.3), 0 0 0 6px rgba(227,178,60,.38); }
+}
+.chooser-glow { animation: chooser-glow 2.4s ease-in-out infinite; }
+@keyframes attn-dot { 0%, 100% { transform: scale(.7); opacity: .55; } 50% { transform: scale(1); opacity: 1; } }
+.attn-dot { animation: attn-dot 1.6s ease-in-out infinite; }
+
+/* End of game: the "end of the line" banner, score cards, floating +/- points, confetti. */
+@keyframes end-banner {
+  0% { opacity: 0; transform: translateX(-120%) skewX(-8deg); }
+  14% { opacity: 1; transform: translateX(4%) skewX(3deg); }
+  22% { transform: translateX(0) skewX(0); }
+  84% { opacity: 1; transform: translateX(0); }
+  100% { opacity: 0; transform: translateX(110%) skewX(-6deg); }
+}
+.end-banner { animation: end-banner 2700ms cubic-bezier(.2,.8,.3,1) both; }
+@keyframes score-card-in { from { opacity: 0; transform: translateY(-30px) scale(.9); } to { opacity: 1; transform: none; } }
+.score-card-in { animation: score-card-in 450ms cubic-bezier(.2,.8,.3,1.2) both; }
+@keyframes delta-float { 0% { opacity: 0; transform: translate(-50%, 6px) scale(.8); } 15% { opacity: 1; transform: translate(-50%, 0) scale(1.1); } 70% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -22px); } }
+.delta-float { animation: delta-float 900ms ease-out both; }
+@keyframes ticket-reveal { from { opacity: 0; transform: translateY(-14px) rotate(-4deg) scale(.9); } to { opacity: 1; transform: none; } }
+.ticket-reveal { animation: ticket-reveal 260ms cubic-bezier(.2,.8,.3,1.2) both; }
+@keyframes bonus-pop { 0% { opacity: 0; transform: translate(-50%, 20px) scale(.6); } 18% { opacity: 1; transform: translate(-50%, 0) scale(1.08); } 26% { transform: translate(-50%, 0) scale(1); } 100% { opacity: 1; transform: translate(-50%, 0); } }
+.bonus-pop { animation: bonus-pop 900ms cubic-bezier(.2,.8,.3,1) both; }
+@keyframes confetti-fall { 0% { transform: translateY(-20px) rotate(0); opacity: 1; } 100% { transform: translateY(105vh) rotate(720deg); opacity: .9; } }
+.confetti { animation: confetti-fall linear both; }
+@keyframes crown-bob { 0%, 100% { transform: translateY(0) rotate(-6deg); } 50% { transform: translateY(-5px) rotate(6deg); } }
+.crown-bob { animation: crown-bob 1.8s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .chooser-glow, .attn-dot, .crown-bob { animation: none; }
+  .confetti { display: none; }
+  .end-banner, .score-card-in, .ticket-reveal { animation-name: fade-in; }
+  .delta-float, .bonus-pop { animation: none; transform: translateX(-50%); }
+  .final-splash > div { animation: none; }
+  .steam-puff, .burst-ring, .burst-spark { animation: none; display: none; }
+  .claim-banner { animation: none; transform: translateX(-50%); }
+  .emote-pop { animation-name: fade-only; transform: translateX(-50%); }
+  .turn-banner { animation-name: fade-only; transform: translateX(-50%); }
+  .car-drop, .ring-in, .target-ping, .card-in, .pop, .fade-in, .claim-flash, .turn-pulse, .deal-in, .reshuffle-out, .reshuffle-label, .drawn-flash, .bubble-in, .podium-rise { animation: none; }
+  .banner-in { animation: none; transform: translateX(-50%); }
+}
+
+/* Results sheet: laid out off-screen (so the map can measure itself), printed alone. */
+.print-sheet { position: fixed; left: -20000px; top: 0; width: 1000px; }
+.print-sheet .print-map { height: 520px; }
+@media print {
+  @page { size: landscape; margin: 10mm; }
+  body > *:not(.print-sheet) { display: none !important; }
+  /* same pixel size as on screen, so the map keeps the proportions it measured; the browser scales the page to fit */
+  .print-sheet { position: static; left: 0; }
+  html, body { background: #efe2c4 !important; height: auto; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}

@@ -1,0 +1,7 @@
+/* European retro railway theme (VITE_THEME=rail sets <html data-theme="rail">). One file per area under ./rail. */
+@import "./rail/fonts.css";
+@import "./rail/tokens.css";
+@import "./rail/map.css";
+@import "./rail/cards.css";
+@import "./rail/fx.css";
+@import "./rail/screens.css";

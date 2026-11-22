@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- one badge, three looks: vintage poster (gold), modern high-speed rail (red), 1930s continental rail (green); a train head-on over the bands -->
+  <clipPath id="b"><rect x="2" y="2" width="60" height="60" rx="13"/></clipPath>
+  <g clip-path="url(#b)">
+    <rect width="64" height="64" fill="#e3b23c"/>
+    <polygon points="0,52 52,0 64,0 64,12 12,64 0,64" fill="#c8281c"/>
+    <polygon points="64,24 24,64 64,64" fill="#1f4a3a"/>
+  </g>
+  <rect x="2" y="2" width="60" height="60" rx="13" fill="none" stroke="#2a2018" stroke-width="3"/>
+  <!-- train, front view -->
+  <g stroke="#2a2018" stroke-width="2.4" stroke-linejoin="round">
+    <path d="M20 50 V27 Q20 15 32 15 Q44 15 44 27 V50 Z" fill="#f7f1e3"/>
+    <path d="M24 30 V25 Q24 21 32 21 Q40 21 40 25 V30 Z" fill="#2a2018"/>
+  </g>
+  <rect x="20" y="37" width="24" height="4" fill="#e3b23c" stroke="#2a2018" stroke-width="1.6"/>
+  <circle cx="26" cy="45.5" r="2.2" fill="#ffde00" stroke="#2a2018" stroke-width="1.2"/>
+  <circle cx="38" cy="45.5" r="2.2" fill="#ffde00" stroke="#2a2018" stroke-width="1.2"/>
+  <rect x="17" y="51" width="30" height="3.5" rx="1.5" fill="#2a2018"/>
+</svg>

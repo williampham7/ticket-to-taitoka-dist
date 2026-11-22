@@ -1,0 +1,201 @@
+/* Rail theme (screens and game chrome). Scope every rule under [data-theme="rail"]. */
+
+/* paper: a faint fibre texture and warm mottling, CSS only */
+:root[data-theme="rail"] {
+  --rail-paper:
+    radial-gradient(circle at 20% 30%, rgba(120,90,40,.035) 0 1px, transparent 1.5px) 0 0 / 5px 5px,
+    radial-gradient(circle at 70% 60%, rgba(120,90,40,.03) 0 1px, transparent 1.5px) 2px 3px / 7px 7px,
+    radial-gradient(120% 90% at 30% 10%, rgba(255,255,255,.35), rgba(255,255,255,0) 60%);
+  --rail-green: #1f4a3a;
+  --rail-green-dark: #142f25;
+  --rail-brass: #b8903a;
+  --rail-brass-light: #e2c675;
+}
+[data-theme="rail"] body { background: var(--rail-paper), var(--color-table); }
+
+/* ---------- menu frame: the antique map behind a sepia wash, a poster card on top ---------- */
+[data-theme="rail"] .rail-frame { background: #d9cfb3; }
+[data-theme="rail"] .rail-frame-wash {
+  background:
+    radial-gradient(ellipse 70% 65% at 50% 50%, rgba(242,234,214,.55), rgba(242,234,214,.25) 60%, rgba(31,42,36,.45) 100%);
+}
+[data-theme="rail"] .rail-poster {
+  background: var(--rail-paper), var(--color-ticket);
+  border-radius: 6px;
+  box-shadow:
+    0 0 0 1px var(--rail-green-dark),
+    0 0 0 5px var(--rail-green),
+    0 0 0 6px var(--rail-brass),
+    0 30px 70px -20px rgba(20,30,24,.65),
+    inset 0 0 0 6px var(--color-ticket),
+    inset 0 0 0 7px rgba(184,144,58,.7);
+  overflow: hidden;
+}
+/* stepped deco corners on the card's inner rule */
+[data-theme="rail"] .rail-poster::before,
+[data-theme="rail"] .rail-poster::after {
+  content: ""; position: absolute; width: 22px; height: 22px; pointer-events: none; z-index: 2;
+  border: 1.5px solid var(--rail-brass);
+}
+[data-theme="rail"] .rail-poster::before { left: 12px; bottom: 12px; border-right: 0; border-top: 0; }
+[data-theme="rail"] .rail-poster::after { right: 12px; bottom: 12px; border-left: 0; border-top: 0; }
+[data-theme="rail"] .rail-hero { border-bottom: 3px solid var(--rail-brass); box-shadow: 0 1px 0 var(--rail-green-dark); }
+[data-theme="rail"] .rail-train { animation: rail-train-in 1300ms cubic-bezier(.16,.84,.3,1) both; }
+[data-theme="rail"] .rail-speed { animation: rail-train-in 1300ms cubic-bezier(.16,.84,.3,1) both; }
+@keyframes rail-train-in { from { transform: translateX(-120px); opacity: 0; } to { transform: none; opacity: 1; } }
+
+[data-theme="rail"] .rail-title > span:first-child { letter-spacing: .32em; font-weight: 600; }
+[data-theme="rail"] .rail-title > span:last-child { letter-spacing: .1em; }
+/* a brass rule with a diamond in the middle */
+[data-theme="rail"] .rail-rule { position: relative; height: 9px; max-width: 320px; }
+[data-theme="rail"] .rail-rule::before {
+  content: ""; position: absolute; left: 0; right: 0; top: 4px; height: 1px; background: var(--rail-brass);
+  box-shadow: 0 -2px 0 rgba(184,144,58,.45);
+}
+[data-theme="rail"] .rail-rule > span {
+  position: absolute; left: 50%; top: 0; width: 9px; height: 9px; margin-left: -4.5px; transform: rotate(45deg);
+  background: var(--color-poster); box-shadow: 0 0 0 2px var(--color-ticket), 0 0 0 3px var(--rail-brass);
+}
+[data-theme="rail"] .rail-footnote { border-top: 1px solid var(--color-line); padding-top: 14px; font-size: 14.5px; }
+
+/* ---------- buttons, links, inputs: enamel with a brass inlay ---------- */
+[data-theme="rail"] .rail-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: .5em;
+  border-radius: 5px; padding: 12px 22px; min-height: 48px;
+  font-family: var(--font-display); font-weight: 700; font-size: 16px; letter-spacing: .12em; text-transform: uppercase;
+  line-height: 1.1; padding-top: 14px;
+  transition: background-color .15s, color .15s, box-shadow .15s, transform .1s;
+}
+[data-theme="rail"] .rail-btn:enabled:active { transform: translateY(1px); }
+[data-theme="rail"] .rail-btn-primary {
+  color: #fbefd6;
+  background: linear-gradient(180deg, #8e2433 0%, #6e1824 100%);
+  box-shadow: inset 0 0 0 3px #6e1824, inset 0 0 0 4px var(--rail-brass-light), 0 3px 0 #4a0f18, 0 8px 18px -8px rgba(74,15,24,.7);
+}
+[data-theme="rail"] .rail-btn-primary:enabled:hover { background: linear-gradient(180deg, #9c2a3a 0%, #7b1e2b 100%); }
+[data-theme="rail"] .rail-btn-primary:disabled { background: #b7ad94; color: #f2ead6; box-shadow: inset 0 0 0 3px #b7ad94, inset 0 0 0 4px rgba(255,255,255,.4); }
+[data-theme="rail"] .rail-btn-secondary {
+  color: var(--color-ink); background: rgba(255,255,255,.35);
+  box-shadow: inset 0 0 0 2px var(--rail-green), inset 0 0 0 4px var(--color-ticket), inset 0 0 0 5px rgba(184,144,58,.8), 0 2px 0 rgba(31,74,58,.35);
+}
+[data-theme="rail"] .rail-btn-secondary:hover { background: rgba(31,74,58,.07); }
+[data-theme="rail"] .rail-btn:focus-visible { outline: 3px solid var(--rail-brass); outline-offset: 3px; }
+
+[data-theme="rail"] .rail-link {
+  font-family: var(--font-display); font-weight: 600; font-size: 15px; letter-spacing: .04em; color: var(--color-poster);
+  text-decoration: underline; text-decoration-color: var(--rail-brass); text-decoration-thickness: 2px; text-underline-offset: 5px;
+}
+[data-theme="rail"] .rail-link:hover { color: var(--color-poster-dark); }
+
+[data-theme="rail"] .rail-input {
+  border-radius: 4px; border: 1.5px solid var(--color-line-strong); background: #fffaf0;
+  padding: 7px 12px; font-size: 16px; color: var(--color-ink);
+  box-shadow: inset 0 1px 2px rgba(31,42,36,.12);
+}
+[data-theme="rail"] .rail-input:focus { outline: none; border-color: var(--rail-green); box-shadow: 0 0 0 3px rgba(184,144,58,.35); }
+
+/* ---------- game chrome ---------- */
+/* the top bar: a green enamel band with a brass rule under it */
+[data-theme="rail"] [data-testid="side-rail"] ~ * { }
+[data-theme="rail"] header.bg-panel {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,0) 50%, rgba(0,0,0,.12)),
+    var(--rail-green);
+  border-bottom: 0;
+  box-shadow: inset 0 -1px 0 var(--rail-green-dark), inset 0 -4px 0 var(--rail-brass), 0 2px 6px rgba(20,30,24,.25);
+  padding-bottom: 3px;
+}
+[data-theme="rail"] header.bg-panel > h1 { color: #f2ead6; font-size: 21px; letter-spacing: .14em; text-transform: uppercase; }
+[data-theme="rail"] header.bg-panel > h1 .text-poster { color: var(--rail-brass-light); }
+[data-theme="rail"] header.bg-panel .bg-panel-2 { background: #f2ead6; border-color: rgba(214,178,94,.7); }
+[data-theme="rail"] header.bg-panel button.bg-panel-2:hover { border-color: var(--rail-brass-light); background: #fffaf0; }
+[data-theme="rail"] header [data-testid="status"].bg-poster { box-shadow: inset 0 0 0 1px var(--rail-brass-light); border-color: #5a1520; }
+[data-theme="rail"] header [data-testid="status"].bg-mustard { background: var(--rail-brass-light); }
+[data-theme="rail"] .turn-pulse { animation-name: turn-pulse-rail; }
+@keyframes turn-pulse-rail {
+  0%, 100% { box-shadow: inset 0 0 0 1px #e2c675, 0 0 0 0 rgba(226,198,117,.6); }
+  50% { box-shadow: inset 0 0 0 1px #e2c675, 0 0 0 8px rgba(226,198,117,0); }
+}
+
+/* side rail and hand tray: paper, with a double rule along the edge they share with the map */
+[data-theme="rail"] [data-testid="side-rail"] {
+  background: var(--rail-paper), var(--color-panel);
+  border-left: 0; box-shadow: inset 3px 0 0 var(--rail-green), inset 4px 0 0 var(--rail-brass);
+  padding-left: 16px;
+}
+[data-theme="rail"] [data-testid="side-rail"] h2 {
+  font-family: var(--font-display); font-weight: 600; font-size: 14px; letter-spacing: .06em; color: var(--color-ink);
+  display: flex; align-items: center; gap: 8px;
+}
+[data-theme="rail"] [data-testid="side-rail"] h2::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, var(--rail-brass), transparent); }
+[data-theme="rail"] [data-testid="side-rail"] [data-testid="log"] li.bg-panel-2 { background: rgba(255,255,255,.45); border-left: 2px solid var(--rail-brass); border-radius: 2px; }
+[data-theme="rail"] [data-testid="hand-tray"] {
+  background: var(--rail-paper), var(--color-panel);
+  border-top: 0; box-shadow: inset 0 3px 0 var(--rail-green), inset 0 4px 0 var(--rail-brass);
+  padding-top: 10px;
+}
+[data-theme="rail"] [data-testid="hand-tray"] h2 { font-size: 15px; letter-spacing: .06em; }
+[data-theme="rail"] .ticket-scroll::-webkit-scrollbar-thumb { background: #c9b98f; }
+[data-theme="rail"] .ticket-scroll::-webkit-scrollbar-thumb:hover { background: #a08a5a; }
+/* the deck's and the ticket pile's counters: little brass-rimmed plates */
+[data-theme="rail"] [data-testid="draw-deck"] > span.bg-ink,
+[data-theme="rail"] [data-testid="draw-tickets"] > span.bg-ink { background: var(--rail-green-dark); color: #f6e7bf; box-shadow: inset 0 0 0 1px var(--rail-brass-light); border-radius: 4px; }
+
+/* the map's floating buttons and the docked ticket chooser */
+[data-theme="rail"] [data-testid="spotlight"], [data-theme="rail"] [data-testid="show-longest"] { border-width: 1.5px; border-color: rgba(31,74,58,.5); }
+[data-theme="rail"] [data-testid="ticket-chooser"] {
+  background: var(--rail-paper), var(--color-panel);
+  border: 0; border-radius: 6px;
+  box-shadow: 0 0 0 2px var(--rail-green), 0 0 0 3px var(--rail-brass), 0 14px 32px rgba(20,30,24,.35);
+}
+[data-theme="rail"] [data-testid="ticket-chooser"] [data-testid="keep-tickets"] {
+  border-radius: 4px; font-size: 14px; letter-spacing: .1em; text-transform: uppercase; padding-top: 10px;
+  box-shadow: inset 0 0 0 2px #7b1e2b, inset 0 0 0 3px var(--rail-brass-light), 0 2px 0 #4a0f18;
+}
+[data-theme="rail"] [data-testid="ticket-chooser"] [data-testid="keep-tickets"]:disabled { box-shadow: none; }
+[data-theme="rail"] .chooser-glow { animation-name: chooser-glow-rail; }
+@keyframes chooser-glow-rail {
+  0%, 100% { box-shadow: 0 0 0 2px #1f4a3a, 0 0 0 3px #b8903a, 0 14px 32px rgba(20,30,24,.35), 0 0 0 3px rgba(226,198,117,0); }
+  50% { box-shadow: 0 0 0 2px #1f4a3a, 0 0 0 3px #b8903a, 0 14px 32px rgba(20,30,24,.35), 0 0 0 9px rgba(226,198,117,.4); }
+}
+[data-theme="rail"] .final-ribbon { background: repeating-linear-gradient(135deg, #e2c675 0 14px, #d6b25e 14px 28px); }
+
+/* ---------- turn announcement: an enamel station sign ---------- */
+[data-theme="rail"] .rail-sign {
+  position: relative; text-align: center; padding: 18px 40px 16px 52px; border-radius: 12px;
+  color: #1f2a24; background: linear-gradient(180deg, #fbf6e6, #efe5c8);
+  box-shadow: inset 0 0 0 4px #fbf6e6, inset 0 0 0 6px var(--rail-green), 0 0 0 2px #0f241c, 0 18px 40px rgba(20,30,24,.45);
+}
+[data-theme="rail"] .rail-sign-mine {
+  color: #f6eed6; background: linear-gradient(180deg, #2a5d4a, #1b4134);
+  box-shadow: inset 0 0 0 4px #1b4134, inset 0 0 0 6px #f2ead6, 0 0 0 2px #0f241c, 0 18px 40px rgba(20,30,24,.5);
+  padding: 22px 50px 18px 62px;
+}
+[data-theme="rail"] .rail-sign-band {
+  position: absolute; left: 12px; top: 12px; bottom: 12px; width: 14px; border-radius: 3px;
+  background: var(--seat); box-shadow: inset 0 0 0 1.5px rgba(0,0,0,.25);
+}
+[data-theme="rail"] .rail-screw {
+  position: absolute; width: 7px; height: 7px; border-radius: 9999px;
+  background: radial-gradient(circle at 35% 35%, #f6e2a4, #a07a2c); box-shadow: 0 0 0 1px rgba(0,0,0,.35);
+}
+[data-theme="rail"] .rail-screw::after { content: ""; position: absolute; left: 1px; right: 1px; top: 3px; height: 1px; background: rgba(60,40,10,.6); transform: rotate(35deg); }
+[data-theme="rail"] .rail-screw-0 { left: -14px; top: -14px; }
+[data-theme="rail"] .rail-screw-0, [data-theme="rail"] .rail-screw-1, [data-theme="rail"] .rail-screw-2, [data-theme="rail"] .rail-screw-3 { display: none; }
+
+/* ---------- pass-and-play curtain: a dark green lacquered panel with a brass sunburst ---------- */
+[data-theme="rail"] [data-testid="curtain"] {
+  background:
+    repeating-conic-gradient(from 0deg at 50% 115%, rgba(214,178,94,.035) 0 4deg, transparent 4deg 9deg),
+    radial-gradient(ellipse 80% 60% at 50% 100%, #2a5d4a, #142f25 70%);
+}
+[data-theme="rail"] [data-testid="curtain"] h2 { letter-spacing: .04em; }
+[data-theme="rail"] [data-testid="recap"] { border-radius: 4px; border-color: rgba(214,178,94,.45); }
+
+/* ---------- audio buttons and panels ---------- */
+[data-theme="rail"] .volume-range::-webkit-slider-thumb { background: var(--rail-brass-light); border-color: var(--rail-green); }
+[data-theme="rail"] .volume-range::-moz-range-thumb { background: var(--rail-brass-light); border-color: var(--rail-green); }
+
+@media (prefers-reduced-motion: reduce) {
+  [data-theme="rail"] .rail-train, [data-theme="rail"] .rail-speed { animation: none; }
+}
