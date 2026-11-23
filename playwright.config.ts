@@ -8,8 +8,11 @@ export default defineConfig({
   fullyParallel: false,
   workers: 1,
   reporter: [['list']],
+  expect: { timeout: 10_000 },
   use: {
     baseURL: `http://localhost:${PORT}`,
+    // every visitor is asked for a name first: tests start with one (asName() in helpers.ts sets another)
+    storageState: { cookies: [], origins: [{ origin: `http://localhost:${PORT}`, localStorage: [{ name: 'boboland.myName', value: '"Tester"' }] }] },
     viewport: { width: 1440, height: 860 },
     trace: 'retain-on-failure',
   },

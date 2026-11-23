@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { keepTickets } from './helpers';
+import { keepTickets, asName } from './helpers';
 
 test('LAN: host and guest in two browsers stay in sync, and a reload keeps the seat', async ({ browser, baseURL }) => {
   const hostCtx = await browser.newContext({ viewport: { width: 1440, height: 860 } });
@@ -7,20 +7,18 @@ test('LAN: host and guest in two browsers stay in sync, and a reload keeps the s
   const host = await hostCtx.newPage();
   const guest = await guestCtx.newPage();
 
+  await asName(host, 'Host');
   await host.goto('/menu');
   await host.getByTestId('play-lan').click();
-  await host.getByTestId('my-name').fill('Host');
-  await host.getByTestId('host-game').click();
 
   const share = host.getByTestId('share-url');
-  await expect(share).toContainText('/join/');
+  await expect(share).toContainText('/p/');
   const shareUrl = await share.innerText();
   // The share link points at this computer's Wi-Fi address; open the same path on localhost.
   const path = new URL(shareUrl).pathname;
 
+  await asName(guest, 'Guest');
   await guest.goto(`${baseURL}${path}`);
-  await guest.getByTestId('my-name').fill('Guest');
-  await guest.getByTestId('join-game').click();
 
   // Everyone gathers in the waiting room; only the host can start
   await expect(guest).toHaveURL(/\/wait\//);
@@ -80,15 +78,13 @@ test('LAN chat: messages and emotes reach the other player, with a reaction over
   const host = await hostCtx.newPage();
   const guest = await guestCtx.newPage();
 
+  await asName(host, 'Host');
   await host.goto('/menu');
   await host.getByTestId('play-lan').click();
-  await host.getByTestId('my-name').fill('Host');
-  await host.getByTestId('host-game').click();
   const share = host.getByTestId('share-url');
-  await expect(share).toContainText('/join/');
+  await expect(share).toContainText('/p/');
+  await asName(guest, 'Guest');
   await guest.goto(`${baseURL}${new URL(await share.innerText()).pathname}`);
-  await guest.getByTestId('my-name').fill('Guest');
-  await guest.getByTestId('join-game').click();
   await expect(guest).toHaveURL(/\/wait\//);
   await host.getByTestId('start-lan').click();
   await expect(host).toHaveURL(/\/play\//, { timeout: 15_000 });
@@ -123,19 +119,18 @@ test('LAN waiting room: no player count up front, colours chosen before the star
   const [hostCtx, aCtx, bCtx] = await Promise.all([ctx(), ctx(), ctx()]);
   const [host, a, b] = await Promise.all([hostCtx.newPage(), aCtx.newPage(), bCtx.newPage()]);
 
+  await asName(host, 'Host');
   await host.goto('/menu');
   await host.getByTestId('play-lan').click();
   await expect(host.locator('[data-count]')).toHaveCount(0); // no player-count picker any more
-  await host.getByTestId('my-name').fill('Host');
-  await host.getByTestId('host-game').click();
   await expect(host.getByTestId('start-lan')).toBeDisabled(); // nobody else yet
+  await expect(host.getByTestId('share-url')).toContainText('/p/');
   const path = new URL(await host.getByTestId('share-url').innerText()).pathname;
   await expect(host.getByTestId('waiting-players').locator('li')).toHaveCount(5); // host + 4 open seats
 
   for (const [page, name] of [[a, 'Ana'], [b, 'Bo']] as const) {
+    await asName(page, name);
     await page.goto(`${baseURL}${path}`);
-    await page.getByTestId('my-name').fill(name);
-    await page.getByTestId('join-game').click();
     await expect(page).toHaveURL(/\/wait\//);
   }
 
@@ -161,14 +156,13 @@ test('LAN new game: when the host opens a new waiting room, everyone moves there
   const [hostCtx, guestCtx] = await Promise.all([ctx(), ctx()]);
   const [host, guest] = await Promise.all([hostCtx.newPage(), guestCtx.newPage()]);
 
+  await asName(host, 'Host');
   await host.goto('/menu');
   await host.getByTestId('play-lan').click();
-  await host.getByTestId('my-name').fill('Host');
-  await host.getByTestId('host-game').click();
+  await expect(host.getByTestId('share-url')).toContainText('/p/');
   const path = new URL(await host.getByTestId('share-url').innerText()).pathname;
+  await asName(guest, 'Guest');
   await guest.goto(`${baseURL}${path}`);
-  await guest.getByTestId('my-name').fill('Guest');
-  await guest.getByTestId('join-game').click();
   await guest.getByTestId('my-color').getByRole('radio', { name: 'Pink' }).click();
   await expect(host.locator('[data-testid=waiting-players] [data-seat="1"]')).toHaveAttribute('data-color', '2');
   await host.getByTestId('start-lan').click();
@@ -202,14 +196,13 @@ test('LAN leave: asks first, and a guest leaving takes the whole table back to t
   const [hostCtx, guestCtx] = await Promise.all([ctx(), ctx()]);
   const [host, guest] = await Promise.all([hostCtx.newPage(), guestCtx.newPage()]);
 
+  await asName(host, 'Host');
   await host.goto('/menu');
   await host.getByTestId('play-lan').click();
-  await host.getByTestId('my-name').fill('Host');
-  await host.getByTestId('host-game').click();
+  await expect(host.getByTestId('share-url')).toContainText('/p/');
   const path = new URL(await host.getByTestId('share-url').innerText()).pathname;
+  await asName(guest, 'Guest');
   await guest.goto(`${baseURL}${path}`);
-  await guest.getByTestId('my-name').fill('Guest');
-  await guest.getByTestId('join-game').click();
   await expect(host.locator('[data-testid=waiting-players] [data-seat="1"]')).toContainText('Guest');
   await host.getByTestId('start-lan').click();
   for (const p of [host, guest]) await expect(p).toHaveURL(/\/play\//, { timeout: 15_000 });

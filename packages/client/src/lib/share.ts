@@ -16,3 +16,8 @@ export function shareUrlFor(c: ShareContext, matchID: string): string {
   const port = c.page.port ? `:${c.page.port}` : '';
   return `${c.page.protocol}//${host}${port}/join/${matchID}`;
 }
+
+/** The party invite link: whoever opens it joins this party and follows its host. */
+export function inviteUrlFor(c: ShareContext, partyID: string): string {
+  return shareUrlFor(c, 'x').replace(/\/join\/x$/, `/p/${partyID}`);
+}

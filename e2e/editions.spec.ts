@@ -4,7 +4,7 @@
  * Nothing here depends on the seed: the map is read from the screen (city ids, the tab title, the theme).
  */
 import { expect, test, type Page } from '@playwright/test';
-import { keepTickets } from './helpers';
+import { keepTickets, asName } from './helpers';
 
 const theme = (page: Page) => page.locator('html');
 const city = (page: Page, id: string) => page.locator(`[data-city="${id}"]`);
@@ -68,17 +68,16 @@ test('LAN: the host switches the map in the waiting room, the joiner follows, an
   const [hostCtx, guestCtx] = await Promise.all([ctx(), ctx()]);
   const [host, guest] = await Promise.all([hostCtx.newPage(), guestCtx.newPage()]);
 
+  await asName(host, 'Host');
   await host.goto('/menu?edition=usa');
   await host.getByTestId('play-lan').click();
-  await host.getByTestId('my-name').fill('Host');
-  await host.getByTestId('host-game').click();
+  await expect(host.getByTestId('share-url')).toContainText('/p/');
   const path = new URL(await host.getByTestId('share-url').innerText()).pathname;
 
   // the joiner arrives on USA (their own default) and sees the switcher locked
+  await asName(guest, 'Guest');
   await guest.goto(`${baseURL}${path}`);
   await expect(guest).toHaveTitle('Ticket to Taitoka');
-  await guest.getByTestId('my-name').fill('Guest');
-  await guest.getByTestId('join-game').click();
   await expect(guest).toHaveURL(/\/wait\//);
   await expect(guest.getByTestId('edition-switcher')).toHaveAttribute('data-locked', 'true');
   await expect(host.getByTestId('edition-switcher')).not.toHaveAttribute('data-locked', 'true');

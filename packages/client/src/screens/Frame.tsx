@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { MapView } from '../board/MapView';
 import { MusicButton, VolumeSlider } from '../lib/AudioButtons';
 import { navigate } from '../lib/router';
+import { isFollower, usePartyState } from '../lib/party';
 import { SKIN } from '../lib/skin';
 import { HSR, MERLION, RAIL } from '../theme';
 import { MerlionFrame, MerlionTitle } from '../merlion/MerlionChrome';
@@ -29,11 +30,14 @@ export function Frame({ children, wide, edition }: FrameProps) {
  * the sound controls on the right.
  */
 function TopBar({ edition }: { edition?: boolean | EditionSwitcherProps }) {
+  // a party member's screen follows the host: no navigating or map switching of their own
+  const follower = isFollower(usePartyState());
+  if (follower && edition) edition = { ...(edition === true ? {} : edition), locked: true, lockedNote: 'Your party host picks the map' };
   const edge = HSR || RAIL || MERLION ? 'top-3 sm:top-4' : 'top-4';
   const side = HSR || RAIL || MERLION ? 'sm:left-4' : '';
   return (
     <>
-      {edition && (
+      {edition && !follower && (
         <button type="button" onClick={() => navigate('/')} data-testid="back-to-main" aria-label="Back to Main Menu" title="Back to Main Menu"
           className={`absolute left-3 z-10 flex h-9 items-center gap-1.5 rounded-lg border border-line bg-panel-2 px-2.5 text-[14px] leading-none text-ink transition-colors hover:border-ink sm:px-3 ${side} ${edge}`}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M15 5l-7 7 7 7" /></svg>
@@ -45,7 +49,7 @@ function TopBar({ edition }: { edition?: boolean | EditionSwitcherProps }) {
           <EditionSwitcher {...(edition === true ? {} : edition)} />
         </div>
       )}
-      <div className={`absolute z-10 flex gap-2 ${HSR || RAIL || MERLION ? 'right-3 sm:right-4' : 'right-4'} ${edge}`}>
+      <div className={`absolute right-[136px] z-10 flex gap-2 sm:right-[140px] ${edge}`}>
         <VolumeSlider />
         <MusicButton />
       </div>

@@ -8,6 +8,7 @@ import { lanAddresses } from './lanInfo';
 import { SERVER_TITLE } from './title';
 import { openBrowser } from './openBrowser';
 import { installBots } from './bots';
+import { installParty } from './party';
 
 const PORT = Number(process.env.PORT ?? 8000);
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -28,6 +29,7 @@ server.router.get('/api/lan-info', (ctx) => {
 });
 
 installBots(server, { port: PORT });
+installParty(server);
 
 if (fs.existsSync(indexHtml)) {
   server.app.use(serve(clientDist));

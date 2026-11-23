@@ -4,7 +4,7 @@
  * from the screen. Run with `npm run e2e` (or `npx playwright test e2e/china.spec.ts` after `npm run build`).
  */
 import { expect, test, type Page } from '@playwright/test';
-import { claimFirstRoute, keepTickets, revealIfCurtain } from './helpers';
+import { claimFirstRoute, keepTickets, revealIfCurtain, asName } from './helpers';
 
 const myTurn = (page: Page) => page.getByTestId('status').filter({ hasText: /Your turn/ });
 
@@ -80,17 +80,15 @@ test('China LAN: host and guest stay in sync whoever goes first, and a reload ke
   const host = await hostCtx.newPage();
   const guest = await guestCtx.newPage();
 
+  await asName(host, 'Host');
   await host.goto('/menu?edition=china');
   await host.getByTestId('play-lan').click();
-  await host.getByTestId('my-name').fill('Host');
-  await host.getByTestId('host-game').click();
   const share = host.getByTestId('share-url');
-  await expect(share).toContainText('/join/');
+  await expect(share).toContainText('/p/');
   const joinPath = new URL(await share.innerText()).pathname;
 
+  await asName(guest, 'Guest');
   await guest.goto(`${baseURL}${joinPath}`);
-  await guest.getByTestId('my-name').fill('Guest');
-  await guest.getByTestId('join-game').click();
   await expect(guest).toHaveURL(/\/wait\//);
   await expect(host.getByTestId('waiting-players')).toContainText('Guest');
   await host.getByTestId('start-lan').click();

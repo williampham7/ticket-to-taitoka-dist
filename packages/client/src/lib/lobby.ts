@@ -65,6 +65,18 @@ export function setSeatColor(seat: Seat, color: number): Promise<void> {
   return updateSeatData(seat, { color });
 }
 
+/** Show a new name on my seat (and remember it on this computer). */
+export async function renameSeat(seat: Seat, name: string): Promise<void> {
+  await lobby.updatePlayer(GAME_NAME, seat.matchID, { playerID: seat.playerID, credentials: seat.credentials, newName: name } as never);
+  remember({ ...seat, name });
+}
+
+/** Give up my seat in a waiting room (I left the party or was removed from it). */
+export async function leaveSeat(seat: Seat): Promise<void> {
+  await lobby.leaveMatch(GAME_NAME, seat.matchID, { playerID: seat.playerID, credentials: seat.credentials });
+  save(seatKey(seat.matchID), null);
+}
+
 /** Host only: pick the map the room plays. Every joined screen follows. */
 export function setRoomEdition(seat: Seat, edition: EditionId): Promise<void> {
   return updateSeatData(seat, { edition });

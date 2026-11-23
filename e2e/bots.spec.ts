@@ -1,12 +1,11 @@
 import { expect, test } from '@playwright/test';
-import { keepTickets } from './helpers';
+import { keepTickets, asName } from './helpers';
 
 // Needs the server started with TTB_BOT_DELAY=50 so bot turns are quick.
 test('LAN: host fills seats with bots, starts, and the bots take their turns', async ({ page }) => {
+  await asName(page, 'Host');
   await page.goto('/menu');
   await page.getByTestId('play-lan').click();
-  await page.getByTestId('my-name').fill('Host');
-  await page.getByTestId('host-game').click();
   const seats = page.getByTestId('waiting-players').locator('[data-seat]');
   await expect(seats).toHaveCount(1);
 

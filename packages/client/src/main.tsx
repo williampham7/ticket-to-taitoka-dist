@@ -7,8 +7,10 @@ import './theme-rail.css';
 import './theme-merlion.css';
 import { App } from './App';
 import { initMusic } from './lib/music';
+import { startParty } from './lib/party';
 
 initMusic();
+startParty();
 
 createRoot(document.getElementById('root')!).render(
   <>

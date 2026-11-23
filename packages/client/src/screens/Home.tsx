@@ -8,10 +8,14 @@ import { RailHero } from '../rail/RailChrome';
 import { MerlionHero } from '../merlion/MerlionChrome';
 import { HowToPlay } from '../game/HowToPlay';
 import { Frame, PrimaryButton, SecondaryButton, Title } from './Frame';
+import { isFollower, usePartyState } from '../lib/party';
 
 export function Home() {
   const [help, setHelp] = useState(false);
   const online = useOnline();
+  const party = usePartyState();
+  const follower = isFollower(party);
+  const hostName = party.party?.members.find((m) => m.id === party.party?.host)?.name;
   const sub = MAP_ID === 'sg'
     ? `Ride the MRT from Tuas to Changi, connect Marina Bay, Chinatown and the Gardens, and make it to ${SKIN.name}.`
     : MAP_ID === 'europe'
@@ -27,8 +31,12 @@ export function Home() {
       {MERLION && <MerlionHero />}
       <Title sub={sub} />
       <div className={`grid gap-3 ${HSR ? 'sm:grid-cols-2' : ''}`}>
-        <PrimaryButton onClick={() => navigate('/local' + window.location.search)} data-testid="play-local">Play on this computer</PrimaryButton>
-        <SecondaryButton onClick={() => navigate('/host')} data-testid="play-lan">{online ? 'Play online' : 'Play on two computers'}</SecondaryButton>
+        {follower ? <p className="text-[16px]" data-testid="party-waiting">Waiting for {hostName ?? 'your host'} to pick a game…</p> : (
+          <>
+            <PrimaryButton onClick={() => navigate('/local' + window.location.search)} data-testid="play-local">Play on this computer</PrimaryButton>
+            <SecondaryButton onClick={() => navigate('/host')} data-testid="play-lan">{online ? 'Play online' : 'Play on two computers'}</SecondaryButton>
+          </>
+        )}
         <button type="button" onClick={() => setHelp(true)} data-testid="open-help"
           className={MERLION ? 'mrt-link mt-1 justify-self-start' : RAIL ? 'rail-link mt-1 justify-self-start' : HSR ? 'hsr-link mt-1 justify-self-start'
             : 'mt-1 justify-self-start font-display text-[16px] text-poster underline decoration-2 underline-offset-4 hover:text-poster-dark'}>How to play</button>

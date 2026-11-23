@@ -1,6 +1,7 @@
 import { EDITIONS, EDITION_IDS, SKINS, type EditionId } from '@boboland/shared';
 import { EDITION, setEdition, urlWithoutEdition } from '../edition';
 import { navigate } from '../lib/router';
+import { isFollower, usePartyState } from '../lib/party';
 import './EditionPicker.css';
 
 /**
@@ -9,7 +10,11 @@ import './EditionPicker.css';
  * Picking the page's own edition just opens the menu; another one saves the choice and reloads on /menu.
  */
 export function EditionPicker() {
+  const party = usePartyState();
+  const follower = isFollower(party);
+  const hostName = party.party?.members.find((m) => m.id === party.party?.host)?.name ?? 'your host';
   const pick = (id: EditionId) => {
+    if (follower) return;
     if (id === EDITION.id) {
       const url = new URL(urlWithoutEdition(window.location.href, '/menu'));
       navigate(url.pathname + url.search);
@@ -21,7 +26,7 @@ export function EditionPicker() {
     <main className="ep" data-testid="edition-picker">
       <header className="ep-head">
         <h1 className="ep-title">Where to?</h1>
-        <p className="ep-sub">Pick a map. You can switch maps later from the menu.</p>
+        <p className="ep-sub" data-testid={follower ? 'party-waiting' : undefined}>{follower ? `You're in ${hostName}'s party. They pick the game, and your screen follows.` : 'Pick a map. You can switch maps later from the menu.'}</p>
       </header>
       <div className="ep-grid">
         {EDITION_IDS.map((id) => (

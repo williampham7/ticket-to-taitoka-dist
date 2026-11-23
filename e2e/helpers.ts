@@ -36,3 +36,8 @@ export async function claimFirstRoute(page: Page): Promise<string> {
   await expect(picker).toBeHidden();
   return id;
 }
+
+/** Give this page's player a name before it loads (every new visitor is asked for one). */
+export async function asName(page: Page, name: string) {
+  await page.addInitScript((n) => localStorage.setItem('boboland.myName', JSON.stringify(n)), name);
+}

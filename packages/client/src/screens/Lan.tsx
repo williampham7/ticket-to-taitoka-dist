@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { QRCodeSVG } from 'qrcode.react';
 import { Client } from 'boardgame.io/client';
 import { SocketIO } from 'boardgame.io/multiplayer';
 import { BobolandGame } from '@boboland/shared';
@@ -11,7 +10,7 @@ import { EDITION, setEdition } from '../edition';
 import { editionForMap, editionToFollow, shouldFollow, type FollowAttempt } from '../lib/seatData';
 import type { EditionId } from '@boboland/shared/src/editions';
 import { canStart, firstFreeColor, joinedSeats, seatColors, MAX_SEATS } from '../lib/lobbyRules';
-import { load, save } from '../lib/storage';
+import { inviteUrl, isFollower, isHost as isPartyHost, rename, setPartyRoom, usePartyState } from '../lib/party';
 import { HSR, INK, PLAYER_COLORS, colorFill } from '../theme';
 import { ColorPicker } from './ColorPicker';
 import { readChat, type ChatLine, type ChatPayload } from '../lib/chat';
@@ -19,26 +18,7 @@ import { BotPicker, RemoveBot } from './BotPicker';
 import { Frame, INPUT_CLASS, PrimaryButton, SecondaryButton, Title } from './Frame';
 import { EnterCurtain, clearCurtain, dipToDark, queueCurtain, takeCurtain } from '../curtain/EnterCurtain';
 
-const NAME_KEY = 'boboland.myName';
 const TOAST_TEXT = HSR ? 'text-white' : 'text-[#fff6e6]';
-
-function NameField({ value, onChange }: { value: string; onChange: (v: string) => void }) {
-  if (HSR) {
-    return (
-      <label className="mb-5 grid max-w-xs gap-1.5">
-        <span className="hsr-label">Your name</span>
-        <input value={value} onChange={(e) => onChange(e.target.value.slice(0, 16))} data-testid="my-name" autoFocus className={INPUT_CLASS} />
-      </label>
-    );
-  }
-  return (
-    <label className="mb-4 flex items-center gap-3">
-      <span className="text-[16px]">Your name</span>
-      <input value={value} onChange={(e) => onChange(e.target.value.slice(0, 16))} data-testid="my-name" autoFocus
-        className="w-48 rounded-md border-2 border-line-strong bg-panel px-3 py-1.5 text-[16px] focus:border-ink focus:outline-none" />
-    </label>
-  );
-}
 
 /** A game's seats, polled; `next` is the new waiting room once the host starts another game. */
 function useSeats(matchID: string, poll: boolean) {
@@ -93,34 +73,50 @@ function useFollowEdition(room: EditionId | undefined) {
   }, [room]);
 }
 
+/**
+ * Open the party's waiting room: the one it is already in when there is one (bots and all, now on this page's map),
+ * else a new one with me in seat 0. No name to ask: everyone has one from the party.
+ */
 export function LanHost() {
-  const [name, setName] = useState(load(NAME_KEY, ''));
-  const [busy, setBusy] = useState(false);
+  const party = usePartyState();
   const [error, setError] = useState<string | null>(null);
-  const online = useOnline();
-  const create = async () => {
-    setBusy(true);
-    save(NAME_KEY, name.trim());
-    try {
-      const seat = await createLanMatch(name.trim());
-      navigate(`/wait/${seat.matchID}`);
-    } catch {
-      setError('Could not reach the game server. Start it with `npm start` on this computer, then try again.');
-      setBusy(false);
-    }
-  };
+  const started = useRef(false);
+  useEffect(() => {
+    if (started.current || !party.name || (party.me && !party.party)) return;
+    started.current = true;
+    const open = async () => {
+      const room = party.party?.room;
+      const seat = room ? savedSeat(room) : null;
+      if (room && seat?.playerID === '0') {
+        const info = await matchInfo(room).catch(() => null);
+        if (info && !info.nextMatchID) {
+          if (info.edition !== EDITION.id) await setRoomEdition(seat, EDITION.id).catch(() => {});
+          return navigate(`/wait/${room}`, true);
+        }
+      }
+      const s = await createLanMatch(party.name);
+      navigate(`/wait/${s.matchID}`, true);
+    };
+    open().catch(() => setError('Could not reach the game server. Start it with `npm start` on this computer, then try again.'));
+  }, [party.name, party.me, party.party]);
   return (
     <Frame edition>
-      <Title sub={online
-        ? `You'll host the game on this computer. Up to ${MAX_SEATS - 1} others join from anywhere with the link you'll get next, and you start when everyone's in.`
-        : `You'll host the game on this computer. Up to ${MAX_SEATS - 1} others join on the same Wi-Fi, and you start when everyone's in.`} />
-      <NameField value={name} onChange={setName} />
-      {error && <p className="mb-4 rounded-md bg-poster/10 px-3 py-2 text-[14px] text-poster">{error}</p>}
-      <div className="flex gap-3">
-        <PrimaryButton disabled={!name.trim() || busy} onClick={create} data-testid="host-game">Host a game</PrimaryButton>
-        <SecondaryButton onClick={() => navigate('/menu')}>Back</SecondaryButton>
-      </div>
+      <Title sub={error ?? 'Opening the waiting room…'} />
+      {error && <SecondaryButton onClick={() => navigate('/menu')}>Back</SecondaryButton>}
     </Frame>
+  );
+}
+
+/** My name, editable in place (it changes in the party too). */
+function MyName({ testId = 'my-name' }: { testId?: string }) {
+  const { name } = usePartyState();
+  const [v, setV] = useState(name);
+  useEffect(() => setV(name), [name]);
+  const save = () => { if (v.trim() && v.trim() !== name) void rename(v); else setV(name); };
+  return (
+    <input value={v} maxLength={16} aria-label="Your name" data-testid={testId} onChange={(e) => setV(e.target.value)} onBlur={save}
+      onKeyDown={(e) => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); }}
+      className={`${INPUT_CLASS} w-40`} />
   );
 }
 
@@ -128,7 +124,10 @@ export function LanWaiting({ matchID }: { matchID: string }) {
   const me = useMemo(() => savedSeat(matchID), [matchID]);
   const { info, error, refresh } = useWaitingRoom(matchID);
   useFollowEdition(info?.edition);
+  const party = usePartyState();
   const [lan, setLan] = useState<{ lanIp?: string; publicUrl?: string | null }>({});
+  const [url, setUrl] = useState('');
+  useEffect(() => { if (party.party) void inviteUrl(party.party.id).then(setUrl); }, [party.party?.id]); // eslint-disable-line react-hooks/exhaustive-deps
   const [starting, setStarting] = useState(false);
   const [startError, setStartError] = useState<string | null>(null);
   useEffect(() => { lanInfo().then((i) => setLan({ lanIp: i.addresses[0], publicUrl: i.publicUrl })).catch(() => {}); }, []);
@@ -144,13 +143,15 @@ export function LanWaiting({ matchID }: { matchID: string }) {
       .catch(() => { entering.current = null; setStartError('The game started without you. Ask the host to start a new one.'); });
   }, [me, info, next]);
 
-  const url = shareUrl(lan, matchID);
   const online = !!lan.publicUrl;
   const seats = info?.seats ?? [];
   const joined = joinedSeats(seats);
   const colors = seatColors(seats, PLAYER_COLORS.length);
   const colorOf = (id: number) => colors[joined.findIndex((s) => s.id === id)];
   const host = me?.playerID === '0';
+  // the party keeps this room while the host goes back to the menus (and drops it on the main menu)
+  useEffect(() => { if (host && !next && isPartyHost(party)) setPartyRoom(matchID); }, [host, next, matchID, party]);
+  const follower = isFollower(party);
   const mine = me && joined.some((s) => String(s.id) === me.playerID) ? colorOf(Number(me.playerID)) : undefined;
   const takenByOthers = new Set(joined.filter((s) => String(s.id) !== me?.playerID).map((s) => colorOf(s.id)));
   const pick = async (c: number) => { if (me) { await setSeatColor(me, c).catch(() => {}); void refresh(); } };
@@ -180,8 +181,8 @@ export function LanWaiting({ matchID }: { matchID: string }) {
   const intro = (
     <>
       {online
-        ? `Send this link to the other players (up to ${MAX_SEATS} in all). It works from anywhere on the internet.`
-        : `Open this link on the other computers, or scan the code (up to ${MAX_SEATS} players).`}
+        ? `Send this link to your friends (up to ${MAX_SEATS} in all). It works from anywhere, and they stay in your party.`
+        : `Open this link on the other computers on your Wi-Fi (up to ${MAX_SEATS} in all). They stay in your party.`}
       {' '}{host ? 'Start the game when everyone is in.' : 'The host starts the game when everyone is in.'}
     </>
   );
@@ -194,7 +195,7 @@ export function LanWaiting({ matchID }: { matchID: string }) {
       ) : (
         <p className="text-[15px] text-muted" data-testid="waiting-for-host">Waiting for the host to start…</p>
       )}
-      <SecondaryButton onClick={() => navigate('/menu')}>Leave</SecondaryButton>
+      {!follower && <SecondaryButton onClick={() => navigate('/menu')}>Back</SecondaryButton>}
     </>
   );
   const footnote = online
@@ -211,12 +212,6 @@ export function LanWaiting({ matchID }: { matchID: string }) {
         </div>
         <p className="mt-2 text-[14.5px] leading-relaxed text-muted">{intro}</p>
         <div className="mt-5 flex flex-col gap-5 sm:flex-row sm:items-start">
-          <figure className="hsr-qr shrink-0 self-center sm:self-start">
-            <QRCodeSVG value={url} size={132} fgColor={INK} bgColor="#ffffff" />
-            <figcaption className="mt-2 text-center text-[11.5px] font-semibold uppercase tracking-[0.14em] text-muted">
-              <span className="hsr-zh mr-1.5 tracking-[0.2em]" aria-hidden>扫码上车</span>Scan to join
-            </figcaption>
-          </figure>
           <div className="min-w-0 flex-1">
             <div className="hsr-label mb-1.5">Invite link</div>
             <div className="flex items-stretch gap-2">
@@ -248,6 +243,8 @@ export function LanWaiting({ matchID }: { matchID: string }) {
         </div>
         {mine !== undefined && (
           <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-line pt-4">
+            <span className="hsr-label">Your name</span>
+            <MyName />
             <span className="hsr-label">Your colour</span>
             <ColorPicker label="Your colour" testId="my-color" value={mine} taken={[...takenByOthers]} onChange={(c) => void pick(c)} />
           </div>
@@ -265,7 +262,6 @@ export function LanWaiting({ matchID }: { matchID: string }) {
       <p className="mt-1 text-[15px] text-muted">{intro}</p>
       {online && <div className="mt-2 inline-block rounded-full border-2 border-ink bg-mustard px-3 py-0.5 text-[13px] font-semibold" data-testid="online-badge">Online game</div>}
       <div className="mt-5 flex items-start gap-6">
-        <div className="shrink-0 rounded-lg border-2 border-ink bg-white p-2.5"><QRCodeSVG value={url} size={132} fgColor={INK} bgColor="#ffffff" /></div>
         <div className="min-w-0 flex-1">
           <div className="select-text break-all font-display text-[20px] text-poster" data-testid="share-url">{url}</div>
           <button type="button" className="mt-1 text-[14px] text-muted underline decoration-dotted underline-offset-4 hover:text-ink"
@@ -290,7 +286,9 @@ export function LanWaiting({ matchID }: { matchID: string }) {
         </div>
       </div>
       {mine !== undefined && (
-        <div className="mt-5 flex items-center gap-4">
+        <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2">
+          <span className="text-[15px]">Your name</span>
+          <MyName />
           <span className="text-[15px]">Your colour</span>
           <ColorPicker label="Your colour" testId="my-color" value={mine} taken={[...takenByOthers]} onChange={(c) => void pick(c)} />
         </div>
@@ -302,40 +300,29 @@ export function LanWaiting({ matchID }: { matchID: string }) {
   );
 }
 
+/** Take a seat in a waiting room (the party brought me here): my party name, the first free colour. */
 export function LanJoin({ matchID }: { matchID: string }) {
   const existing = savedSeat(matchID);
   const { info, error } = useWaitingRoom(matchID);
-  useFollowEdition(info?.edition); // an invite link always lands on the room's map
-  const [name, setName] = useState(load(NAME_KEY, ''));
-  const [busy, setBusy] = useState(false);
+  const { name } = usePartyState();
   const [joinError, setJoinError] = useState<string | null>(null);
-  useEffect(() => { if (existing) navigate(`/wait/${matchID}`, true); }, [existing, matchID]);
+  const tried = useRef(false);
   const seats = info?.seats;
   const open = seats?.some((s) => !s.name);
   const started = !!info?.nextMatchID;
-
-  const join = async () => {
-    setBusy(true);
-    save(NAME_KEY, name.trim());
-    try {
-      await joinLanMatch(matchID, name.trim(), undefined, firstFreeColor(seats ?? [], PLAYER_COLORS.length));
-      navigate(`/wait/${matchID}`);
-    } catch {
-      setJoinError('Every seat in this game is taken.');
-      setBusy(false);
-    }
-  };
+  useEffect(() => {
+    if (existing) { navigate(`/wait/${matchID}`, true); return; }
+    if (!seats || !name || tried.current) return;
+    if (started || !open) { setJoinError(started ? 'This game has already started.' : 'Every seat in this game is taken.'); return; }
+    tried.current = true;
+    joinLanMatch(matchID, name, undefined, firstFreeColor(seats, PLAYER_COLORS.length))
+      .then(() => navigate(`/wait/${matchID}`, true))
+      .catch(() => { tried.current = false; setJoinError('Every seat in this game is taken.'); });
+  }, [existing, seats, name, started, open, matchID]);
   return (
     <Frame>
-      <Title sub="You've been invited to a game. Enter your name to take a seat." />
-      {started && <p className="mb-4 rounded-md bg-poster/10 px-3 py-2 text-[14px] text-poster">This game has already started.</p>}
-      {seats && !open && !started && <p className="mb-4 rounded-md bg-poster/10 px-3 py-2 text-[14px] text-poster">Every seat in this game is taken.</p>}
-      {(error || joinError) && <p className="mb-4 rounded-md bg-poster/10 px-3 py-2 text-[14px] text-poster">{error ?? joinError}</p>}
-      <NameField value={name} onChange={setName} />
-      <div className="flex gap-3">
-        <PrimaryButton disabled={!name.trim() || busy || !open || started} onClick={join} data-testid="join-game">Join the game</PrimaryButton>
-        <SecondaryButton onClick={() => navigate('/menu')}>Back</SecondaryButton>
-      </div>
+      <Title sub={error ?? joinError ?? 'Taking your seat…'} />
+      {(error || joinError) && <SecondaryButton onClick={() => navigate('/menu')}>Back</SecondaryButton>}
     </Frame>
   );
 }

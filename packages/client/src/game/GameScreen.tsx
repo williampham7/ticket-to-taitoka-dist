@@ -318,7 +318,7 @@ export function GameScreen({ state, playerID, moves, players, onExit, exitLabel,
   return (
     <div ref={root} className="grid h-full grid-cols-[minmax(0,1fr)_236px] grid-rows-[56px_1fr_136px] bg-table [grid-template-areas:'top_top''map_side''hand_side']">
       {/* top bar */}
-      <header className="flex items-center gap-3 border-b border-line bg-panel px-4 [grid-area:top]">
+      <header className="flex items-center gap-3 border-b border-line bg-panel pl-4 pr-[140px] [grid-area:top]">
         <h1 className="whitespace-nowrap font-display text-[23px] tracking-[0.02em]">Ticket to <span className="text-poster">{SKIN.name}</span>{HSR && SKIN.zh && <span className="ml-1.5 align-[2px] text-[15px] font-bold text-poster/80" style={{ fontFamily: 'var(--font-zh)' }}>{SKIN.zh}</span>}</h1>
         <div className={`flex min-w-0 items-center gap-2 truncate rounded-full border px-3 py-1.5 text-[14px] ${lastTurn ? pick('turn-pulse border-transparent bg-mustard font-semibold text-ink', 'turn-pulse border-ink bg-mustard font-semibold text-ink') : yourMove ? pick('turn-pulse border-transparent bg-poster font-medium text-white', 'turn-pulse border-poster bg-poster text-[#fff6e6]') : pick('border-line bg-panel-2 text-muted', 'border-line bg-panel-2')}`} data-testid="status" data-your-turn={yourMove || undefined} data-last-turn={lastTurn || undefined}>
           {yourMove && <span className={pick(`hsr-status-dot h-2 w-2 shrink-0 rounded-full ${lastTurn ? 'bg-ink' : 'bg-white'}`, 'h-2.5 w-2.5 shrink-0 animate-ping rounded-full bg-[#fff6e6]')} aria-hidden />}
