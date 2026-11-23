@@ -55,7 +55,7 @@ powershell -ExecutionPolicy Bypass -File desktop\setup-windows.ps1
 
 Replace `<REPO_URL>` with the GitHub link the user gave you, without `.git` or a trailing slash, and `<REPO_NAME>` with the repo's name. If the default branch isn't `main`, use its name in the zip URL and in the folder name. To finish, tell the user:
 
-- Double-click the icon. The first start takes a minute while the game builds.
+- Double-click the icon. The first start takes a minute while the game builds. Updates install themselves when the icon starts the game.
 - Keep the window that opens running while you play.
 - Pick USA, China, Europe or Singapore in the browser.
 - To play with friends elsewhere, choose *Play online*, host a game and send them the link it shows.
@@ -119,7 +119,7 @@ To redraw the icon from `desktop/icon.svg`, run `node desktop/make-icon.mjs`. It
 
 **Sound:** the game plays an original old-time railway tune in the background and short sound effects for draws, claims and tickets. The music-note button and the speaker button switch them on and off separately, the volume slider sets how loud both are, and all of it is remembered. The music starts after your first click, because browsers don't play sound before that.
 
-**Updating the game later:** download the new zip into a fresh folder in your home folder, run the setup script there, and delete the old folder. Setup recreates the Desktop icon so it points at the new one.
+**Updates are automatic.** Each time the desktop icon starts the game, it checks this repository for a newer version. When there is one, the window shows *UPDATE FOUND*, what's new, and progress while it downloads the changed files (about 1 MB) and, only if the game's packages changed, runs `npm install`. Then the game starts as usual. If the computer is offline or GitHub can't be reached, the installed version starts. The updater is `desktop/update.mjs`; it remembers the installed version in `.tools/update-state.json`, and it never touches a git checkout (use `git pull` there).
 
 **Moved or renamed the folder?** Run `npm install` again, then remake the desktop icon. `npm install` relinks the game's internal packages, and `npm run play` won't start until you do.
 

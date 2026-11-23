@@ -29,6 +29,8 @@ Write-Output "Node $(node -v)"
 Write-Output "Installing the game's packages..."
 npm install --no-audit --no-fund
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+# Record the version just installed, so the first launch does not download it again.
+node desktop\update.mjs --mark-current
 
 & (Join-Path $PSScriptRoot 'make-shortcut.ps1')
 Write-Output ''

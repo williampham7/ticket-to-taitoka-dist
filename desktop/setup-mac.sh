@@ -26,6 +26,8 @@ echo "Node $(node -v)"
 
 echo "Installing the game's packages..."
 npm install --no-audit --no-fund
+# Record the version just installed, so the first launch does not download it again.
+node desktop/update.mjs --mark-current
 
 if ! command -v cloudflared >/dev/null && [ ! -x .tools/cloudflared ]; then
   arch="$(uname -m)"; [ "$arch" = "arm64" ] && flavour=arm64 || flavour=amd64
