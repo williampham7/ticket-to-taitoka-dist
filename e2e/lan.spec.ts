@@ -196,3 +196,37 @@ test('LAN new game: when the host opens a new waiting room, everyone moves there
 
   await Promise.all([hostCtx.close(), guestCtx.close()]);
 });
+
+test('LAN leave: asks first, and a guest leaving takes the whole table back to the waiting room', async ({ browser, baseURL }) => {
+  const ctx = () => browser.newContext({ viewport: { width: 1440, height: 860 } });
+  const [hostCtx, guestCtx] = await Promise.all([ctx(), ctx()]);
+  const [host, guest] = await Promise.all([hostCtx.newPage(), guestCtx.newPage()]);
+
+  await host.goto('/menu');
+  await host.getByTestId('play-lan').click();
+  await host.getByTestId('my-name').fill('Host');
+  await host.getByTestId('host-game').click();
+  const path = new URL(await host.getByTestId('share-url').innerText()).pathname;
+  await guest.goto(`${baseURL}${path}`);
+  await guest.getByTestId('my-name').fill('Guest');
+  await guest.getByTestId('join-game').click();
+  await expect(host.locator('[data-testid=waiting-players] [data-seat="1"]')).toContainText('Guest');
+  await host.getByTestId('start-lan').click();
+  for (const p of [host, guest]) await expect(p).toHaveURL(/\/play\//, { timeout: 15_000 });
+
+  // Stay keeps the game going
+  await guest.getByTestId('leave-game').click();
+  await expect(guest.getByTestId('confirm-leave')).toBeVisible();
+  await guest.getByTestId('stay-in-game').click();
+  await expect(guest.getByTestId('confirm-leave')).toHaveCount(0);
+  await expect(guest).toHaveURL(/\/play\//);
+
+  // Leave moves everybody, host included, into the next waiting room
+  await guest.getByTestId('leave-game').click();
+  await guest.getByTestId('confirm-leave-yes').click();
+  for (const p of [host, guest]) await expect(p).toHaveURL(/\/wait\//, { timeout: 15_000 });
+  await expect(host.getByTestId('start-lan')).toBeVisible();
+  await expect(host.locator('[data-testid=waiting-players] [data-seat="1"]')).toContainText('Guest');
+
+  await Promise.all([hostCtx.close(), guestCtx.close()]);
+});

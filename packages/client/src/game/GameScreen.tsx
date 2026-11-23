@@ -47,6 +47,8 @@ interface Props {
   players: PlayerMeta[];
   onExit: () => void;
   exitLabel: string;
+  /** LAN / online: the top-bar exit asks first, then sends the whole table back to the waiting room */
+  onLeave?: () => void;
   /** pass-and-play: the curtain covers the screen between seats, so turn chimes are handled there */
   shared?: boolean;
   /** chat with the other players (LAN, online and pass-and-play) */
@@ -68,7 +70,7 @@ function usePref(key: string, initial: boolean) {
   return [v, (n: boolean) => { setV(n); save(key, n); }] as const;
 }
 
-export function GameScreen({ state, playerID, moves, players, onExit, exitLabel, shared, chat, hidden, newGame }: Props) {
+export function GameScreen({ state, playerID, moves, players, onExit, exitLabel, onLeave, shared, chat, hidden, newGame }: Props) {
   const { G, ctx } = state;
   const me = G.players[playerID];
   const root = useRef<HTMLDivElement>(null);
@@ -104,6 +106,7 @@ export function GameScreen({ state, playerID, moves, players, onExit, exitLabel,
   const [banner, setBanner] = useState<{ id: number; text: string; fill?: string } | null>(null);
   const [claimBanner, setClaimBanner] = useState<{ id: number; who: string; route: string; fill: string } | null>(null);
   const [confirmTickets, setConfirmTickets] = useState(false);
+  const [confirmLeave, setConfirmLeave] = useState(false);
   const [finalSplash, setFinalSplash] = useState<{ id: number; who: string; fill?: string } | null>(null);
   const [help, setHelp] = useState(false);
   const [showResults, setShowResults] = useState(true);
@@ -361,7 +364,7 @@ export function GameScreen({ state, playerID, moves, players, onExit, exitLabel,
         </button>
         <MusicButton />
         <VolumeSlider />
-        <button type="button" onClick={onExit} className="rounded-lg border border-line bg-panel-2 px-3 py-1.5 text-[14px] hover:border-ink">{exitLabel}</button>
+        <button type="button" onClick={onLeave ? () => setConfirmLeave(true) : onExit} data-testid="leave-game" className="rounded-lg border border-line bg-panel-2 px-3 py-1.5 text-[14px] hover:border-ink">{exitLabel}</button>
       </header>
 
       {/* map */}
@@ -555,6 +558,7 @@ export function GameScreen({ state, playerID, moves, players, onExit, exitLabel,
         <ConfirmTickets n={Math.min(3, G.ticketDeckCount ?? G.ticketDeck.length)} onCancel={() => setConfirmTickets(false)}
           onConfirm={() => { setConfirmTickets(false); moves.drawTickets(); }} />
       )}
+      {confirmLeave && onLeave && <ConfirmLeave onCancel={() => setConfirmLeave(false)} onConfirm={() => { setConfirmLeave(false); onLeave(); }} />}
       {help && <HowToPlay onClose={() => setHelp(false)} />}
 
       {over && G.result && showResults && !finaleOn && (
@@ -725,6 +729,30 @@ export function CardWord({ card }: { card: Card }) {
       style={{ color: CARD_FILL[card], textShadow: light ? '0 0 1px #3b2a1e, 0 0 1px #3b2a1e, 0 0 1px #3b2a1e' : undefined }}>
       {cardName(card).toLowerCase()}
     </span>
+  );
+}
+
+function ConfirmLeave({ onConfirm, onCancel }: { onConfirm: () => void; onCancel: () => void }) {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onCancel();
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onCancel]);
+  return (
+    <div className={`fade-in fixed inset-0 z-[75] grid place-items-center p-4 ${pick('bg-ink/35 backdrop-blur-[2px]', 'bg-ink/40')}`} onClick={onCancel}>
+      <div role="dialog" aria-label="Leave the game?" data-testid="confirm-leave" onClick={(e) => e.stopPropagation()}
+        className={`w-[380px] max-w-full rounded-2xl p-5 ${pick('border border-line bg-panel shadow-[0_24px_60px_rgba(20,33,61,.3)]', 'border-2 border-ink bg-ticket shadow-2xl')}`}>
+        <h2 className="font-display text-[22px] leading-tight">Leave the game?</h2>
+        <p className="mt-1.5 text-[15px] leading-snug text-muted">
+          This ends the game for everyone. All players go back to the waiting room, and this game can’t be resumed.
+        </p>
+        <div className="mt-4 flex justify-end gap-2">
+          <button type="button" autoFocus onClick={onCancel} data-testid="stay-in-game" className={pick('rounded-[10px] border border-line-strong bg-panel px-4 py-2 text-[15px] hover:border-ink', 'rounded-lg border-2 border-ink bg-panel px-4 py-2 text-[15px]')}>Stay</button>
+          <button type="button" onClick={onConfirm} data-testid="confirm-leave-yes"
+            className={pick('rounded-[10px] bg-poster px-4 py-2 font-display text-[16px] text-white shadow-[0_2px_8px_rgba(200,16,46,.3)] hover:bg-poster-dark active:translate-y-px', 'rounded-lg bg-poster px-4 py-2 font-display text-[15px] text-[#fff6e6] shadow-[0_3px_0_#8e2d24] active:translate-y-0.5 active:shadow-none')}>Leave</button>
+        </div>
+      </div>
+    </div>
   );
 }
 

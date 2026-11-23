@@ -3,6 +3,12 @@ import { useSyncExternalStore } from 'react';
 const listeners = new Set<() => void>();
 window.addEventListener('popstate', () => listeners.forEach((l) => l()));
 
+/** Run `cb` after every route change (navigate or back/forward). */
+export function onNavigate(cb: () => void) {
+  listeners.add(cb);
+  return () => listeners.delete(cb);
+}
+
 export function navigate(path: string, replace = false) {
   if (replace) history.replaceState(null, '', path);
   else history.pushState(null, '', path);

@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { MapView } from '../board/MapView';
 import { MusicButton, VolumeSlider } from '../lib/AudioButtons';
+import { navigate } from '../lib/router';
 import { SKIN } from '../lib/skin';
 import { HSR, MERLION, RAIL } from '../theme';
 import { MerlionFrame, MerlionTitle } from '../merlion/MerlionChrome';
@@ -23,13 +24,24 @@ export function Frame({ children, wide, edition }: FrameProps) {
   return HSR ? <HsrFrame wide={wide} top={top}>{children}</HsrFrame> : <VintageFrame wide={wide} top={top}>{children}</VintageFrame>;
 }
 
-/** The edition switcher on the left (when asked for), the sound controls on the right. */
+/**
+ * Top bar: a "Back to Main Menu" button on the left, the edition switcher centred and 15% bigger,
+ * the sound controls on the right.
+ */
 function TopBar({ edition }: { edition?: boolean | EditionSwitcherProps }) {
   const edge = HSR || RAIL || MERLION ? 'top-3 sm:top-4' : 'top-4';
+  const side = HSR || RAIL || MERLION ? 'sm:left-4' : '';
   return (
     <>
       {edition && (
-        <div className={`absolute left-3 z-10 sm:left-4 ${edge}`}>
+        <button type="button" onClick={() => navigate('/')} data-testid="back-to-main" aria-label="Back to Main Menu" title="Back to Main Menu"
+          className={`absolute left-3 z-10 flex h-9 items-center gap-1.5 rounded-lg border border-line bg-panel-2 px-2.5 text-[14px] leading-none text-ink transition-colors hover:border-ink sm:px-3 ${side} ${edge}`}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M15 5l-7 7 7 7" /></svg>
+          <span className="max-sm:hidden">Back to Main Menu</span>
+        </button>
+      )}
+      {edition && (
+        <div className={`absolute left-1/2 z-10 -translate-x-1/2 sm:scale-[1.15] max-sm:top-14 ${edge}`}>
           <EditionSwitcher {...(edition === true ? {} : edition)} />
         </div>
       )}
@@ -51,7 +63,7 @@ function VintageFrame({ children, wide, top }: SubFrameProps) {
       </div>
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(239,226,196,.55),rgba(59,42,30,.35))]" />
       {top}
-      <div className="relative grid h-full place-items-center overflow-auto p-6 max-sm:pt-16">
+      <div className="relative grid h-full place-items-center overflow-auto p-6 max-sm:pt-[6.5rem]">
         <div className={`fade-in relative w-full ${wide ? 'max-w-3xl' : 'max-w-xl'} rounded-2xl border-2 border-ink bg-ticket shadow-[0_24px_60px_rgba(59,42,30,.45)]`}>
           {/* perforated stub edge */}
           <div className="pointer-events-none absolute inset-y-6 left-[86px] border-l-2 border-dashed border-line-strong" />
@@ -78,7 +90,7 @@ function HsrFrame({ children, wide, top }: SubFrameProps) {
       </div>
       <div className="hsr-frame-wash absolute inset-0" aria-hidden />
       {top}
-      <div className="relative grid h-full overflow-auto px-4 pb-6 pt-16 [place-items:safe_center] sm:p-8">
+      <div className="relative grid h-full overflow-auto px-4 pb-6 pt-[6.5rem] [place-items:safe_center] sm:p-8">
         <div className={`hsr-menu-card fade-in relative w-full ${wide ? 'max-w-3xl' : 'max-w-xl'} overflow-hidden rounded-[22px] border border-line bg-panel`}>
           <div className="hsr-livery" aria-hidden />
           <div className="min-w-0 px-5 pb-7 pt-6 sm:px-10 sm:pb-9 sm:pt-8">{children}</div>
@@ -97,7 +109,7 @@ function RailFrame({ children, wide, top }: SubFrameProps) {
       </div>
       <div className="rail-frame-wash absolute inset-0" aria-hidden />
       {top}
-      <div className="relative grid h-full overflow-auto px-4 pb-6 pt-16 [place-items:safe_center] sm:p-8">
+      <div className="relative grid h-full overflow-auto px-4 pb-6 pt-[6.5rem] [place-items:safe_center] sm:p-8">
         <div className={`rail-poster fade-in relative w-full ${wide ? 'max-w-3xl' : 'max-w-xl'}`}>
           <div className="relative min-w-0 px-6 pb-7 pt-7 sm:px-10 sm:pb-9 sm:pt-8">{children}</div>
         </div>

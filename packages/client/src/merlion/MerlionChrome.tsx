@@ -21,7 +21,7 @@ export function MerlionFrame({ children, wide, top }: { children: ReactNode; wid
       </div>
       <div className="mrt-frame-wash absolute inset-0" aria-hidden />
       {top}
-      <div className="relative grid h-full overflow-auto px-4 pb-6 pt-16 [place-items:safe_center] sm:p-8">
+      <div className="relative grid h-full overflow-auto px-4 pb-6 pt-[6.5rem] [place-items:safe_center] sm:p-8">
         <div className={`mrt-page fade-in relative w-full ${wide ? 'max-w-3xl' : 'max-w-xl'}`}>
           <div className="mrt-page-tiles" aria-hidden />
           <div className="relative min-w-0 px-6 pb-7 pt-6 sm:px-10 sm:pb-9 sm:pt-7">{children}</div>

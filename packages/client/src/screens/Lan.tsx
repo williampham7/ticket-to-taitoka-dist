@@ -355,15 +355,19 @@ export function LanGame({ matchID }: { matchID: string }) {
     rejoinWaitingRoom(seat, next, myColor).then(() => navigate(`/wait/${next}`, true))
       .catch(() => setNewGameError('Could not join the new waiting room.'));
   }, [seat, next]); // eslint-disable-line react-hooks/exhaustive-deps
+  const backToRoom = (failure: string) => {
+    if (!seat || opening || next) return;
+    setOpening(true);
+    openNextWaitingRoom(seat).then((id) => rejoinWaitingRoom(seat, id, myColor)).then((s) => navigate(`/wait/${s.matchID}`, true))
+      .catch(() => { setOpening(false); setNewGameError(failure); });
+  };
   const newGame = useMemo(() => seat && {
     allowed: seat.playerID === '0',
     busy: opening || !!next,
-    onStart: () => {
-      setOpening(true);
-      openNextWaitingRoom(seat).then((id) => rejoinWaitingRoom(seat, id, myColor)).then((s) => navigate(`/wait/${s.matchID}`, true))
-        .catch(() => { setOpening(false); setNewGameError('Could not start a new game. Try again.'); });
-    },
+    onStart: () => backToRoom('Could not start a new game. Try again.'),
   }, [seat, opening, next, myColor]);
+  /** Open the next waiting room (idempotent on the server: the first caller creates it) and go there; everyone else follows through `next`. */
+  const leaveGame = () => backToRoom('Could not leave the game. Try again.');
   const players = useMemo(() => (seats ? metaFrom(seats) : null), [seats && seats.map((s) => `${s.name}${s.bot ?? ''}`).join('|')]);
   const client = useMemo(() => {
     if (!seat || !seats) return null;
@@ -414,7 +418,7 @@ export function LanGame({ matchID }: { matchID: string }) {
     }
     return (
       <div className="relative h-full">
-        <GameScreen state={state} playerID={seat.playerID} moves={client!.moves} players={players} onExit={() => navigate('/menu')} exitLabel="Leave" chat={chat} hidden={curtain}
+        <GameScreen state={state} playerID={seat.playerID} moves={client!.moves} players={players} onExit={() => navigate('/menu')} exitLabel="Leave" onLeave={leaveGame} chat={chat} hidden={curtain}
           newGame={newGame ?? undefined} />
         {newGameError && (
           <div className={`absolute bottom-5 left-1/2 z-[70] -translate-x-1/2 rounded-full bg-poster px-4 py-1.5 text-[14px] ${TOAST_TEXT} shadow-lg`}>{newGameError}</div>

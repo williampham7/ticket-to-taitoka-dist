@@ -4,6 +4,7 @@ import { BPM, buildSong, type SongEvent } from './song';
 import { BPM_HSR, buildSongHsr } from './songHsr';
 import { BPM_RAIL, buildSongRail, type RailEvent } from './songRail';
 import { BPM_MERLION, buildSongMerlion, createMerlionVoices, VOLUME_MERLION, type MerlionEvent } from './songMerlion';
+import { onNavigate } from './router';
 import { load, save } from './storage';
 import { getMuted, getVolume, subscribeMuted, subscribeVolume } from './sound';
 
@@ -502,6 +503,15 @@ function stop() {
   master!.gain.setTargetAtTime(0.0001, ctx.currentTime, 0.15);
 }
 
+// The edition picker (/) is the main menu: all music stops there, and waits until a game's screens open.
+let armed = false;
+const onPicker = () => window.location.pathname === '/';
+onNavigate(() => {
+  if (!armed || !enabled) return;
+  if (onPicker()) stop();
+  else if (!timer) start();
+});
+
 export function setMusicOn(on: boolean) {
   enabled = on;
   save(KEY, on);
@@ -519,7 +529,8 @@ export function initMusic() {
   const kick = () => {
     window.removeEventListener('pointerdown', kick);
     window.removeEventListener('keydown', kick);
-    if (enabled) start();
+    armed = true;
+    if (enabled && !onPicker()) start();
   };
   window.addEventListener('pointerdown', kick);
   window.addEventListener('keydown', kick);
