@@ -71,7 +71,6 @@ const TEXT: Record<EditionId, React.ReactNode> = {
       <span className="ep-sg-name">{name('singapore')}</span>
       <span className="ep-sg-line">Tuas to Changi, with Marina Bay, Chinatown and the Gardens in between</span>
       <span className="ep-sg-label">Singapore</span>
-      <span className="ep-sg-rule" aria-hidden>{['#d42e12', '#009645', '#9900aa', '#fa9e0d', '#005ec4', '#9d5b25'].map((c) => <i key={c} style={{ background: c }} />)}</span>
     </>
   ),
 };
