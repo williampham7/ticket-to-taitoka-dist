@@ -1,7 +1,7 @@
-import { memo, useEffect, useMemo, useRef, useState, type ReactNode, type SVGProps } from 'react';
+import { memo, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode, type SVGProps } from 'react';
 import { CITIES, CITY_BY_ID, MAP_BOUNDS, MAP_ID, ROUTES, ROUTE_BY_ID, ROUTE_POINTS, bentRect, cityXY, routeLane, type CarSlot, type City, type Route } from '@boboland/shared';
-import { fitMapWithDock, type Box } from './fit';
-import { DOCK_PANEL, DOCK_ZONE } from './dock';
+import { fitMapWithDock, fitPiecesWithDock, type Box } from './fit';
+import { DOCK_PANEL, DOCK_ZONE, FIT_PIECES, MAP_BUTTONS, dockPanel } from './dock';
 import { carRects, routeMidpoint } from './geometry';
 import { UsaGeoLayer } from './UsaGeoLayer';
 import { ChinaGeoLayer } from './ChinaGeoLayer';
@@ -35,6 +35,32 @@ export interface MapViewProps {
 
 const CONTENT: Box = { x: MAP_BOUNDS.x, y: MAP_BOUNDS.y, w: MAP_BOUNDS.width, h: MAP_BOUNDS.height };
 const ZONE = DOCK_ZONE[MAP_ID];
+/** Maps fitted to their drawn pieces (see FIT_PIECES) rather than to MAP_BOUNDS. */
+const TIGHT = FIT_PIECES.has(MAP_ID);
+
+/** Every train car's box (map units), grown by the claimable glow around it. */
+function carPieces(): Box[] {
+  const grow = 4;
+  return ROUTES.flatMap((r) => carRects(r).map((c) => {
+    const a = (c.angle * Math.PI) / 180, cos = Math.abs(Math.cos(a)), sin = Math.abs(Math.sin(a));
+    const hw = (cos * c.w + sin * c.h) / 2 + grow, hh = (sin * c.w + cos * c.h) / 2 + grow;
+    return { x: c.cx - hw, y: c.cy - hh, w: 2 * hw, h: 2 * hh };
+  }));
+}
+
+/** The drawn box (map units) of every part of every city (dot, icon, name, hub banner), measured in the live SVG. */
+function measureCities(svg: SVGSVGElement): Box[] | null {
+  const vb = svg.viewBox.baseVal, r = svg.getBoundingClientRect();
+  if (!vb || !vb.width || !r.width) return null;
+  const k = vb.width / r.width, grow = 3; // grow: the text halos' strokes
+  const out: Box[] = [];
+  for (const el of Array.from(svg.querySelectorAll('[data-city]')).flatMap((g) => Array.from(g.children))) {
+    const b = el.getBoundingClientRect();
+    if (!b.width && !b.height) continue;
+    out.push({ x: vb.x + (b.left - r.left) * k - grow, y: vb.y + (b.top - r.top) * k - grow, w: b.width * k + 2 * grow, h: b.height * k + 2 * grow });
+  }
+  return out.length ? out : null;
+}
 
 export function MapView(props: MapViewProps) {
   const ref = useRef<HTMLDivElement>(null);
@@ -48,7 +74,23 @@ export function MapView(props: MapViewProps) {
     return () => ro.disconnect();
   }, []);
 
-  const { vb, scale: dockScale } = useMemo(() => fitMapWithDock(size, CONTENT, ZONE, DOCK_PANEL), [size.w, size.h]);
+  // Singapore: zoom in on what is drawn (cars, places, labels), measured once the SVG is up and again once fonts load
+  const svgRef = useRef<SVGSVGElement>(null);
+  const [cityBoxes, setCityBoxes] = useState<Box[] | null>(null);
+  const cars = useMemo(() => (TIGHT ? carPieces() : []), []);
+  const mounted = size.w > 0;
+  useLayoutEffect(() => {
+    if (!TIGHT || !mounted) return;
+    let live = true;
+    const measure = () => { const svg = svgRef.current; const b = live && svg ? measureCities(svg) : null; if (b) setCityBoxes(b); };
+    measure();
+    document.fonts?.ready.then(measure);
+    return () => { live = false; };
+  }, [mounted]);
+  const { vb, scale: dockScale } = useMemo(() => {
+    if (TIGHT && cityBoxes) return fitPiecesWithDock(size, [...cars, ...cityBoxes], { pad: 8, keepOut: [MAP_BUTTONS] }, dockPanel(MAP_ID));
+    return fitMapWithDock(size, CONTENT, ZONE, DOCK_PANEL);
+  }, [size.w, size.h, cityBoxes, cars]);
   // the docked ticket chooser sits beside the map, not inside it; it reads its size from this page-wide variable
   useEffect(() => {
     const root = document.documentElement;
@@ -67,7 +109,7 @@ export function MapView(props: MapViewProps) {
     <div ref={ref} className="relative h-full w-full overflow-hidden select-none" data-testid="map">
       {size.w > 0 && (MAP_ID === 'usa' ? <UsaGeoLayer vb={vb} /> : MAP_ID === 'china' ? <ChinaGeoLayer vb={vb} /> : MAP_ID === 'sg' ? <SgGeoLayer vb={vb} /> : <EuropeGeoLayer vb={vb} />)}
       {size.w > 0 && (
-        <svg className="absolute inset-0 h-full w-full" viewBox={`${vb.x} ${vb.y} ${vb.w} ${vb.h}`} preserveAspectRatio="xMidYMid slice">
+        <svg ref={svgRef} className="absolute inset-0 h-full w-full" viewBox={`${vb.x} ${vb.y} ${vb.w} ${vb.h}`} preserveAspectRatio="xMidYMid slice">
           <defs>
             <filter id="m-glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="4" /></filter>
             <filter id="m-spot" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="6" /></filter>

@@ -24,8 +24,7 @@ export function TicketChooser({ pending, min, initial, onKeep, onHover }: Props)
   const ready = keep.length >= need;
   return (
     <div className={`fade-in chooser-glow pointer-events-auto absolute z-30 flex flex-col ${pick('rounded-[14px] border border-line bg-panel/97 shadow-[0_12px_32px_rgba(20,33,61,.22)]', 'rounded-xl border-2 border-ink bg-panel/97 shadow-[0_10px_30px_rgba(60,40,20,.3)]')}`}
-      style={{ right: DOCK_PANEL.margin, bottom: DOCK_PANEL.margin, width: DOCK_PANEL.w, transform: 'scale(var(--dock-scale, 1))', transformOrigin: 'bottom right',
-        maxHeight: `calc((100% - ${DOCK_PANEL.margin * 2}px) / var(--dock-scale, 1))` }} data-testid="ticket-chooser">
+      style={{ right: DOCK_PANEL.margin, bottom: DOCK_PANEL.margin, width: DOCK_PANEL.w, transform: 'scale(var(--dock-scale, 1))', transformOrigin: 'bottom right' }} data-testid="ticket-chooser">
       <div className="px-3 pb-1.5 pt-2.5">
         <h2 className="flex items-start gap-2 font-display text-[16px] leading-tight">
           {/* a small breathing dot: your move is waiting here */}
@@ -35,7 +34,8 @@ export function TicketChooser({ pending, min, initial, onKeep, onHover }: Props)
         </h2>
         <p className="mt-0.5 text-[12px] leading-snug text-muted">Keep at least {need}. Hover to see on the map.</p>
       </div>
-      <div className="grid min-h-0 gap-1.5 overflow-y-auto px-3 py-1.5">
+      {/* no inner scroll area: iOS Safari can leave tickets in a scrolled list inside this scaled, animated panel unpainted */}
+      <div className="grid gap-1.5 px-3 py-1.5">
         {pending.map((id) => (
           <TicketCard key={id} compact ticket={TICKET_BY_ID[id]} selected={keep.includes(id)} onToggle={() => toggle(id)} onHover={onHover} />
         ))}
