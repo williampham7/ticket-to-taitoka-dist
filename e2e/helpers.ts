@@ -41,3 +41,9 @@ export async function claimFirstRoute(page: Page): Promise<string> {
 export async function asName(page: Page, name: string) {
   await page.addInitScript((n) => localStorage.setItem('boboland.myName', JSON.stringify(n)), name);
 }
+
+/** On the first page (/), open the Ticket to Taitoka series card so the map cards (pick-usa, pick-china...) show. */
+export async function openMaps(page: Page) {
+  await page.getByTestId('series-card').click();
+  await expect(page.getByTestId('map-chooser')).toBeVisible();
+}

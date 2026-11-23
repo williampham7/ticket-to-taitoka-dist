@@ -4,16 +4,26 @@
  * Nothing here depends on the seed: the map is read from the screen (city ids, the tab title, the theme).
  */
 import { expect, test, type Page } from '@playwright/test';
-import { keepTickets, asName } from './helpers';
+import { keepTickets, asName, openMaps } from './helpers';
 
 const theme = (page: Page) => page.locator('html');
 const city = (page: Page, id: string) => page.locator(`[data-city="${id}"]`);
 
 test('picker, menu, switcher, then a pass-and-play game on that map', async ({ page }) => {
-  // the first page is the picker: four editions
+  // the first page is the picker: one series card that opens a row of four maps
   await page.goto('/');
   await expect(page.getByTestId('edition-picker')).toBeVisible();
+  await expect(page.locator('[data-testid^="pick-"]')).toHaveCount(0);
+  await openMaps(page);
   await expect(page.locator('[data-testid^="pick-"]')).toHaveCount(4);
+
+  // a click that is not on a map card (the blurred backdrop) closes the maps again, and so does Escape
+  await page.mouse.click(8, 8);
+  await expect(page.getByTestId('map-chooser')).toHaveCount(0);
+  await openMaps(page);
+  await page.keyboard.press('Escape');
+  await expect(page.getByTestId('map-chooser')).toHaveCount(0);
+  await openMaps(page);
   await expect(page.getByTestId('pick-singapore')).toBeVisible();
 
   // picking one goes to the menu, in that edition's name and theme

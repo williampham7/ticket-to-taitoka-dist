@@ -1,18 +1,25 @@
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { EDITIONS, EDITION_IDS, SKINS, type EditionId } from '@boboland/shared';
 import { EDITION, setEdition, urlWithoutEdition } from '../edition';
 import { navigate } from '../lib/router';
 import { isFollower, usePartyState } from '../lib/party';
+import { SeriesArt, SERIES_CHIP } from './seriesArt';
 import './EditionPicker.css';
+import './series.css';
 
 /**
- * The first screen: pick an edition (USA, China, Europe or Singapore). Each card is drawn in its own edition's style
- * with fixed colours and fonts (not the theme tokens), so it looks the same whichever theme the page loaded with.
+ * The first screen. The route-building games sit behind one flagship card, the Ticket to Taitoka series; opening it
+ * blurs the page and drops a row of map cards (USA, China, Europe, Singapore) under a banner, and a
+ * click anywhere that is not a map card closes it again. Each map card is drawn in its own edition's style with fixed
+ * colours and fonts (not the theme tokens), so it looks the same whichever theme the page loaded with.
  * Picking the page's own edition just opens the menu; another one saves the choice and reloads on /menu.
  */
 export function EditionPicker() {
   const party = usePartyState();
   const follower = isFollower(party);
   const hostName = party.party?.members.find((m) => m.id === party.party?.host)?.name ?? 'your host';
+  const [maps, setMaps] = useState<'closed' | 'open' | 'closing'>('closed');
+  const seriesRef = useRef<HTMLButtonElement>(null);
   const pick = (id: EditionId) => {
     if (follower) return;
     if (id === EDITION.id) {
@@ -22,22 +29,124 @@ export function EditionPicker() {
       setEdition(id, { path: '/menu' });
     }
   };
+  const closeMaps = useCallback(() => {
+    setMaps((m) => (m === 'open' ? 'closing' : m));
+    const quick = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    window.setTimeout(() => {
+      setMaps('closed');
+      seriesRef.current?.focus({ preventScroll: true });
+    }, quick ? 0 : 200);
+  }, []);
   return (
-    <main className="ep" data-testid="edition-picker">
+    <>
+    <main className="ep" data-testid="edition-picker" inert={maps !== 'closed' ? true : undefined}>
       <header className="ep-head">
         <h1 className="ep-title">Where to?</h1>
-        <p className="ep-sub" data-testid={follower ? 'party-waiting' : undefined}>{follower ? `You're in ${hostName}'s party. They pick the game, and your screen follows.` : 'Pick a map. You can switch maps later from the menu.'}</p>
+        <p className="ep-sub" data-testid={follower ? 'party-waiting' : undefined}>{follower ? `You're in ${hostName}'s party. They pick the game, and your screen follows.` : 'Pick a game. You can switch maps later from the menu.'}</p>
       </header>
       <div className="ep-grid">
-        {EDITION_IDS.map((id) => (
-          <button key={id} type="button" className={`ep-card ep-${id}`} onClick={() => pick(id)} data-testid={`pick-${id}`}
-            aria-label={`${EDITIONS[id].label}: Ticket to ${SKINS[EDITIONS[id].skin].name}`}>
-            <span className="ep-art" aria-hidden>{ART[id]}</span>
-            <span className="ep-text">{TEXT[id]}</span>
-          </button>
-        ))}
+        <SeriesCard buttonRef={seriesRef} open={maps !== 'closed'} onOpen={() => setMaps('open')} />
       </div>
     </main>
+    {maps !== 'closed' && <MapChooser closing={maps === 'closing'} onClose={closeMaps} onPick={pick} />}
+    </>
+  );
+}
+
+const FLAGSHIP = SKINS[EDITIONS.usa.skin].name;
+const SERIES = `Ticket to ${FLAGSHIP}`;
+const COUNT = ['No', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven'][EDITION_IDS.length] ?? String(EDITION_IDS.length);
+
+/** The flagship card: a gold railway ticket with a night route map, the maps it covers, and a tear-off stub. */
+function SeriesCard({ buttonRef, open, onOpen }: { buttonRef: React.Ref<HTMLButtonElement>; open: boolean; onOpen: () => void }) {
+  return (
+    <button ref={buttonRef} type="button" className="ep-series" onClick={onOpen} data-testid="series-card"
+      aria-haspopup="dialog" aria-expanded={open} aria-label={`${SERIES} series: choose a map`}>
+      <span className="eps-ticket">
+        <span className="eps-art" aria-hidden><SeriesArt /></span>
+        <span className="eps-body">
+          <span className="eps-to">Ticket to</span>
+          <span className="eps-titlerow">
+            <span className="eps-name">{FLAGSHIP}</span>
+            <span className="eps-seal">Series</span>
+          </span>
+          <span className="eps-line">Collect cards, claim routes and connect your cities before the trains run out. {COUNT} maps, 2 to 5 players.</span>
+          <span className="eps-chips" aria-hidden>
+            {EDITION_IDS.map((id) => <span key={id} className="eps-chip" style={{ background: SERIES_CHIP[id] }}>{EDITIONS[id].label}</span>)}
+          </span>
+          <span className="eps-cta">Choose a map</span>
+        </span>
+        <span className="eps-stub" aria-hidden>
+          <span className="eps-admit">Admit</span>
+          <span className="eps-count">2–5</span>
+          <span className="eps-players">players</span>
+          <span className="eps-serial">No. 000001</span>
+        </span>
+      </span>
+    </button>
+  );
+}
+
+/**
+ * The map chooser: a banner for the series with tracks branching down to one card per map, over a blurred page.
+ * Only the map cards pick; a click anywhere else (the backdrop, the banner, the gaps) and Escape close it.
+ */
+function MapChooser({ closing, onClose, onPick }: { closing: boolean; onClose: () => void; onPick: (id: EditionId) => void }) {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    ref.current?.querySelector<HTMLButtonElement>('.ep-mini')?.focus({ preventScroll: true });
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') { e.preventDefault(); onClose(); return; }
+      if (e.key !== 'Tab' || !ref.current) return;
+      const stops = [...ref.current.querySelectorAll<HTMLButtonElement>('button')];
+      const i = stops.indexOf(document.activeElement as HTMLButtonElement);
+      const next = e.shiftKey ? (i <= 0 ? stops.length - 1 : i - 1) : (i + 1) % stops.length;
+      e.preventDefault();
+      stops[next]?.focus();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onClose]);
+  const n = EDITION_IDS.length;
+  return (
+    <div ref={ref} className={`ep-maps${closing ? ' is-closing' : ''}`} role="dialog" aria-modal="true" aria-labelledby="ep-maps-title"
+      data-testid="map-chooser" onClick={onClose} style={{ '--n': n } as React.CSSProperties}>
+      <div className="ep-maps-inner">
+        <div className="ep-maps-head">
+          <span className="eps-to">Ticket to</span>
+          <span className="eps-titlerow">
+            <span className="eps-name" id="ep-maps-title">{FLAGSHIP}</span>
+            <span className="eps-seal">Series</span>
+          </span>
+          <span className="ep-maps-hint">Choose a map</span>
+        </div>
+        <svg className="ep-maps-ribs" viewBox="0 0 1000 72" preserveAspectRatio="none" aria-hidden>
+          {EDITION_IDS.map((id, i) => {
+            const x = ((i + 0.5) / n) * 1000;
+            const d = `M500 0 C500 44 ${x} 26 ${x} 72`;
+            return (
+              <g key={id}>
+                <path d={d} className="ep-rib-ties" vectorEffect="non-scaling-stroke" />
+                <path d={d} className="ep-rib-rail" vectorEffect="non-scaling-stroke" />
+                <path d={d} className="ep-rib-gap" vectorEffect="non-scaling-stroke" />
+              </g>
+            );
+          })}
+        </svg>
+        <div className="ep-maps-row">
+          {EDITION_IDS.map((id, i) => (
+            <div key={id} className="ep-maps-cell" style={{ '--i': i, '--tilt': `${(i - (n - 1) / 2) * 1.6}deg` } as React.CSSProperties}>
+              <button type="button" className={`ep-card ep-mini ep-${id}`} onClick={(e) => { e.stopPropagation(); onPick(id); }} data-testid={`pick-${id}`}
+                aria-label={`${EDITIONS[id].label}: Ticket to ${SKINS[EDITIONS[id].skin].name}`}>
+                <span className="ep-art" aria-hidden>{ART[id]}</span>
+                <span className="ep-text">{TEXT[id]}</span>
+              </button>
+            </div>
+          ))}
+        </div>
+        <button type="button" className="ep-maps-close" data-testid="map-chooser-close">Back</button>
+      </div>
+    </div>
   );
 }
 

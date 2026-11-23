@@ -1,0 +1,295 @@
+/*
+ * The Ticket to Taitoka series card and its map chooser. Like the rest of the picker it uses fixed colours and the
+ * fonts every theme loads (Alfa Slab One, Oswald, Libre Baskerville italic), so it looks the same in every theme.
+ * The card is a gold railway ticket: a night route map, the title with a red "Series" stamp, and a tear-off stub.
+ */
+.ep-series {
+  --gold: linear-gradient(115deg, #f8dd88 0%, #e9b647 26%, #fbe8a4 45%, #e3aa3b 63%, #c78a28 100%);
+  --guilloche:
+    repeating-linear-gradient(48deg, rgba(122, 74, 12, .08) 0 1px, transparent 1px 7px),
+    repeating-linear-gradient(-48deg, rgba(122, 74, 12, .08) 0 1px, transparent 1px 7px);
+  display: block;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #17204a;
+  text-align: left;
+  font: inherit;
+  filter: drop-shadow(0 14px 22px rgba(0, 0, 0, .45));
+  transition: transform .2s ease, filter .2s ease;
+}
+.ep-series:hover { transform: translateY(-3px); filter: drop-shadow(0 20px 28px rgba(0, 0, 0, .52)); }
+.ep-series:active { transform: translateY(0); }
+.ep-series:focus-visible { outline: 3px solid #ffd166; outline-offset: 6px; border-radius: 16px; }
+
+.eps-ticket {
+  --stub: 118px;
+  --notch: 11px;
+  --cut: calc(100% - var(--stub));
+  position: relative;
+  height: 100%;
+  display: grid;
+  grid-template-columns: 1fr var(--stub);
+  grid-template-rows: minmax(210px, 1fr) auto;
+  grid-template-areas: "art stub" "body stub";
+  overflow: hidden;
+  border-radius: 14px;
+  background: var(--guilloche), var(--gold);
+  /* two half-moon notches where the stub tears off */
+  -webkit-mask:
+    radial-gradient(circle var(--notch) at var(--cut) 0, #0000 98%, #000),
+    radial-gradient(circle var(--notch) at var(--cut) 100%, #0000 98%, #000);
+  -webkit-mask-composite: source-in;
+  mask:
+    radial-gradient(circle var(--notch) at var(--cut) 0, #0000 98%, #000),
+    radial-gradient(circle var(--notch) at var(--cut) 100%, #0000 98%, #000);
+  mask-composite: intersect;
+}
+/* the foil catches the light when you point at it */
+.eps-ticket::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(105deg, transparent 38%, rgba(255, 252, 235, .55) 49%, transparent 60%);
+  transform: translateX(-110%);
+  transition: transform .9s ease;
+}
+.ep-series:hover .eps-ticket::after { transform: translateX(110%); }
+
+.eps-art { grid-area: art; position: relative; margin: 14px 0 0 14px; border-radius: 8px; overflow: hidden; }
+.eps-art svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.eps-art::after { content: ""; position: absolute; inset: 0; border-radius: inherit; box-shadow: inset 0 0 0 2px #17204a, inset 0 0 0 4px rgba(255, 231, 163, .25); }
+
+.eps-body { grid-area: body; display: flex; flex-direction: column; align-items: flex-start; padding: 16px 18px 20px 22px; min-width: 0; }
+.eps-to { font-family: "Libre Baskerville", Georgia, serif; font-style: italic; font-size: 16px; color: #5a3e12; }
+.eps-titlerow { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px; }
+.eps-name {
+  font-family: "Alfa Slab One", Georgia, serif;
+  font-size: clamp(38px, 6vw, 54px);
+  line-height: 1;
+  color: #17204a;
+  text-shadow: 0 1px 0 rgba(255, 244, 200, .7);
+}
+/* a rubber stamp, a little crooked, in railway red */
+.eps-seal {
+  padding: 4px 11px 3px 13px;
+  border: 2.5px solid #a3261c;
+  border-radius: 999px;
+  outline: 1px solid rgba(163, 38, 28, .7);
+  outline-offset: 2px;
+  transform: rotate(-7deg);
+  font-family: "Oswald", "Arial Narrow", sans-serif;
+  font-weight: 600;
+  font-size: 15px;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: #a3261c;
+  mix-blend-mode: multiply;
+}
+.eps-line { margin-top: 8px; max-width: 46ch; font-family: "Libre Baskerville", Georgia, serif; font-style: italic; font-size: 15px; line-height: 1.55; color: #4a3510; }
+.eps-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+.eps-chip {
+  padding: 3px 10px 2px;
+  border-radius: 4px;
+  font-family: "Oswald", "Arial Narrow", sans-serif;
+  font-weight: 500;
+  font-size: 13px;
+  letter-spacing: .03em;
+  color: #fff8e6;
+  box-shadow: inset 0 -2px 0 rgba(0, 0, 0, .22);
+}
+.eps-cta {
+  margin-top: 16px;
+  padding: 9px 20px 8px;
+  border-radius: 999px;
+  background: #17204a;
+  color: #ffe7a3;
+  font-family: "Oswald", "Arial Narrow", sans-serif;
+  font-weight: 600;
+  font-size: 17px;
+  letter-spacing: .04em;
+  box-shadow: 0 3px 0 #0b1029;
+  transition: background .2s ease;
+}
+.ep-series:hover .eps-cta { background: #24306a; }
+
+.eps-stub {
+  grid-area: stub;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 18px 8px;
+  border-left: 2px dashed rgba(23, 32, 74, .45);
+  background: rgba(255, 249, 226, .2);
+  text-align: center;
+}
+.eps-admit { font-family: "Libre Baskerville", Georgia, serif; font-style: italic; font-size: 15px; color: #5a3e12; }
+.eps-count { font-family: "Alfa Slab One", Georgia, serif; font-size: 40px; line-height: 1.05; color: #a3261c; }
+.eps-players { font-family: "Oswald", "Arial Narrow", sans-serif; font-weight: 500; font-size: 15px; letter-spacing: .06em; }
+.eps-serial { margin-top: 16px; font-family: "Oswald", "Arial Narrow", sans-serif; font-size: 11px; letter-spacing: .14em; opacity: .65; }
+
+/* routes being claimed: pieces drop onto one route after another, stay a while, then lift for the next round */
+.eps-piece { filter: drop-shadow(0 1.5px 1.5px rgba(0, 0, 0, .55)); transform-box: fill-box; transform-origin: center; animation: eps-claim 9s linear infinite both; }
+@keyframes eps-claim {
+  0% { opacity: 0; transform: translateY(-7px) scale(1.3); }
+  2.5% { opacity: 1; transform: none; }
+  62% { opacity: 1; transform: none; }
+  68%, 100% { opacity: 0; transform: none; }
+}
+
+/* phones: the stub becomes a strip along the bottom, notched at both sides */
+@media (max-width: 719px) {
+  .eps-ticket {
+    --stubh: 54px;
+    --cuty: calc(100% - var(--stubh));
+    grid-template-columns: 1fr;
+    grid-template-rows: 150px auto var(--stubh);
+    grid-template-areas: "art" "body" "stub";
+    -webkit-mask:
+      radial-gradient(circle var(--notch) at 0 var(--cuty), #0000 98%, #000),
+      radial-gradient(circle var(--notch) at 100% var(--cuty), #0000 98%, #000);
+    -webkit-mask-composite: source-in;
+    mask:
+      radial-gradient(circle var(--notch) at 0 var(--cuty), #0000 98%, #000),
+      radial-gradient(circle var(--notch) at 100% var(--cuty), #0000 98%, #000);
+    mask-composite: intersect;
+  }
+  .eps-art { margin: 12px 12px 0; }
+  .eps-body { padding: 14px 16px 18px; }
+  .eps-stub { flex-direction: row; gap: 8px; padding: 0 16px; border-left: 0; border-top: 2px dashed rgba(23, 32, 74, .45); }
+  .eps-count { font-size: 24px; }
+  .eps-serial { margin: 0 0 0 auto; }
+}
+
+/* ---------- the map chooser ---------- */
+.ep-maps {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  overflow-y: auto;
+  background: rgba(10, 14, 32, .5);
+  -webkit-backdrop-filter: blur(12px) saturate(.8);
+  backdrop-filter: blur(12px) saturate(.8);
+  color: #f1ede4;
+  font-family: "Oswald", "Arial Narrow", sans-serif;
+  animation: ep-maps-in .22s ease both;
+}
+.ep-maps.is-closing { animation: ep-maps-out .2s ease both; pointer-events: none; }
+@keyframes ep-maps-in { from { opacity: 0; } }
+@keyframes ep-maps-out { to { opacity: 0; } }
+.ep-maps-inner {
+  box-sizing: border-box;
+  min-height: 100%;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 32px 16px 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* the banner the maps hang from: a small gold ticket, notched at both ends */
+.ep-maps-head {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px 34px 14px;
+  border-radius: 10px;
+  background:
+    repeating-linear-gradient(48deg, rgba(122, 74, 12, .08) 0 1px, transparent 1px 7px),
+    linear-gradient(115deg, #f8dd88 0%, #e9b647 30%, #fbe8a4 50%, #e3aa3b 70%, #c78a28 100%);
+  color: #17204a;
+  text-align: center;
+  -webkit-mask:
+    radial-gradient(circle 9px at 0 50%, #0000 98%, #000),
+    radial-gradient(circle 9px at 100% 50%, #0000 98%, #000);
+  -webkit-mask-composite: source-in;
+  mask:
+    radial-gradient(circle 9px at 0 50%, #0000 98%, #000),
+    radial-gradient(circle 9px at 100% 50%, #0000 98%, #000);
+  mask-composite: intersect;
+  animation: ep-head-in .34s cubic-bezier(.2, .9, .3, 1.15) both;
+}
+.ep-maps-head .eps-to { font-size: 13px; }
+.ep-maps-head .eps-titlerow { justify-content: center; gap: 4px 12px; }
+.ep-maps-head .eps-name { font-size: clamp(28px, 4vw, 36px); }
+.ep-maps-head .eps-seal { font-size: 12px; padding: 3px 9px 2px 11px; border-width: 2px; }
+.ep-maps-hint { margin-top: 6px; font-weight: 500; font-size: 15px; letter-spacing: .04em; color: #3a2a0c; }
+@keyframes ep-head-in { from { opacity: 0; transform: translateY(16px) scale(.92); } }
+
+/* tracks fanning out from the banner to every map, like the ribs of an umbrella */
+.ep-maps-ribs { display: none; width: 100%; height: 64px; overflow: visible; animation: ep-ribs .45s .1s ease-out both; }
+.ep-rib-ties { fill: none; stroke: #c9a24a; stroke-width: 12; stroke-dasharray: 2.5 6; opacity: .7; }
+.ep-rib-rail { fill: none; stroke: #f6e7bf; stroke-width: 5; }
+.ep-rib-gap { fill: none; stroke: #1a2140; stroke-width: 1.6; }
+@keyframes ep-ribs { from { clip-path: inset(0 0 100% 0); } to { clip-path: inset(0 0 0 0); } }
+
+.ep-maps-row { width: 100%; margin-top: 20px; display: grid; grid-template-columns: repeat(2, 1fr); row-gap: 16px; }
+.ep-maps-cell {
+  padding: 0 7px;
+  display: flex;
+  transform-origin: 50% 0;
+  animation: ep-drop .55s cubic-bezier(.2, .85, .3, 1.12) both;
+  animation-delay: calc(140ms + var(--i) * 70ms);
+}
+@keyframes ep-drop {
+  from { opacity: 0; transform: translateY(-56px) scale(.82) rotate(var(--tilt)); }
+  60% { opacity: 1; }
+  to { opacity: 1; transform: none; }
+}
+@media (min-width: 600px) { .ep-maps-row { grid-template-columns: repeat(3, 1fr); } }
+@media (min-width: 960px) {
+  .ep-maps-row { grid-template-columns: repeat(var(--n), 1fr); margin-top: 0; }
+  .ep-maps-row, .ep-maps-ribs { max-width: calc(var(--n) * 248px); }
+  .ep-maps-ribs { display: block; }
+}
+
+/* the map cards, shrunk: art on top, the name and the map's badge below, the line cut to two lines */
+.ep-card.ep-mini { width: 100%; min-height: 0; grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+.ep-card.ep-mini .ep-art { aspect-ratio: 4 / 3; border-right: 0; }
+.ep-mini.ep-europe .ep-art { border-bottom: 2px solid #b8903a; }
+.ep-mini.ep-sf .ep-art { border-bottom: 3px solid #4a3b35; }
+.ep-mini.ep-singapore .ep-art { border-bottom: 3px solid #10343c; }
+.ep-card.ep-mini .ep-text { padding: 10px 12px 12px; gap: 1px; }
+.ep-mini .ep-text > [class$="-to"] { font-size: 11.5px; }
+.ep-mini .ep-text > [class$="-name"] { font-size: 23px; }
+.ep-mini .ep-text > .ep-china-name { font-size: 28px; }
+.ep-mini .ep-text > .ep-europe-name { font-size: 20px; letter-spacing: .05em; }
+.ep-mini .ep-text > .ep-china-zh { font-size: 12px; }
+.ep-mini .ep-sf-heart { width: 18px; height: 16px; }
+.ep-mini .ep-text > [class$="-line"] {
+  margin: 4px 0 10px;
+  font-size: 12px;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.ep-mini .ep-text > [class$="-label"] { margin-top: auto; font-size: 12px; padding-top: 2px; padding-bottom: 2px; }
+.ep-mini .ep-china-no { font-size: 11px; }
+
+.ep-maps-close {
+  margin-top: 24px;
+  padding: 7px 22px 6px;
+  border: 1px solid rgba(241, 237, 228, .4);
+  border-radius: 999px;
+  background: rgba(241, 237, 228, .1);
+  color: #f1ede4;
+  font: 500 15px "Oswald", "Arial Narrow", sans-serif;
+  letter-spacing: .04em;
+  animation: ep-maps-in .3s .45s ease both;
+}
+.ep-maps-close:hover { background: rgba(241, 237, 228, .2); }
+.ep-maps-close:focus-visible { outline: 3px solid #ffd166; outline-offset: 3px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ep-series, .eps-ticket::after, .eps-cta { transition: none; }
+  .ep-series:hover { transform: none; }
+  .eps-piece { animation: none; }
+  .ep-maps, .ep-maps.is-closing, .ep-maps-head, .ep-maps-ribs, .ep-maps-cell, .ep-maps-close { animation: none; }
+}

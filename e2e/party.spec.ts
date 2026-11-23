@@ -1,5 +1,5 @@
 import { expect, test, type Browser, type Page } from '@playwright/test';
-import { asName } from './helpers';
+import { asName, openMaps } from './helpers';
 
 const dots = (p: Page) => p.getByTestId('party-button');
 
@@ -39,6 +39,7 @@ test('the party follows the host through maps and the waiting room, keeps the ro
   const { host, guest, close } = await party(browser);
 
   // the host picks China: the guest follows to the China menu, with no buttons of their own
+  await openMaps(host);
   await host.getByTestId('pick-china').click();
   await expect(host).toHaveTitle('Ticket to Beijing');
   await expect(guest).toHaveTitle('Ticket to Beijing', { timeout: 15_000 });
@@ -77,6 +78,7 @@ test('the party follows the host through maps and the waiting room, keeps the ro
   // the main menu forgets the room: the next waiting room is a new one, without the bot
   await host.getByTestId('back-to-main').click();
   await expect(guest).toHaveURL(/\/$/);
+  await openMaps(host);
   await host.getByTestId('pick-europe').click();
   await host.getByTestId('play-lan').click();
   await expect(host).toHaveURL(/\/wait\//);
