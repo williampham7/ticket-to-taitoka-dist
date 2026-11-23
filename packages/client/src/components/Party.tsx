@@ -1,30 +1,52 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useSyncExternalStore, type CSSProperties } from 'react';
+import { usePath } from '../lib/router';
+import { HSR } from '../theme';
 import { QRCodeSVG } from 'qrcode.react';
 import {
   PARTY_MAX, clearNotice, inviteUrl, isFollower, isHost, kick, leaveParty, rename, setFirstName, usePartyState,
 } from '../lib/party';
 
 /**
- * The party controls, the same on every screen (drawn with fixed colours, not the theme tokens):
- * a "Party" button in the top-right corner with one dot per seat (blue = a person), and its panel.
+ * The party controls: a "Party" button with one dot per seat (blue = a person), and its panel. They take the
+ * page's colours from the theme tokens, like the volume buttons; the dark screens (edition picker, Frontline,
+ * the hold screen) get a dark set of the same tokens. Screens with a top bar place the button in it (`inline`),
+ * next to the sound controls; elsewhere it sits in the top-right corner.
  */
 const BLUE = '#3b82f6';
-const panel = 'rounded-xl border border-white/15 bg-[#1b2029]/95 text-[#eef1f6] shadow-[0_18px_48px_rgba(0,0,0,.45)] backdrop-blur';
-const field = 'min-h-[36px] w-full rounded-md border border-white/20 bg-[#10141b] px-2.5 text-[15px] text-white outline-none focus:border-[#3b82f6]';
-const smallBtn = 'rounded-md border border-white/20 px-2.5 py-1 text-[13px] hover:border-white/50 disabled:opacity-50';
+const panel = 'rounded-xl border border-line bg-panel text-ink shadow-[0_18px_48px_rgba(0,0,0,.28)]';
+const field = 'min-h-[36px] w-full rounded-md border border-line-strong bg-paper px-2.5 text-[15px] text-ink outline-none focus:outline-none focus-visible:outline-none focus:border-ink';
+const smallBtn = 'rounded-md border border-line px-2.5 py-1 text-[13px] hover:border-ink disabled:opacity-50';
+const PICKER_DARK = { '--color-panel': '#2b3138', '--color-panel-2': '#353c44', '--color-paper': '#1f2429', '--color-ink': '#f1ede4', '--color-line': '#4d5661', '--color-line-strong': '#66707c', '--color-muted': '#b5bcc4' } as CSSProperties;
+const FRONTLINE_DARK = { '--color-panel': '#1e2320', '--color-panel-2': '#2a302b', '--color-paper': '#161a15', '--color-ink': '#e8e6df', '--color-line': '#556b2f', '--color-line-strong': '#6b7f45', '--color-muted': '#b9b6aa' } as CSSProperties;
+/** Token overrides for the screens drawn in fixed dark colours. */
+function useDarkTokens(): CSSProperties | undefined {
+  const path = usePath();
+  if (path.startsWith('/frontline')) return FRONTLINE_DARK;
+  if (path === '/' || path.startsWith('/party')) return PICKER_DARK;
+  return undefined;
+}
+
+// how many inline buttons are on screen: the corner one only shows when there are none
+let inlineCount = 0;
+const inlineListeners = new Set<() => void>();
+const setInline = (d: number) => { inlineCount += d; inlineListeners.forEach((l) => l()); };
+const useInlineCount = () => useSyncExternalStore((cb) => { inlineListeners.add(cb); return () => inlineListeners.delete(cb); }, () => inlineCount);
 
 export function PartyDots({ filled }: { filled: number }) {
   return (
     <span className="flex items-center gap-[3px]" aria-hidden>
       {Array.from({ length: PARTY_MAX }, (_, i) => (
-        <span key={i} className="h-2 w-2 rounded-full" style={i < filled ? { background: BLUE } : { boxShadow: 'inset 0 0 0 1.5px #9aa6b8' }} />
+        <span key={i} className="h-2 w-2 rounded-full" style={i < filled ? { background: BLUE } : { boxShadow: 'inset 0 0 0 1.5px var(--color-muted)' }} />
       ))}
     </span>
   );
 }
 
-export function PartyButton() {
+export function PartyButton({ inline = false }: { inline?: boolean }) {
   const s = usePartyState();
+  const dark = useDarkTokens();
+  const inlineHere = useInlineCount();
+  useEffect(() => { if (!inline) return; setInline(1); return () => setInline(-1); }, [inline]);
   const [open, setOpen] = useState(false);
   const root = useRef<HTMLDivElement>(null);
   const count = s.party?.members.length ?? 1;
@@ -37,12 +59,12 @@ export function PartyButton() {
     document.addEventListener('keydown', esc);
     return () => { document.removeEventListener('pointerdown', away); document.removeEventListener('keydown', esc); };
   }, [open]);
-  if (!s.name) return null;
+  if (!s.name || (!inline && inlineHere > 0)) return null;
   return (
-    <div ref={root} className="fixed right-3 top-3 z-[95] sm:right-4">
+    <div ref={root} style={dark} className={inline ? 'relative' : 'fixed right-3 top-3 z-[95] sm:right-4 sm:top-4'}>
       <button type="button" onClick={() => setOpen(!open)} aria-expanded={open} data-testid="party-button" data-party-count={count}
         aria-label={`Party: ${count} of ${PARTY_MAX}`}
-        className="flex h-9 items-center gap-2 rounded-lg border border-white/15 bg-[#1b2029]/90 px-3 text-[14px] font-semibold text-white shadow-md backdrop-blur hover:border-white/40">
+        className={`flex h-9 items-center gap-2 rounded-lg border border-line bg-panel-2 px-3 text-[14px] font-semibold text-ink transition-colors hover:border-ink${HSR ? ' hsr-audio-btn' : ''}`}>
         Party <PartyDots filled={count} />
       </button>
       {open && <PartyPanel onClose={() => setOpen(false)} />}
@@ -62,7 +84,7 @@ function PartyPanel({ onClose }: { onClose: () => void }) {
   const copy = () => { void navigator.clipboard?.writeText(url); setCopied(true); setTimeout(() => setCopied(false), 1500); };
   const saveName = () => void rename(name);
   return (
-    <div className={`${panel} absolute right-0 top-full mt-2 w-[310px] max-w-[calc(100vw-24px)] p-4`} data-testid="party-panel" role="dialog" aria-label="Party">
+    <div className={`${panel} absolute right-0 top-full z-[95] mt-2 w-[310px] max-w-[calc(100vw-24px)] p-4`} data-testid="party-panel" role="dialog" aria-label="Party">
       <div className="flex items-center justify-between">
         <h2 className="text-[17px] font-bold">Party</h2>
         <button type="button" onClick={onClose} aria-label="Close" className="text-[18px] leading-none opacity-70 hover:opacity-100">×</button>
@@ -74,7 +96,7 @@ function PartyPanel({ onClose }: { onClose: () => void }) {
             <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: BLUE }} />
             <span className="min-w-0 truncate font-semibold">{m.name}</span>
             {m.id === s.me?.id && <span className="text-[12px] opacity-60">(you)</span>}
-            {m.id === p?.host && <span className="rounded-full bg-white/15 px-2 text-[11px]">host</span>}
+            {m.id === p?.host && <span className="rounded-full bg-panel-2 px-2 text-[11px]">host</span>}
             {host && m.id !== s.me?.id && (
               <button type="button" className={`${smallBtn} ml-auto`} onClick={() => void kick(m.id)} data-testid={`kick-${m.name}`}>Remove</button>
             )}
@@ -82,7 +104,7 @@ function PartyPanel({ onClose }: { onClose: () => void }) {
         ))}
         {Array.from({ length: Math.max(0, PARTY_MAX - (p?.members.length ?? 1)) }, (_, i) => (
           <li key={`open-${i}`} className="flex items-center gap-2 text-[14px] opacity-50">
-            <span className="h-2.5 w-2.5 rounded-full" style={{ boxShadow: 'inset 0 0 0 1.5px #9aa6b8' }} />Open
+            <span className="h-2.5 w-2.5 rounded-full" style={{ boxShadow: 'inset 0 0 0 1.5px var(--color-muted)' }} />Open
           </li>
         ))}
       </ul>
@@ -101,7 +123,7 @@ function PartyPanel({ onClose }: { onClose: () => void }) {
           <div className="mt-1.5 flex gap-3">
             {url && <div className="shrink-0 rounded-md bg-white p-1.5"><QRCodeSVG value={url} size={84} /></div>}
             <div className="min-w-0 flex-1">
-              <div className="select-text break-all text-[13px] text-[#9cc3ff]" data-testid="party-url">{url}</div>
+              <div className="select-text break-all text-[13px] text-ink underline decoration-dotted underline-offset-2" data-testid="party-url">{url}</div>
               <button type="button" className={`${smallBtn} mt-2`} onClick={copy} data-testid="party-copy">{copied ? 'Copied' : 'Copy link'}</button>
             </div>
           </div>
@@ -121,10 +143,11 @@ function PartyPanel({ onClose }: { onClose: () => void }) {
 export function NamePrompt() {
   const s = usePartyState();
   const [name, setName] = useState('');
+  const dark = useDarkTokens();
   if (s.name) return null;
   const go = () => { if (name.trim()) void setFirstName(name); };
   return (
-    <div className="fixed inset-0 z-[100] grid place-items-center bg-black/55 p-4 backdrop-blur-[2px]">
+    <div className="fixed inset-0 z-[100] grid place-items-center bg-black/45 p-4 backdrop-blur-[2px]" style={dark}>
       <div className={`${panel} w-[340px] max-w-full p-5`} role="dialog" aria-label="Your name" data-testid="name-prompt">
         <h2 className="text-[20px] font-bold">What should we call you?</h2>
         <p className="mt-1 text-[14px] opacity-70">Other players see this name. You can change it later in Party.</p>
@@ -143,7 +166,7 @@ export function PartyHold() {
   const hostName = s.party?.members.find((m) => m.id === s.party?.host)?.name ?? 'The host';
   const follower = isFollower(s);
   return (
-    <main className="grid h-full place-items-center bg-[#1b2029] p-6 text-center text-[#eef1f6]" data-testid="party-hold">
+    <main className="grid h-full place-items-center bg-[#2b3138] p-6 text-center text-[#f1ede4]" data-testid="party-hold">
       <div className="max-w-sm">
         <h1 className="text-[24px] font-bold">{follower ? `${hostName} is playing` : 'Nothing to follow'}</h1>
         <p className="mt-2 text-[15px] opacity-75">

@@ -3,6 +3,7 @@ import { MapView } from '../board/MapView';
 import { MusicButton, VolumeSlider } from '../lib/AudioButtons';
 import { navigate } from '../lib/router';
 import { isFollower, usePartyState } from '../lib/party';
+import { PartyButton } from '../components/Party';
 import { SKIN } from '../lib/skin';
 import { HSR, MERLION, RAIL } from '../theme';
 import { MerlionFrame, MerlionTitle } from '../merlion/MerlionChrome';
@@ -49,9 +50,10 @@ function TopBar({ edition }: { edition?: boolean | EditionSwitcherProps }) {
           <EditionSwitcher {...(edition === true ? {} : edition)} />
         </div>
       )}
-      <div className={`absolute right-[136px] z-10 flex gap-2 sm:right-[140px] ${edge}`}>
+      <div className={`absolute z-10 flex gap-2 ${HSR || RAIL || MERLION ? 'right-3 sm:right-4' : 'right-4'} ${edge}`}>
         <VolumeSlider />
         <MusicButton />
+        <PartyButton inline />
       </div>
     </>
   );

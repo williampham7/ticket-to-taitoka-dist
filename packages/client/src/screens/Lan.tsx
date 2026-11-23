@@ -10,7 +10,7 @@ import { EDITION, setEdition } from '../edition';
 import { editionForMap, editionToFollow, shouldFollow, type FollowAttempt } from '../lib/seatData';
 import type { EditionId } from '@boboland/shared/src/editions';
 import { canStart, firstFreeColor, joinedSeats, seatColors, MAX_SEATS } from '../lib/lobbyRules';
-import { inviteUrl, isFollower, isHost as isPartyHost, rename, setPartyRoom, usePartyState } from '../lib/party';
+import { inviteUrl, isFollower, isHost as isPartyHost, setPartyRoom, usePartyState } from '../lib/party';
 import { HSR, INK, PLAYER_COLORS, colorFill } from '../theme';
 import { ColorPicker } from './ColorPicker';
 import { readChat, type ChatLine, type ChatPayload } from '../lib/chat';
@@ -104,19 +104,6 @@ export function LanHost() {
       <Title sub={error ?? 'Opening the waiting room…'} />
       {error && <SecondaryButton onClick={() => navigate('/menu')}>Back</SecondaryButton>}
     </Frame>
-  );
-}
-
-/** My name, editable in place (it changes in the party too). */
-function MyName({ testId = 'my-name' }: { testId?: string }) {
-  const { name } = usePartyState();
-  const [v, setV] = useState(name);
-  useEffect(() => setV(name), [name]);
-  const save = () => { if (v.trim() && v.trim() !== name) void rename(v); else setV(name); };
-  return (
-    <input value={v} maxLength={16} aria-label="Your name" data-testid={testId} onChange={(e) => setV(e.target.value)} onBlur={save}
-      onKeyDown={(e) => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); }}
-      className={`${INPUT_CLASS} w-40`} />
   );
 }
 
@@ -243,8 +230,6 @@ export function LanWaiting({ matchID }: { matchID: string }) {
         </div>
         {mine !== undefined && (
           <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-line pt-4">
-            <span className="hsr-label">Your name</span>
-            <MyName />
             <span className="hsr-label">Your colour</span>
             <ColorPicker label="Your colour" testId="my-color" value={mine} taken={[...takenByOthers]} onChange={(c) => void pick(c)} />
           </div>
@@ -287,8 +272,6 @@ export function LanWaiting({ matchID }: { matchID: string }) {
       </div>
       {mine !== undefined && (
         <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2">
-          <span className="text-[15px]">Your name</span>
-          <MyName />
           <span className="text-[15px]">Your colour</span>
           <ColorPicker label="Your colour" testId="my-color" value={mine} taken={[...takenByOthers]} onChange={(c) => void pick(c)} />
         </div>

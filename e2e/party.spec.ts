@@ -56,9 +56,11 @@ test('the party follows the host through maps and the waiting room, keeps the ro
   await host.getByTestId('add-bot').click();
   await expect(host.getByTestId('waiting-players').locator('[data-bot]')).toHaveCount(1);
 
-  // renaming in the waiting room shows on the seat and in the party
-  await guest.getByTestId('my-name').fill('Gus');
-  await guest.getByTestId('my-name').press('Enter');
+  // renaming in the Party panel shows on the waiting-room seat too
+  await dots(guest).click();
+  await guest.getByTestId('party-name').fill('Gus');
+  await guest.getByTestId('party-name-save').click();
+  await guest.keyboard.press('Escape');
   await expect(host.getByTestId('waiting-players')).toContainText('Gus');
 
   // back to the map menu, switch to Europe, and the same room (bot and all) comes back, now on Europe
