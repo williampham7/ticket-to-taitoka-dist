@@ -10,6 +10,8 @@ Paste this repository's GitHub link into Claude (Claude Code, the Claude desktop
 
 You're setting this game up on the user's computer. The goal is a **Ticket to Taitoka** icon on their Desktop that starts the game. Work out which operating system they use.
 
+**Where the game goes.** Put the game folder in the user's home folder (`~/Ticket to Taitoka` on macOS, `C:\Users\<name>\Ticket to Taitoka` on Windows), as the commands below do. Never put it on the Desktop, in Documents, or in iCloud Drive or OneDrive: those sync to the cloud, which locks or evicts files while the game builds. The setup scripts refuse to run from those places. Only the small **Ticket to Taitoka** icon belongs on the Desktop, and the setup script makes it; it just points at the game folder.
+
 **If you can run commands on their computer** (Claude Code, or the desktop app with a terminal or computer-use tool), do the steps below yourself. **If you can't** (for example on claude.ai in a browser), give the user these steps one at a time to copy into Terminal (macOS) or PowerShell (Windows), and check each step's output with them.
 
 **macOS**
@@ -115,6 +117,8 @@ To redraw the icon from `desktop/icon.svg`, run `node desktop/make-icon.mjs`. It
 **Chat:** in LAN and online games, the panel under "Last moves" lets you type messages or send emotes and quick phrases. Each one also pops up over the sender's name in the top bar. Pass-and-play has no chat, since everyone shares one screen.
 
 **Sound:** the game plays an original old-time railway tune in the background and short sound effects for draws, claims and tickets. The music-note button and the speaker button switch them on and off separately, the volume slider sets how loud both are, and all of it is remembered. The music starts after your first click, because browsers don't play sound before that.
+
+**Updating the game later:** download the new zip into a fresh folder in your home folder, run the setup script there, and delete the old folder. Setup recreates the Desktop icon so it points at the new one.
 
 **Moved or renamed the folder?** Run `npm install` again, then remake the desktop icon. `npm install` relinks the game's internal packages, and `npm run play` won't start until you do.
 

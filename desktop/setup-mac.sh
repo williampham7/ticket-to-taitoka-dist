@@ -4,6 +4,13 @@
 # Usage (from the game folder): bash desktop/setup-mac.sh
 set -euo pipefail
 cd "$(dirname "$0")/.."
+# iCloud Drive syncs Desktop and Documents, and it can lock or evict files while the game builds (installs hang, files go missing).
+case "$PWD" in
+  "$HOME/Desktop"*|"$HOME/Documents"*|*"/Mobile Documents/"*|*"/CloudStorage/"*)
+    echo "This folder is in $PWD, which iCloud (or another cloud drive) may sync, and that breaks the game's build."
+    echo "Move the whole folder to somewhere not synced, for example ~/Developer or your home folder, then run this again."
+    exit 1 ;;
+esac
 # A folder downloaded with a browser is quarantined, and macOS would block the launcher; clear that.
 xattr -dr com.apple.quarantine . 2>/dev/null || true
 export PATH="$PATH:/opt/homebrew/bin:/usr/local/bin:/opt/homebrew/opt/node@22/bin:/usr/local/opt/node@22/bin"

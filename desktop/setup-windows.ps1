@@ -4,6 +4,17 @@
 $ErrorActionPreference = 'Stop'
 Set-Location (Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path))
 
+# OneDrive and other cloud drives sync Desktop and Documents, and can lock or evict files while the game builds.
+$here = (Get-Location).Path
+$synced = @([Environment]::GetFolderPath('Desktop'), [Environment]::GetFolderPath('MyDocuments'), $env:OneDrive, $env:OneDriveConsumer, $env:OneDriveCommercial) | Where-Object { $_ }
+foreach ($p in $synced) {
+  if ($here.StartsWith($p, [StringComparison]::OrdinalIgnoreCase)) {
+    Write-Output "This folder is in $here, which a cloud drive (OneDrive) may sync, and that breaks the game's build."
+    Write-Output 'Move the whole folder to somewhere not synced, for example C:\Games or C:\Users\<you>\Games, then run this again.'
+    exit 1
+  }
+}
+
 function Get-NodeMajor { try { [int]((node -p "process.versions.node.split('.')[0]") 2>$null) } catch { 0 } }
 if ((Get-NodeMajor) -lt 20) {
   if (Get-Command winget -ErrorAction SilentlyContinue) {
