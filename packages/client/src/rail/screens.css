@@ -109,6 +109,9 @@
 [data-theme="rail"] header.bg-panel > h1 .text-poster { color: var(--rail-brass-light); }
 [data-theme="rail"] header.bg-panel .bg-panel-2 { background: #f2ead6; border-color: rgba(214,178,94,.7); }
 [data-theme="rail"] header.bg-panel button.bg-panel-2:hover { border-color: var(--rail-brass-light); background: #fffaf0; }
+/* Leave: the translucent red tint vanishes on the green enamel, so use a solid pale rose like the cream buttons beside it. */
+[data-theme="rail"] header.bg-panel [data-testid="leave-game"] { background: #f4d6cf; border-color: rgba(179,38,46,.55); color: #1f2a24; }
+[data-theme="rail"] header.bg-panel [data-testid="leave-game"]:hover { background: #f9e3dd; border-color: #b3262e; }
 [data-theme="rail"] header [data-testid="status"].bg-poster { box-shadow: inset 0 0 0 1px var(--rail-brass-light); border-color: #5a1520; }
 [data-theme="rail"] header [data-testid="status"].bg-mustard { background: var(--rail-brass-light); }
 [data-theme="rail"] .turn-pulse { animation-name: turn-pulse-rail; }
