@@ -3,7 +3,7 @@ import { MAP_ID, ROUTE_POINTS, type Card, type MapId, type RouteColor, type Tick
 import { CardTile, CardBack, TicketBack } from './CardFace';
 import { TicketCard } from './TicketCard';
 import { GAME_TITLE, SKIN } from '../lib/skin';
-import { ROUTE_FILL, ROUTE_STROKE, INK, PLAYER_COLORS, MUSTARD, ACCENT } from '../theme';
+import { ROUTE_FILL, ROUTE_STROKE, INK, PLAYER_COLORS, MUSTARD, ACCENT, MERLION } from '../theme';
 
 /** The example trains are drawn in player 1's and player 2's default colours. */
 const P1_COLOR = PLAYER_COLORS[0].fill;
@@ -12,6 +12,10 @@ const ticket = (a: string, b: string, points: number): Ticket => ({ id: `${a}-${
 
 /** Example cities and tickets for a map (ticket ends must be real cities on it). */
 export function examplesFor(mapId: MapId, hub: string) {
+  if (mapId === 'sg') return {
+    intro: ticket('LIN', 'CTN', 5), leg1: ['Little India', hub], leg2: [hub, 'Chinatown'], claim: ['Orchard Road', 'Little India'],
+    toHub: 'National Stadium', gray: ['Geylang', 'National Stadium'], done: ticket('ECP', 'LIN', 7), failed: ticket('NTU', 'TAM', 23),
+  };
   if (mapId === 'china') return {
     intro: ticket('HET', 'TAO', 6), leg1: ['Hohhot', hub], leg2: [hub, 'Qingdao'], claim: ['Zhengzhou', 'Wuhan'],
     toHub: 'Dalian', gray: ['Chengdu', 'Chongqing'], done: ticket('HRB', 'CGO', 10), failed: ticket('HRB', 'HAK', 21),
@@ -51,7 +55,7 @@ function Rail({ cars, color = 'gray', owner, from, to, width = 300, twin }: {
       {[[x1, from], [x2, to]].map(([x, name]) => (
         <g key={name as string}>
           <circle cx={x as number} cy={y} r={r} fill="#f7f1e3" stroke={INK} strokeWidth={2.6} />
-          <text x={x as number} y={y + 30} textAnchor="middle" fontFamily="Oswald" fontWeight={600} fontSize={13} letterSpacing="0.06em" fill={INK}>{(name as string).toUpperCase()}</text>
+          <text x={x as number} y={y + 30} textAnchor="middle" fontFamily={MERLION ? 'Poppins' : 'Oswald'} fontWeight={600} fontSize={13} letterSpacing="0.06em" fill={INK}>{(name as string).toUpperCase()}</text>
         </g>
       ))}
     </svg>
@@ -96,7 +100,7 @@ const CHAPTERS: Chapter[] = [
     body: (
       <>
         <p className="text-[17px] leading-relaxed">
-          {GAME_TITLE} is a race {MAP_ID === 'europe' ? 'across Europe' : MAP_ID === 'china' ? 'across China, from Harbin to Haikou' : 'across America, from Seattle to Miami'}. You claim railway routes between cities,
+          {GAME_TITLE} is a race {MAP_ID === 'sg' ? 'across Singapore, from Tuas to Changi' : MAP_ID === 'europe' ? 'across Europe' : MAP_ID === 'china' ? 'across China, from Harbin to Haikou' : 'across America, from Seattle to Miami'}. You claim railway routes between cities,
           connect the cities on your secret <b>destination tickets</b>, and try to finish with the most points.
         </p>
         <div className="my-5 flex items-center justify-center gap-5 rounded-2xl border-2 border-dashed border-line-strong bg-paper/60 p-5">

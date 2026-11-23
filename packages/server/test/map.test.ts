@@ -6,6 +6,7 @@ describe('the default map of a match made without setupData', () => {
     expect(defaultMap(['node', 'index.ts', '--map=europe'], {})).toBe('europe');
     expect(defaultMap(['node', 'index.ts', '--map=china'], { TTB_MAP: 'europe' })).toBe('china');
     expect(defaultMap([], { TTB_MAP: 'china' })).toBe('china');
+    expect(defaultMap([], { TTB_MAP: 'sg' })).toBe('sg');
     expect(defaultMap([], {})).toBe('usa');
   });
 

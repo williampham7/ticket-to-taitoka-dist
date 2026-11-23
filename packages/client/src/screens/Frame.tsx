@@ -2,7 +2,8 @@ import type { ReactNode } from 'react';
 import { MapView } from '../board/MapView';
 import { MusicButton, VolumeSlider } from '../lib/AudioButtons';
 import { SKIN } from '../lib/skin';
-import { HSR, RAIL } from '../theme';
+import { HSR, MERLION, RAIL } from '../theme';
+import { MerlionFrame, MerlionTitle } from '../merlion/MerlionChrome';
 import { EditionSwitcher, type EditionSwitcherProps } from '../components/EditionSwitcher';
 
 const none = new Set<string>();
@@ -18,12 +19,13 @@ interface FrameProps {
 export function Frame({ children, wide, edition }: FrameProps) {
   const top = <TopBar edition={edition} />;
   if (RAIL) return <RailFrame wide={wide} top={top}>{children}</RailFrame>;
+  if (MERLION) return <MerlionFrame wide={wide} top={top}>{children}</MerlionFrame>;
   return HSR ? <HsrFrame wide={wide} top={top}>{children}</HsrFrame> : <VintageFrame wide={wide} top={top}>{children}</VintageFrame>;
 }
 
 /** The edition switcher on the left (when asked for), the sound controls on the right. */
 function TopBar({ edition }: { edition?: boolean | EditionSwitcherProps }) {
-  const edge = HSR || RAIL ? 'top-3 sm:top-4' : 'top-4';
+  const edge = HSR || RAIL || MERLION ? 'top-3 sm:top-4' : 'top-4';
   return (
     <>
       {edition && (
@@ -31,7 +33,7 @@ function TopBar({ edition }: { edition?: boolean | EditionSwitcherProps }) {
           <EditionSwitcher {...(edition === true ? {} : edition)} />
         </div>
       )}
-      <div className={`absolute z-10 flex gap-2 ${HSR || RAIL ? 'right-3 sm:right-4' : 'right-4'} ${edge}`}>
+      <div className={`absolute z-10 flex gap-2 ${HSR || RAIL || MERLION ? 'right-3 sm:right-4' : 'right-4'} ${edge}`}>
         <VolumeSlider />
         <MusicButton />
       </div>
@@ -109,6 +111,7 @@ export const ZH_TAGLINE = SKIN.zh ? `开往${SKIN.zh}` : undefined;
 
 /** The game's name; `compact` (HSR only) is a smaller one for screens with a lot below it. */
 export function Title({ sub, compact }: { sub?: string; compact?: boolean }) {
+  if (MERLION) return <MerlionTitle sub={sub} compact={compact} />;
   if (RAIL) {
     return (
       <div className={compact ? 'mb-5' : 'mb-6'}>
@@ -147,10 +150,10 @@ export function Title({ sub, compact }: { sub?: string; compact?: boolean }) {
   );
 }
 
-const PRIMARY = RAIL ? 'rail-btn rail-btn-primary' : HSR
+const PRIMARY = MERLION ? 'mrt-btn mrt-btn-primary' : RAIL ? 'rail-btn rail-btn-primary' : HSR
   ? 'hsr-btn hsr-btn-primary'
   : 'rounded-lg bg-poster px-5 py-3 font-display text-[17px] tracking-wide text-[#fff6e6] shadow-[0_4px_0_#8e2d24] transition enabled:hover:-translate-y-px enabled:active:translate-y-1 enabled:active:shadow-none disabled:bg-muted/50 disabled:shadow-none';
-const SECONDARY = RAIL ? 'rail-btn rail-btn-secondary' : HSR
+const SECONDARY = MERLION ? 'mrt-btn mrt-btn-secondary' : RAIL ? 'rail-btn rail-btn-secondary' : HSR
   ? 'hsr-btn hsr-btn-secondary'
   : 'rounded-lg border-2 border-ink bg-panel px-5 py-2.5 font-display text-[16px] tracking-wide shadow-[0_3px_0_#b79f74] transition hover:-translate-y-px active:translate-y-0.5 active:shadow-none';
 
@@ -163,6 +166,6 @@ export function SecondaryButton(props: React.ButtonHTMLAttributes<HTMLButtonElem
 }
 
 /** Text inputs on the menu screens (HSR: rounded, with a rail-blue focus ring). */
-export const INPUT_CLASS = RAIL ? 'rail-input' : HSR
+export const INPUT_CLASS = MERLION ? 'mrt-input' : RAIL ? 'rail-input' : HSR
   ? 'hsr-input'
   : 'rounded-md border-2 border-line-strong bg-panel px-3 py-1.5 text-[16px] focus:border-ink focus:outline-none';

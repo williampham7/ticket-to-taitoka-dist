@@ -1,0 +1,114 @@
+/* Merlion theme (cards and tickets). Scope every rule under [data-theme="merlion"]. */
+
+/* ---- train cards ---------------------------------------------------------------------------- */
+[data-theme="merlion"] .mrt-card {
+  box-shadow: 0 0 0 1.5px #10343c, 0 3px 0 rgba(16,52,60,.22), 0 6px 12px -4px rgba(16,52,60,.32), inset 0 0 0 3px rgba(255,253,246,.5);
+}
+[data-theme="merlion"] .mrt-plate {
+  font-family: var(--font-display); font-weight: 600; font-size: 9px; line-height: 13px; letter-spacing: .04em;
+  color: #10343c; background: #fffdf6; padding: 0 6px; border-radius: 999px; box-shadow: 0 0 0 1px #10343c;
+}
+[data-theme="merlion"] .mrt-plate-loco { font-size: 7.6px; padding: 0 4px; letter-spacing: 0; color: #96186a; }
+/* an arched shophouse window */
+[data-theme="merlion"] .mrt-window {
+  background: #fffdf6; border-radius: 26px 26px 6px 6px;
+  box-shadow: 0 1.5px 0 rgba(16,52,60,.22);
+}
+[data-theme="merlion"] .mrt-window > svg { border-radius: 25px 25px 5px 5px; }
+[data-theme="merlion"] .mrt-window::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; box-shadow: inset 0 0 0 1.2px #10343c;
+}
+[data-theme="merlion"] .mrt-count {
+  font-family: var(--font-display); font-weight: 700; font-size: 12.5px; line-height: 20px; color: #fff;
+  background: #c2268a; border-radius: 999px; box-shadow: 0 0 0 1.5px #10343c, 0 1px 0 rgba(16,52,60,.35);
+}
+[data-theme="merlion"] .mrt-card-back {
+  background:
+    var(--mrt-tile) 0 0 / 16px 16px,
+    #1c6c70;
+  box-shadow: 0 0 0 1.5px #10343c, 0 3px 0 rgba(16,52,60,.22), inset 0 0 0 3px rgba(255,253,246,.55);
+}
+/* the tiles tinted deep teal so the medallion reads */
+[data-theme="merlion"] .mrt-card-back::before {
+  content: ""; position: absolute; inset: 0; background: linear-gradient(160deg, rgba(14,70,78,.82), rgba(10,52,60,.9)); pointer-events: none;
+}
+[data-theme="merlion"] .mrt-card-back > * { position: relative; }
+[data-theme="merlion"] .mrt-back-label {
+  font-family: var(--font-display); font-weight: 600; font-size: 9.5px; letter-spacing: .06em; line-height: 13px;
+  color: #10343c; background: #fffdf6; padding: 0 6px; border-radius: 999px; box-shadow: 0 0 0 1px #10343c;
+}
+[data-theme="merlion"] .mrt-swatch { border-radius: 3px; box-shadow: inset 0 0 0 1px rgba(16,52,60,.55); }
+
+/* the colour you just drew hops up in your hand with an orchid ring */
+[data-theme="merlion"] .drawn-flash { animation-name: drawn-flash-mrt; border-radius: 11px; }
+@keyframes drawn-flash-mrt {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(194,38,138,0); transform: none; }
+  30% { box-shadow: 0 0 0 4px #c2268a; transform: translateY(-10px) rotate(-2.5deg); }
+  55% { transform: translateY(-4px) rotate(1.5deg); }
+}
+
+/* ---- destination tickets: contactless travel passes --------------------------------------------- */
+[data-theme="merlion"] .mrt-ticket {
+  --t-ink: #10343c; --t-dim: #587279; --t-tier: #10996a; --t-tier-2: #3fc79a; --t-ring: #10996a;
+  color: var(--t-ink);
+  background:
+    var(--mrt-tile-soft),
+    linear-gradient(180deg, #ffffff 0%, #f4faf7 100%);
+  box-shadow: inset 0 0 0 1.5px #10343c, 0 2px 0 rgba(16,52,60,.18), 0 4px 10px -3px rgba(16,52,60,.25);
+  transition: box-shadow 150ms ease;
+}
+[data-theme="merlion"] .mrt-ticket[data-tier="mid"] { --t-tier: #1b78c6; --t-tier-2: #4fa6ea; --t-ring: #1b78c6; }
+[data-theme="merlion"] .mrt-ticket[data-tier="long"] { --t-tier: #c2268a; --t-tier-2: #ef6fbd; --t-ring: #c2268a; }
+[data-theme="merlion"] .mrt-strip { background: linear-gradient(100deg, var(--t-tier) 0%, var(--t-tier-2) 100%); box-shadow: inset 0 -1.5px 0 #10343c; }
+[data-theme="merlion"] .mrt-ticket .mrt-strip-side { box-shadow: inset -1.5px 0 0 #10343c; background: linear-gradient(180deg, var(--t-tier), var(--t-tier-2)); }
+[data-theme="merlion"] .mrt-ticket .mrt-t-dim { color: var(--t-dim); }
+[data-theme="merlion"] .mrt-hop-dot { width: 6px; height: 6px; border-radius: 50%; background: #fff; border: 1.8px solid var(--t-tier); flex: none; }
+[data-theme="merlion"] .mrt-hop-line { border-top: 3px solid var(--t-tier); margin: 0 -1px; opacity: .85; }
+[data-theme="merlion"] .mrt-perf {
+  background: radial-gradient(circle, rgba(16,52,60,.45) 0 1px, transparent 1.3px) 0 0 / 2px 5px repeat-y;
+}
+[data-theme="merlion"] .mrt-stub { background: linear-gradient(180deg, rgba(143,210,211,.22), rgba(143,210,211,.08)); }
+[data-theme="merlion"] .mrt-points { filter: drop-shadow(0 1px 0 rgba(16,52,60,.25)); }
+
+[data-theme="merlion"] .mrt-ticket.mrt-selected {
+  box-shadow: inset 0 0 0 2px #10343c, 0 0 0 3px #c2268a, 0 8px 16px -4px rgba(194,38,138,.45);
+}
+[data-theme="merlion"] .mrt-ticket.mrt-done {
+  background: var(--mrt-tile-soft), linear-gradient(180deg, #f0fbf5 0%, #d9f4e6 100%);
+  box-shadow: inset 0 0 0 2px #10996a, 0 2px 0 rgba(16,52,60,.18), 0 4px 10px -3px rgba(16,52,60,.25);
+}
+[data-theme="merlion"] .mrt-ticket.mrt-failed { --t-ink: #6d7f83; filter: saturate(.5); }
+[data-theme="merlion"] .mrt-keep { color: var(--t-dim); border: 1.5px dashed rgba(16,52,60,.35); background: #fff; }
+[data-theme="merlion"] .mrt-keep-on { color: #fff; background: #c2268a; border: 1.5px solid #96186a; }
+[data-theme="merlion"] .mrt-check { background: #c2268a; color: #fff; box-shadow: 0 0 0 1.5px #10343c, 0 1px 3px rgba(16,52,60,.3); }
+
+[data-theme="merlion"] .mrt-stamp {
+  border: 2px solid currentColor; border-radius: 6px; background: rgba(255,255,255,.8);
+  font-family: var(--font-display); font-weight: 700; letter-spacing: .04em;
+}
+[data-theme="merlion"] .mrt-stamp-ok { color: #0b7a52; }
+[data-theme="merlion"] .mrt-stamp-no { color: #b21f6f; }
+
+[data-theme="merlion"] .mrt-ticket-back {
+  background: linear-gradient(135deg, #1c8a8e 0%, #c2268a 130%);
+  box-shadow: inset 0 0 0 1.5px #10343c, 0 4px 10px rgba(16,52,60,.3);
+}
+
+/* the vintage golden-ticket classes (the ticket pile) as white travel-pass stock */
+[data-theme="merlion"] .gold-ticket {
+  background:
+    linear-gradient(115deg, rgba(255,255,255,0) 30%, rgba(255,230,246,.8) 45%, rgba(255,255,255,0) 60%) no-repeat -160% 0 / 60% 100%,
+    var(--mrt-tile-soft),
+    linear-gradient(180deg, #ffffff 0%, #eef8f4 100%);
+  border-color: #10343c;
+}
+[data-theme="merlion"] :hover > .gold-ticket, [data-theme="merlion"] .gold-ticket:hover { background-position: 260% 0, 0 0, 0 0; }
+[data-theme="merlion"] .gold-ticket.gold-done { background: linear-gradient(180deg, #f0fbf5 0%, #d9f4e6 100%); border-color: #10996a; }
+[data-theme="merlion"] .gold-rule { border-color: rgba(194,38,138,.3); }
+[data-theme="merlion"] .gold-ticket.gold-selected { border-color: var(--color-poster); }
+[data-theme="merlion"] .gold-ticket .bg-poster\/\[\.07\] { background: rgba(194,38,138,.08); }
+[data-theme="merlion"] .gold-ticket .border-\[\#c39a3e\] { border-color: #9dbcb8; }
+
+@media (prefers-reduced-motion: reduce) {
+  [data-theme="merlion"] .drawn-flash { animation: none; }
+}

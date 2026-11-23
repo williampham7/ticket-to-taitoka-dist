@@ -1,0 +1,9 @@
+/* Singapore board (theme merlion): geo layer and map pieces. Imported through theme-merlion.css. */
+[data-geo="sg"] { background: #8fd2d3; }
+
+/* Slow sparkle on the water and a gentle drift on the cloud shadows (GPU transform only). */
+.sg-cloud { animation: sg-cloud-drift 60s ease-in-out infinite alternate; will-change: transform; }
+@keyframes sg-cloud-drift { from { transform: translateX(-40px); } to { transform: translateX(60px); } }
+.sg-glint { animation: sg-glint 5s ease-in-out infinite; }
+@keyframes sg-glint { 0%, 100% { opacity: .15; } 50% { opacity: .6; } }
+@media (prefers-reduced-motion: reduce) { .sg-cloud, .sg-glint { animation: none; } }

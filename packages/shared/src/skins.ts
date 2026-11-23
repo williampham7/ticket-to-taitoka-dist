@@ -11,12 +11,17 @@ export interface Skin {
   name: string;
   /** The hub's Chinese name (China map). */
   zh?: string;
+  /** The hub's own name when it differs from the game's name (Singapore: Marina Bay). */
+  hubName?: string;
+  /** Hearts next to the special cities on the map. */
+  hearts?: boolean;
 }
 
 export const SKINS = {
   taitoka: { id: 'taitoka', name: 'Taitoka' },
   beijing: { id: 'beijing', name: 'Beijing', zh: '北京' },
   europa: { id: 'europa', name: 'Europa' },
+  singapore: { id: 'singapore', name: 'Singapore', hubName: 'Marina Bay', hearts: false },
 } as const satisfies Record<string, Skin>;
 
 export function skinFor(id: string | null | undefined): Skin {
@@ -26,4 +31,4 @@ export function skinFor(id: string | null | undefined): Skin {
 export const gameTitle = (skin: Skin) => `Ticket to ${skin.name}`;
 
 /** A city's name in this skin: the hub takes the skin's name, every other city keeps its own. */
-export const cityNameIn = (skin: Skin, city: { name: string; hub?: boolean }) => (city.hub ? skin.name : city.name);
+export const cityNameIn = (skin: Skin, city: { name: string; hub?: boolean }) => (city.hub ? skin.hubName ?? skin.name : city.name);

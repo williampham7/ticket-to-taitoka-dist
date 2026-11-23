@@ -1,5 +1,6 @@
 import { useSyncExternalStore } from 'react';
-import { HSR, RAIL } from '../theme';
+import { HSR, MERLION, RAIL } from '../theme';
+import { createMerlionSfx } from './soundMerlion';
 import { createHsrSfx } from './soundHsr';
 import { createRailSfx } from './soundRail';
 import { load, save } from './storage';
@@ -150,6 +151,7 @@ export const sfxEnv = { audio, volume: () => volume };
 
 export const sfx: typeof vintageSfx = HSR ? hsrSfx
   : RAIL ? createRailSfx({ audio, volume: () => volume })
+  : MERLION ? createMerlionSfx({ audio, volume: () => volume })
   : vintageSfx;
 
 export function setMuted(m: boolean) {

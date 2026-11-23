@@ -10,4 +10,5 @@ export const DOCK_ZONE: Record<MapId, DockZone> = {
   usa: { x0: 1490, y0: 640 }, // east of Miami, Jacksonville and Charlotte (labels included); covers the compass
   china: { x0: 1505, y0: 700 }, // East China Sea: east of Fuzhou and Xiamen, south of Shanghai (labels included)
   europe: { x0: 1700, y0: 560 }, // Black Sea: east of the Istanbul and Bucharest labels
+  sg: { x0: 1500, y0: 800 }, // South China Sea: east of the Gardens by the Bay label, south of East Coast Park
 };

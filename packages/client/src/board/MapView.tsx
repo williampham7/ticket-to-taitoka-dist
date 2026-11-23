@@ -6,10 +6,12 @@ import { carRects, routeMidpoint } from './geometry';
 import { UsaGeoLayer } from './UsaGeoLayer';
 import { ChinaGeoLayer } from './ChinaGeoLayer';
 import { EuropeGeoLayer } from './EuropeGeoLayer';
+import { SgGeoLayer } from './SgGeoLayer';
+import { MerlionHub, MerlionPlace } from '../merlion/places';
 import { hubPlate, stationLabel, stationR, EN_SIZE, PLATE_EN, PLATE_ZH, ZH_SIZE } from './stationLabels';
 import { ClaimCelebration } from './ClaimCelebration';
 import { claimTiming } from './claimFx';
-import { ACCENT, HALO, HSR, INK, MUSTARD, ROUTE_FILL, ROUTE_STROKE, SOFT_INK, TARGET } from '../theme';
+import { ACCENT, HALO, HSR, INK, MERLION, MUSTARD, ROUTE_FILL, ROUTE_STROKE, SOFT_INK, TARGET } from '../theme';
 import { cityName, cityNameZh } from '../lib/skin';
 
 export interface MapViewProps {
@@ -63,7 +65,7 @@ export function MapView(props: MapViewProps) {
 
   return (
     <div ref={ref} className="relative h-full w-full overflow-hidden select-none" data-testid="map">
-      {size.w > 0 && (MAP_ID === 'usa' ? <UsaGeoLayer vb={vb} /> : MAP_ID === 'china' ? <ChinaGeoLayer vb={vb} /> : <EuropeGeoLayer vb={vb} />)}
+      {size.w > 0 && (MAP_ID === 'usa' ? <UsaGeoLayer vb={vb} /> : MAP_ID === 'china' ? <ChinaGeoLayer vb={vb} /> : MAP_ID === 'sg' ? <SgGeoLayer vb={vb} /> : <EuropeGeoLayer vb={vb} />)}
       {size.w > 0 && (
         <svg className="absolute inset-0 h-full w-full" viewBox={`${vb.x} ${vb.y} ${vb.w} ${vb.h}`} preserveAspectRatio="xMidYMid slice">
           <defs>
@@ -128,7 +130,10 @@ const Routes = memo(function Routes(p: RoutesProps) {
             <path d={lanePath} fill="none" stroke="transparent" strokeWidth={20} />
             {(canClaim || highlight) && !owner && (
               <g opacity={hovered ? 1 : 0.85} filter={hovered ? 'url(#m-glow)' : undefined}>
-                {cars.map((c, i) => HSR ? (
+                {cars.map((c, i) => MERLION ? (
+                  <CarBox key={i} c={c} x={-c.w / 2 - 3} y={-c.h / 2 - 3} width={c.w + 6} height={c.h + 6} rx={6}
+                    transform={`translate(${c.cx},${c.cy}) rotate(${c.angle})`} fill={hovered ? '#ffd45a' : '#fff0b8'} />
+                ) : HSR ? (
                   <CarBox key={i} c={c} x={-c.w / 2 - 3} y={-c.h / 2 - 3} width={c.w + 6} height={c.h + 6} rx={5.5}
                     transform={`translate(${c.cx},${c.cy}) rotate(${c.angle})`} fill={hovered ? '#ffc21a' : '#ffe08a'} />
                 ) : (
@@ -162,6 +167,17 @@ const Routes = memo(function Routes(p: RoutesProps) {
               if (owner !== undefined) {
                 const fresh = p.fresh?.has(r.id);
                 const drop = fresh ? claimTiming(r.length).drops[i] : 0;
+                // Singapore: a bold, saturated carriage with a thick ink outline, a gloss and window band, so it reads as taken against the pale empty slots
+                if (MERLION) return (
+                  <g key={i} transform={tr}>
+                    <g className={fresh ? 'car-drop' : undefined} style={fresh ? { animationDelay: `${drop}ms` } : undefined}>
+                      <CarBox c={c} x={-c.w / 2 + 0.6} y={-4.9} width={c.w} height={12.4} rx={5} fill={INK} opacity={0.35} />
+                      <CarBox c={c} x={-c.w / 2} y={-6.2} width={c.w} height={12.4} rx={5} fill={p.playerFill[owner]} stroke={INK} strokeWidth={2.1} />
+                      <CarBox c={c} x={-c.w / 2 + 3.5} y={-3.6} width={Math.max(0, c.w - 7)} height={3.4} rx={1.7} fill="#fff" opacity={0.7} />
+                      <CarBox c={c} x={-c.w / 2 + 3} y={2.2} width={Math.max(0, c.w - 6)} height={1.5} rx={0.75} fill={INK} opacity={0.4} />
+                    </g>
+                  </g>
+                );
                 if (HSR) return (
                   <g key={i} transform={tr}>
                     <g className={fresh ? 'car-drop' : undefined} style={fresh ? { animationDelay: `${drop}ms` } : undefined}>
@@ -184,6 +200,15 @@ const Routes = memo(function Routes(p: RoutesProps) {
                   </g>
                 );
               }
+              // an empty slot: a slim, pale, lightly outlined bay (the colour still says what to pay with)
+              if (MERLION) return (
+                <g key={i} transform={tr}>
+                  <CarBox c={c} x={-c.w / 2} y={-4.1} width={c.w} height={8.2} rx={3.4}
+                    fill={ROUTE_FILL[r.color]} stroke={hovered && canClaim ? INK : ROUTE_STROKE}
+                    strokeOpacity={hovered && canClaim ? 1 : 0.5} strokeWidth={hovered && canClaim ? 1.7 : 1} />
+                  <CarBox c={c} x={-c.w / 2 + 2} y={-2.1} width={Math.max(0, c.w - 4)} height={4.2} rx={2.1} fill="#fff" opacity={0.28} />
+                </g>
+              );
               if (HSR) return (
                 <CarBox key={i} c={c} transform={tr} x={-c.w / 2} y={-c.h / 2} width={c.w} height={c.h} rx={3.2}
                   fill={ROUTE_FILL[r.color]} stroke={hovered && canClaim ? INK : ROUTE_STROKE}
@@ -232,7 +257,11 @@ const Cities = memo(function Cities({ highlight }: { highlight: string[] }) {
         );
       })}
       {HSR && CITIES.map((c) => <Station key={c.id} city={c} />)}
-      {!HSR && CITIES.map((c) => {
+      {MERLION && CITIES.map((c) => {
+        const [x, y] = cityXY(c.id);
+        return c.hub ? <MerlionHub key={c.id} city={c} x={x} y={y} name={cityName(c.id)} /> : <MerlionPlace key={c.id} city={c} x={x} y={y} name={cityName(c.id)} />;
+      })}
+      {!HSR && !MERLION && CITIES.map((c) => {
         const [x, y] = cityXY(c.id);
         if (c.hub) return <HubCity key={c.id} id={c.id} x={x} y={y} />;
         const off = { t: [0, -18, 'middle'], b: [0, 27, 'middle'], l: [-15, 5, 'end'], r: [15, 5, 'start'], tl: [-11, -11, 'end'], bl: [-11, 24, 'end'] }[c.label] as [number, number, 'middle' | 'end' | 'start'];

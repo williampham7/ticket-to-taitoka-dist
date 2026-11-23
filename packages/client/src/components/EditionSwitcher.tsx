@@ -1,6 +1,6 @@
 import { EDITIONS, EDITION_IDS, type EditionId } from '@boboland/shared';
 import { EDITION, setEdition } from '../edition';
-import { HSR, RAIL } from '../theme';
+import { HSR, MERLION, RAIL } from '../theme';
 
 export interface EditionSwitcherProps {
   /** The edition shown as chosen (default: the page's own). */
@@ -13,10 +13,10 @@ export interface EditionSwitcherProps {
   lockedNote?: string;
 }
 
-const shape = HSR ? 'rounded-full' : RAIL ? 'rounded-[3px]' : 'rounded-lg';
+const shape = HSR || MERLION ? 'rounded-full' : RAIL ? 'rounded-[3px]' : 'rounded-lg';
 
 /**
- * A compact control in the top bar of the menu screens: USA / China / Europe.
+ * A compact control in the top bar of the menu screens: USA / China / Europe / Singapore ("SG" on phones).
  * Picking another edition reloads the page on it (every screen reads its map and theme once, on load).
  */
 export function EditionSwitcher({ value = EDITION.id, onChange, locked = false, lockedNote = 'Host picks the map' }: EditionSwitcherProps) {
@@ -42,7 +42,9 @@ export function EditionSwitcher({ value = EDITION.id, onChange, locked = false, 
             data-testid={`edition-${id}`}
             className={`h-full px-2.5 text-[14px] leading-none tracking-wide transition-colors sm:px-3 ${shape} ${
               on ? 'bg-ink text-panel' : 'text-ink enabled:hover:bg-panel'} ${locked ? 'cursor-default' : ''} disabled:text-muted`}>
-            {EDITIONS[id].label}
+            {id === 'singapore'
+              ? <><span className="sm:hidden">SG</span><span className="max-sm:hidden">{EDITIONS[id].label}</span></>
+              : EDITIONS[id].label}
           </button>
         );
       })}

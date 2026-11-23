@@ -1,0 +1,105 @@
+/* Merlion game layout: a header that never overflows, and phone layouts. Scoped under [data-theme="merlion"]
+   so the other editions keep their fixed desktop grid (the phone fixes could be shared by dropping the scope). */
+/* ---------- header: the players scroll sideways inside their own lane instead of pushing Leave off screen ---------- */
+[data-theme="merlion"] header.bg-panel { min-width: 0; }
+[data-theme="merlion"] header.bg-panel > h1 { flex: none; }
+[data-theme="merlion"] header.bg-panel > .ml-auto {
+  min-width: 0; flex: 0 1 auto; overflow-x: auto; scrollbar-width: none; padding: 4px 4px 7px; margin-bottom: -3px;
+}
+[data-theme="merlion"] header.bg-panel > .ml-auto::-webkit-scrollbar { display: none; }
+[data-theme="merlion"] header.bg-panel > .ml-auto > [data-player] { flex: none; }
+[data-theme="merlion"] header.bg-panel > :nth-child(n+4) { flex: none; }
+
+@media (max-width: 1600px) {
+  [data-theme="merlion"] header.bg-panel { gap: 8px; padding-left: 12px; padding-right: 12px; }
+  [data-theme="merlion"] header.bg-panel > h1 { font-size: 21px; }
+  [data-theme="merlion"] header.bg-panel > .ml-auto { gap: 6px; }
+  [data-theme="merlion"] header [data-player] { gap: 6px; padding-right: 9px; }
+  [data-theme="merlion"] header [data-player] > span.max-w-24 { max-width: 64px; }
+  [data-theme="merlion"] header.bg-panel > [data-testid="status"] { flex: 0 1 auto; max-width: 170px; }
+  /* the stopwatch and the volume slider make room; music keeps its button */
+  [data-theme="merlion"] header.bg-panel > :nth-child(4),
+  [data-theme="merlion"] header.bg-panel > :nth-child(7) { display: none; }
+  /* the Rules button keeps its book icon */
+  [data-theme="merlion"] header [data-testid="open-help"] { font-size: 0; gap: 0; padding: 0 9px; }
+}
+@media (max-width: 1280px) {
+  [data-theme="merlion"] header [data-player] [data-cards],
+  [data-theme="merlion"] header [data-player] [data-tickets] { gap: 3px; }
+  [data-theme="merlion"] header [data-player] > span.max-w-24 { max-width: 48px; }
+}
+
+/* ---------- phone, portrait (and any narrow window): board on top, then the cards and the hand ---------- */
+@media (max-width: 640px) {
+  [data-theme="merlion"] .grid.h-full:has(> [data-testid="side-rail"]) {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(210px, 1fr) auto auto;
+    grid-template-areas: 'top' 'map' 'side' 'hand';
+  }
+  /* two rows: title, status, Leave / players, Rules, music */
+  [data-theme="merlion"] header.bg-panel {
+    display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; align-items: center;
+    gap: 5px 7px; padding: 6px 10px 3px;
+  }
+  [data-theme="merlion"] header.bg-panel > h1 { grid-area: 1 / 1; font-size: 17px; }
+  [data-theme="merlion"] header.bg-panel > [data-testid="status"] { grid-area: 1 / 2; font-size: 12.5px; padding: 4px 10px; justify-self: stretch; }
+  [data-theme="merlion"] header.bg-panel > .ml-auto { grid-area: 2 / 1 / 3 / 3; margin: 0; padding-bottom: 6px; }
+  [data-theme="merlion"] header.bg-panel > :nth-child(4),
+  [data-theme="merlion"] header.bg-panel > :nth-child(7) { display: none; }
+  [data-theme="merlion"] header.bg-panel > [data-testid="open-help"] { grid-area: 2 / 3; height: 32px; width: 36px; justify-content: center; padding: 0; }
+  [data-theme="merlion"] header.bg-panel > :nth-child(6) { grid-area: 2 / 4; height: 32px; width: 36px; }
+  [data-theme="merlion"] header.bg-panel > :nth-child(8) { grid-area: 1 / 3 / 2 / 5; padding: 5px 10px; font-size: 13px; justify-self: end; }
+  [data-theme="merlion"] [data-testid="spotlight"], [data-theme="merlion"] [data-testid="show-longest"] { font-size: 12.5px; padding: 5px 10px; }
+  /* the turn banner sits top centre, so the map's two buttons move to the bottom right */
+  [data-theme="merlion"] [data-testid="spotlight"] { top: auto; left: auto; right: 8px; bottom: 8px; }
+  [data-theme="merlion"] [data-testid="show-longest"] { top: auto; left: auto; right: 8px; bottom: 46px; }
+
+  /* the rail is a short shelf under the board: the six piles in a row, then the ticket pile; chat scrolls below */
+  [data-theme="merlion"] [data-testid="side-rail"] {
+    display: grid; grid-template-columns: minmax(0, 1fr); align-content: start; gap: 8px;
+    max-height: 232px; padding: 8px 10px 10px; box-shadow: inset 0 2px 0 var(--color-ink); border-left: 0;
+  }
+  [data-theme="merlion"] [data-testid="side-rail"] > section:first-child > h2 { display: none; }
+  [data-theme="merlion"] [data-testid="side-rail"] > section:first-child > div.grid { display: flex; justify-content: space-between; gap: 4px; zoom: .82; padding-bottom: 8px; }
+  [data-theme="merlion"] [data-testid="side-rail"] [data-testid="draw-tickets"] { zoom: .8; justify-self: start; margin-bottom: 4px; }
+  [data-theme="merlion"] [data-testid="side-rail"] > .mt-auto { padding-top: 6px; }
+
+  [data-theme="merlion"] [data-testid="hand-tray"] { gap: 10px; padding: 4px 10px 8px; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; }
+  [data-theme="merlion"] [data-testid="hand-tray"] > div { width: auto !important; flex: none; }
+  [data-theme="merlion"] [data-testid="hand-tray"] > div:last-child { align-items: flex-start; }
+  [data-theme="merlion"] [data-testid="hand-tray"] [data-testid="my-tickets"] { width: auto; overflow: visible; }
+  [data-theme="merlion"] [data-testid="hand-tray"] [data-testid="my-tickets"] > div { margin-left: 0; }
+
+  /* the ticket chooser becomes a bottom sheet across the page, over the shelf */
+  [data-theme="merlion"] [data-testid="ticket-chooser"] {
+    position: fixed !important; left: 8px !important; right: 8px !important; bottom: 8px !important; width: auto !important;
+    transform: none !important; max-height: min(68vh, 520px) !important; z-index: 70;
+  }
+  [data-theme="merlion"] .claim-banner, [data-theme="merlion"] .banner-in { max-width: calc(100% - 16px); }
+}
+
+/* ---------- phone, landscape: board left, a narrow shelf right, a low hand tray ---------- */
+@media (max-height: 520px) and (min-width: 641px) {
+  [data-theme="merlion"] .grid.h-full:has(> [data-testid="side-rail"]) {
+    grid-template-columns: minmax(0, 1fr) 188px; grid-template-rows: 42px minmax(0, 1fr) auto;
+  }
+  [data-theme="merlion"] header.bg-panel > h1 { font-size: 18px; }
+  [data-theme="merlion"] header [data-player] { padding-top: 0; padding-bottom: 0; font-size: 12px; }
+  [data-theme="merlion"] header.bg-panel > .ml-auto { padding-bottom: 7px; }
+  [data-theme="merlion"] header.bg-panel > :nth-child(4),
+  [data-theme="merlion"] header.bg-panel > :nth-child(7) { display: none; }
+  [data-theme="merlion"] [data-testid="side-rail"] { padding: 6px 8px; gap: 6px; }
+  [data-theme="merlion"] [data-testid="side-rail"] > section:first-child > h2 { display: none; }
+  [data-theme="merlion"] [data-testid="side-rail"] > section:first-child > div.grid { zoom: .7; row-gap: 6px; }
+  [data-theme="merlion"] [data-testid="side-rail"] [data-testid="draw-tickets"] { zoom: .7; }
+  [data-theme="merlion"] [data-testid="hand-tray"] { zoom: .7; gap: 10px; padding: 2px 10px 6px; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; }
+  [data-theme="merlion"] [data-testid="hand-tray"] > div { width: auto !important; flex: none; }
+  [data-theme="merlion"] [data-testid="hand-tray"] > div:last-child { align-items: flex-start; }
+  [data-theme="merlion"] [data-testid="hand-tray"] [data-testid="my-tickets"] { width: auto; overflow: visible; }
+  [data-theme="merlion"] [data-testid="hand-tray"] [data-testid="my-tickets"] > div { margin-left: 0; }
+  [data-theme="merlion"] header.bg-panel > [data-testid="status"] { max-width: 120px; }
+  [data-theme="merlion"] [data-testid="spotlight"], [data-theme="merlion"] [data-testid="show-longest"] { font-size: 12px; padding: 4px 10px; }
+  [data-theme="merlion"] [data-testid="spotlight"] { top: 8px; left: 8px; }
+  [data-theme="merlion"] [data-testid="show-longest"] { top: 44px; left: 8px; }
+  [data-theme="merlion"] [data-testid="ticket-chooser"] { max-height: calc(100vh - 56px) !important; }
+}

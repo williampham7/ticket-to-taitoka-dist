@@ -13,18 +13,21 @@ import type { GState } from '../src/types';
 import { activeMapId } from '../src/map/active';
 
 describe('editions', () => {
-  it('has exactly usa, china and europe with their map, skin and theme', () => {
-    expect(EDITION_IDS).toEqual(['usa', 'china', 'europe']);
+  it('has exactly usa, china, europe and singapore with their map, skin and theme', () => {
+    expect(EDITION_IDS).toEqual(['usa', 'china', 'europe', 'singapore']);
     expect(EDITIONS.usa).toEqual({ id: 'usa', map: 'usa', skin: 'taitoka', theme: 'vintage', label: 'USA' });
     expect(EDITIONS.china).toEqual({ id: 'china', map: 'china', skin: 'beijing', theme: 'hsr', label: 'China' });
     expect(EDITIONS.europe).toEqual({ id: 'europe', map: 'europe', skin: 'europa', theme: 'rail', label: 'Europe' });
+    expect(EDITIONS.singapore).toEqual({ id: 'singapore', map: 'sg', skin: 'singapore', theme: 'merlion', label: 'Singapore' });
   });
 
   it('isEditionId / editionFor', () => {
     expect(isEditionId('china')).toBe(true);
+    expect(isEditionId('singapore')).toBe(true);
     expect(isEditionId('sf')).toBe(false);
     expect(isEditionId(undefined)).toBe(false);
     expect(editionFor('europe')).toBe(EDITIONS.europe);
+    expect(editionFor('singapore')).toBe(EDITIONS.singapore);
     expect(editionFor('nope')).toBe(EDITIONS.usa);
     expect(editionFor(null)).toBe(EDITIONS.usa);
   });
@@ -113,7 +116,7 @@ describe('bot plan caches follow the map', () => {
   });
 
   it('plans paths on the active map', () => {
-    for (const id of ['usa', 'china', 'europe'] as const) {
+    for (const id of ['usa', 'china', 'europe', 'sg'] as const) {
       withMap(id, () => {
         const t = MAPS[id].tickets[0];
         const view = { claims: {}, players: { '0': { hand: undefined } } } as unknown as GState;

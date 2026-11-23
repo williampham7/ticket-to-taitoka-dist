@@ -1,0 +1,18 @@
+/*
+ * Merlion type: Poppins (geometric, MRT-signage clean) for display, Inter for the interface. Both are bundled,
+ * so offline LAN play looks the same. Browsers only download them on this theme.
+ */
+@import "@fontsource/poppins/500.css";
+@import "@fontsource/poppins/600.css";
+@import "@fontsource/poppins/700.css";
+@import "@fontsource/inter/400.css";
+@import "@fontsource/inter/500.css";
+@import "@fontsource/inter/600.css";
+@import "@fontsource/inter/700.css";
+:root[data-theme="merlion"] {
+  --font-display: "Poppins", "Segoe UI", system-ui, sans-serif;
+  --font-ui: "Inter", "Segoe UI", system-ui, sans-serif;
+  --font-serif: "Inter", "Segoe UI", system-ui, sans-serif;
+}
+[data-theme="merlion"] .font-display { font-weight: 600; letter-spacing: 0; }
+[data-theme="merlion"] body { letter-spacing: 0.003em; }

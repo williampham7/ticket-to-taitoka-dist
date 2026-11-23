@@ -7,7 +7,7 @@ describe('skins', () => {
     expect(skinFor(undefined)).toBe(SKINS.taitoka);
     expect(skinFor('')).toBe(SKINS.taitoka);
     expect(skinFor('nonsense')).toBe(SKINS.taitoka);
-    expect(Object.keys(SKINS)).toEqual(['taitoka', 'beijing', 'europa']);
+    expect(Object.keys(SKINS)).toEqual(['taitoka', 'beijing', 'europa', 'singapore']);
   });
 
   it('Taitoka renames the game and the hub city', () => {
@@ -16,6 +16,13 @@ describe('skins', () => {
     expect(cityNameIn(t, CITY_BY_ID.BOB)).toBe('Taitoka');
     expect(cityNameIn(SKINS.europa, { name: 'whatever', hub: true })).toBe('Europa');
     expect(gameTitle(SKINS.beijing)).toBe('Ticket to Beijing');
+  });
+
+  it('Singapore: the hub is Marina Bay', () => {
+    const s = skinFor('singapore');
+    expect(gameTitle(s)).toBe('Ticket to Singapore');
+    expect(cityNameIn(s, { name: 'whatever', hub: true })).toBe('Marina Bay');
+    expect(cityNameIn(s, { name: 'Chinatown' })).toBe('Chinatown');
   });
 
   it('only the hub city is renamed', () => {

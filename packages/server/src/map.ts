@@ -1,6 +1,6 @@
 import type { MapId } from '@boboland/shared';
 
-const MAPS_KNOWN: readonly string[] = ['usa', 'china', 'europe'];
+const MAPS_KNOWN: readonly string[] = ['usa', 'china', 'europe', 'sg'];
 
 /**
  * The map of a match created without `setupData.map`: `--map=usa` on the command line, else the TTB_MAP

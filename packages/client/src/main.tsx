@@ -4,6 +4,7 @@ import { createRoot } from 'react-dom/client';
 import './styles.css';
 import './theme-hsr.css';
 import './theme-rail.css';
+import './theme-merlion.css';
 import { App } from './App';
 import { initMusic } from './lib/music';
 

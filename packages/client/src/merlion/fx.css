@@ -1,0 +1,33 @@
+/* Merlion theme (fx and banners). Scope every rule under [data-theme="merlion"]. */
+
+[data-theme="merlion"] [data-testid="claim-banner"] {
+  border: 0; border-radius: 16px; color: #fff;
+  box-shadow: inset 0 0 0 3px rgba(255,255,255,.5), 0 0 0 3px #10343c, 0 5px 0 3px #10343c, 0 14px 30px rgba(16,52,60,.38);
+  text-shadow: 0 1px 0 rgba(16,52,60,.55), 0 0 6px rgba(16,52,60,.25);
+}
+[data-theme="merlion"] [data-testid="claim-banner"] .font-display { font-weight: 700; }
+[data-theme="merlion"] [data-testid="banner"] {
+  border: 0; border-radius: 999px; background: #fff; font-family: var(--font-display); font-weight: 600;
+  box-shadow: 0 0 0 2.5px #10343c, 0 4px 0 2.5px rgba(16,52,60,.25);
+}
+[data-theme="merlion"] [data-testid="final-splash"] > div {
+  border: 0; border-radius: 20px; background: #fbd9ee;
+  box-shadow: inset 0 0 0 6px #fffdf6, 0 0 0 3px #10343c, 0 8px 0 3px #10343c, 0 24px 60px rgba(16,52,60,.45);
+}
+[data-theme="merlion"] [data-testid="final-round"] { border-color: #10343c; border-radius: 999px; }
+[data-theme="merlion"] [data-testid="board-view-bar"] { border-color: #10343c; border-radius: 16px; box-shadow: 0 4px 0 rgba(16,52,60,.25), 0 10px 30px rgba(16,52,60,.25); }
+
+/* turn announcements: white cards with a tile edge (the vintage ones keep their markup, these restyle it) */
+[data-theme="merlion"] [data-testid="turn-banner"] > div {
+  border-width: 3px; border-radius: 18px; border-color: #10343c;
+  box-shadow: 0 0 0 4px #fff, 0 0 0 6.5px #10343c, 0 18px 40px rgba(16,52,60,.4);
+}
+[data-theme="merlion"] [data-testid="turn-banner"] > div:not([style]) { background: #fff; }
+[data-theme="merlion"] [data-testid="turn-banner"] .font-display { font-weight: 700; }
+
+/* the national-day burst on a long claim (board/MerlionCelebration.tsx) */
+.mrt-fx-spark { transform-box: fill-box; transform-origin: center; animation: mrt-spark 1.5s ease-out both; }
+@keyframes mrt-spark { 0% { opacity: 0; transform: scale(.2); } 15% { opacity: 1; } 100% { opacity: 0; transform: scale(1.35) translateY(6px); } }
+.mrt-fx-petal { transform-box: fill-box; transform-origin: center; animation: mrt-petal 1.9s ease-in both; }
+@keyframes mrt-petal { 0% { opacity: 0; transform: translateY(0) rotate(0) scale(.5); } 15% { opacity: 1; } 100% { opacity: 0; transform: translateY(46px) rotate(160deg) scale(1); } }
+@media (prefers-reduced-motion: reduce) { .mrt-fx-spark, .mrt-fx-petal { animation: none; opacity: 0; } }

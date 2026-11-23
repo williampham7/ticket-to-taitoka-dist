@@ -4,7 +4,7 @@ import {
   EMU_GAP, EMU_NOSE, EMU_SCALE, EMU_WIRE_Y, claimTiming, emuConsist, emuProgress, placeVehicle, roofSide, runsLeft, wirePath, type EmuPiece,
 } from './claimFx';
 import { carRects } from './geometry';
-import { HSR, INK, MUSTARD, SOFT_INK } from '../theme';
+import { HSR, INK, MERLION, MUSTARD, SOFT_INK } from '../theme';
 
 const reduced = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
@@ -13,6 +13,7 @@ const reduced = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').ma
  * as it passes, then both cities burst with sparks. Every player sees it.
  */
 export function ClaimCelebration({ route, fill }: { route: Route; fill: string }) {
+  if (MERLION) return <MerlionCelebration route={route} fill={fill} />;
   // the high-speed-rail theme has its own star: an electric train under its overhead line
   return HSR ? <EmuCelebration route={route} fill={fill} /> : <SteamCelebration route={route} fill={fill} />;
 }
@@ -138,6 +139,149 @@ function Burst({ at: [x, y], fill, delay }: { at: [number, number]; fill: string
           {s.star
             ? <path d="M0,-6 L1.6,-1.6 L6,0 L1.6,1.6 L0,6 L-1.6,1.6 L-6,0 L-1.6,-1.6Z" fill="#f2c230" stroke={INK} strokeWidth={0.8} />
             : <circle r={3.2} fill={fill} stroke="#fff" strokeWidth={1} />}
+        </g>
+      ))}
+    </g>
+  );
+}
+
+/* ======================================================================================================
+ * Merlion (Singapore) theme: a driverless MRT train in the claimer's colour glides along the route, and
+ * both stations bloom with orchid petals and a small burst. A long route (4+ cars) gets a National Day
+ * fireworks shell over its middle too.
+ * ====================================================================================================== */
+
+const ORCHID_PINK = '#e45ab0';
+const NATIONAL_DAY = ['#ff7fc6', '#ffd45a', '#7fe3ff', '#ffffff'];
+
+function MerlionCelebration({ route, fill }: { route: Route; fill: string }) {
+  const train = useRef<SVGGElement>(null);
+  const gondola = useRef<SVGGElement>(null);
+  const t = claimTiming(route.length);
+  const stops = useMemo(() => trainStops(route), [route]);
+  const ends = [route.a, route.b];
+  const cable = ends.includes('HBF') && ends.includes('SEN');
+
+  useEffect(() => {
+    if (reduced()) return;
+    const at = (k: number, scale: number, lift = 0) => `translate(${stops[k].x}px, ${stops[k].y + lift}px) rotate(${stops[k].angle}deg) scale(${scale})`;
+    const last = stops.length - 1;
+    const play = (el: SVGGElement | null, scale: number, lift: number) => el?.animate(
+      [
+        { transform: at(0, scale * 0.55, lift), opacity: 0 },
+        ...stops.map((st, k) => ({ transform: at(k, scale, lift), opacity: 1, offset: 0.06 + 0.88 * st.f })),
+        { transform: at(last, scale * 0.55, lift), opacity: 0 },
+      ],
+      { duration: t.travel + 260, delay: t.start - 130, easing: 'cubic-bezier(.45,.05,.4,1)', fill: 'both' },
+    );
+    const run = play(train.current, 1.5, 0);
+    // HarbourFront - Sentosa: a cable car glides above the train (the real one crosses the strait overhead)
+    const car = cable ? play(gondola.current, 1.2, -14) : undefined;
+    return () => { run?.cancel(); car?.cancel(); };
+  }, [stops, t.travel, t.start, cable]);
+
+  if (reduced()) return null;
+  const mid = stops[Math.floor(stops.length / 2)];
+  return (
+    <g pointerEvents="none">
+      <g ref={train} style={{ opacity: 0 }}>
+        <MrtCar fill={fill} />
+      </g>
+      {[route.a, route.b].map((id) => <PetalBurst key={id} at={cityXY(id)} fill={fill} delay={t.arrive} />)}
+      {route.length >= 4 && <Fireworks at={[mid.x, mid.y]} delay={t.arrive - 150} />}
+      {cable && <g ref={gondola} style={{ opacity: 0 }}><CableCar /></g>}
+      {ends.includes('BOB') && <MerlionSpout at={cityXY('BOB')} delay={t.arrive} />}
+      {ends.includes('SEN') && <MerlionSpout at={cityXY('SEN')} delay={t.arrive} />}
+      {ends.includes('CHG') && <ControlTower at={cityXY('CHG')} delay={t.arrive} />}
+    </g>
+  );
+}
+
+/** A small red cable car hanging from its line. */
+function CableCar() {
+  return (
+    <g>
+      <line x1={-9} y1={-6} x2={9} y2={-6} stroke={INK} strokeWidth={1} />
+      <line x1={0} y1={-6} x2={0} y2={-1} stroke={INK} strokeWidth={1} />
+      <rect x={-6} y={-1} width={12} height={8} rx={2} fill="#e8344b" stroke={INK} strokeWidth={1.1} />
+      <rect x={-4} y={1} width={8} height={3.4} rx={0.8} fill="#bfe9ff" />
+    </g>
+  );
+}
+
+/** The Merlion's jet: an arc of water that leaps from a station into the bay (Marina Bay, Sentosa). */
+function MerlionSpout({ at: [x, y], delay }: { at: [number, number]; delay: number }) {
+  return (
+    <g transform={`translate(${x},${y})`}>
+      <path d="M2,-6 Q24,-46 48,-4" fill="none" stroke="#7fe3ff" strokeWidth={4} strokeLinecap="round" pathLength={1} strokeDasharray="1" className="mrt-fx-arc" style={{ animationDelay: `${delay}ms` }} />
+      <path d="M2,-6 Q24,-46 48,-4" fill="none" stroke="#fff" strokeWidth={1.5} strokeLinecap="round" pathLength={1} strokeDasharray="1" className="mrt-fx-arc" style={{ animationDelay: `${delay + 60}ms` }} />
+    </g>
+  );
+}
+
+/** Changi's control tower, its beacon blinking three times. */
+function ControlTower({ at: [x, y], delay }: { at: [number, number]; delay: number }) {
+  return (
+    <g transform={`translate(${x},${y - 12})`} className="mrt-fx-tower" style={{ animationDelay: `${delay}ms` }}>
+      <path d="M-2.4,12 L-1.4,-4 H1.4 L2.4,12Z" fill="#fff" stroke={INK} strokeWidth={1} />
+      <rect x={-5} y={-9} width={10} height={5.4} rx={1.4} fill="#bfe9ff" stroke={INK} strokeWidth={1} />
+      <circle cx={0} cy={-11.5} r={2.2} fill="#ff4a4a" stroke={INK} strokeWidth={0.7} className="mrt-fx-beacon" style={{ animationDelay: `${delay}ms` }} />
+    </g>
+  );
+}
+
+/** A driverless MRT car facing right: white body, a stripe in the player's colour, dark glass, no cab. */
+function MrtCar({ fill }: { fill: string }) {
+  return (
+    <g strokeLinejoin="round">
+      <path d="M-24,-9 H14 C21,-9 26,-4 28,2 V7 H-24Z" fill="#fff" stroke={INK} strokeWidth={1.8} />
+      <rect x={-24} y={0.6} width={52} height={3.4} fill={fill} />
+      {[-20, -10, 0].map((x) => <rect key={x} x={x} y={-6.4} width={7.6} height={5.2} rx={1.2} fill="#2b5a78" stroke={INK} strokeWidth={0.9} />)}
+      <path d="M11,-6.4 H15 C19,-6.4 22,-3.8 23.4,-1.2 H11Z" fill="#2b5a78" stroke={INK} strokeWidth={0.9} />
+      <circle cx={25.6} cy={3.6} r={1.3} fill="#ffe27a" />
+      <rect x={-24} y={7} width={52} height={2.2} rx={1} fill={INK} />
+      {[-15, 12].map((x) => <rect key={x} x={x} y={9.2} width={8} height={1.8} rx={0.9} fill={INK} />)}
+    </g>
+  );
+}
+
+/** Orchid petals drift down from a station and a small ring of gold sparks bursts out. */
+function PetalBurst({ at: [x, y], fill, delay }: { at: [number, number]; fill: string; delay: number }) {
+  const petals = Array.from({ length: 9 }, (_, i) => ({ dx: (i - 4) * 9, dy: -8 - (i % 3) * 8, d: (i % 4) * 90 }));
+  const sparks = Array.from({ length: 8 }, (_, i) => {
+    const a = (i / 8) * Math.PI * 2, d = 40 + (i % 2) * 14;
+    return { dx: Math.cos(a) * d, dy: Math.sin(a) * d };
+  });
+  return (
+    <g transform={`translate(${x},${y})`}>
+      <circle r={14} fill="none" stroke={fill} strokeWidth={5} className="burst-ring" style={{ animationDelay: `${delay}ms` }} />
+      <circle r={14} fill="none" stroke={MUSTARD} strokeWidth={3} className="burst-ring" style={{ animationDelay: `${delay + 120}ms` }} />
+      {sparks.map((s, i) => (
+        <g key={i} className="burst-spark" style={{ animationDelay: `${delay}ms`, ['--dx' as string]: `${s.dx}px`, ['--dy' as string]: `${s.dy}px` }}>
+          <path d="M0,-5.4 L1.4,-1.4 L5.4,0 L1.4,1.4 L0,5.4 L-1.4,1.4 L-5.4,0 L-1.4,-1.4Z" fill={MUSTARD} stroke={INK} strokeWidth={0.7} />
+        </g>
+      ))}
+      {petals.map((p, i) => (
+        <g key={`p${i}`} transform={`translate(${p.dx},${p.dy})`}>
+          <ellipse rx={3} ry={5.6} fill={ORCHID_PINK} stroke={INK} strokeWidth={0.7} className="mrt-fx-petal" style={{ animationDelay: `${delay + 80 + p.d}ms` }} transform={`rotate(${i * 40})`} />
+        </g>
+      ))}
+    </g>
+  );
+}
+
+/** A National Day shell: streaks fanning out in pink, gold and cyan over the middle of a long route. */
+function Fireworks({ at: [x, y], delay }: { at: [number, number]; delay: number }) {
+  const rays = Array.from({ length: 16 }, (_, i) => {
+    const a = (i / 16) * Math.PI * 2, r1 = 14, r2 = i % 2 ? 34 : 46;
+    return { x1: Math.cos(a) * r1, y1: Math.sin(a) * r1, x2: Math.cos(a) * r2, y2: Math.sin(a) * r2, c: NATIONAL_DAY[i % NATIONAL_DAY.length] };
+  });
+  return (
+    <g transform={`translate(${x},${y - 6})`}>
+      {rays.map((r, i) => (
+        <g key={i} className="mrt-fx-spark" style={{ animationDelay: `${Math.max(0, delay) + (i % 2) * 70}ms` }}>
+          <line x1={r.x1} y1={r.y1} x2={r.x2} y2={r.y2} stroke={r.c} strokeWidth={3.2} strokeLinecap="round" />
+          <circle cx={r.x2} cy={r.y2} r={2.4} fill={r.c} />
         </g>
       ))}
     </g>

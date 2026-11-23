@@ -1,7 +1,8 @@
 import type { Card } from '@boboland/shared';
-import { HSR, RAIL, cardBackground, cardInk, cardName } from '../theme';
+import { HSR, MERLION, RAIL, cardBackground, cardInk, cardName } from '../theme';
 import { HsrCardBack, HsrCardTile, HsrSwatch, HsrTicketBack } from '../hsr/HsrCards';
 import { RailCardBack, RailCardTile, RailSwatch, RailTicketBack } from '../rail/RailCards';
+import { MerlionCardBack, MerlionCardTile, MerlionSwatch, MerlionTicketBack } from '../merlion/MerlionCards';
 
 /**
  * The engraving on a train card, in the card's ink colour. `cut` is the colour of the details (windows,
@@ -94,6 +95,7 @@ const FINISH = 'linear-gradient(155deg, rgba(255,255,255,.3) 0%, rgba(255,255,25
 export function CardTile({ card, count, className = '' }: { card: Card; count?: number; className?: string }) {
   if (HSR) return <HsrCardTile card={card} count={count} className={className} />;
   if (RAIL) return <RailCardTile card={card} count={count} className={className} />;
+  if (MERLION) return <MerlionCardTile card={card} count={count} className={className} />;
   const ink = cardInk(card);
   const lightInk = card !== 'white' && card !== 'yellow';
   const cut = lightInk ? 'rgba(30,20,12,.45)' : 'rgba(255,250,240,.75)';
@@ -118,6 +120,7 @@ export function CardTile({ card, count, className = '' }: { card: Card; count?: 
 export function CardBack({ className = '', label }: { className?: string; label?: string }) {
   if (HSR) return <HsrCardBack className={className} label={label} />;
   if (RAIL) return <RailCardBack className={className} label={label} />;
+  if (MERLION) return <MerlionCardBack className={className} label={label} />;
   return (
     <div className={`${SHAPE} grid place-items-center ${className}`}
       style={{ background: 'repeating-linear-gradient(45deg,#2f4f6f 0 6px,#36597c 6px 12px)' }}>
@@ -132,6 +135,7 @@ export function CardBack({ className = '', label }: { className?: string; label?
 export function TicketBack({ className = '' }: { className?: string }) {
   if (HSR) return <HsrTicketBack className={className} />;
   if (RAIL) return <RailTicketBack className={className} />;
+  if (MERLION) return <MerlionTicketBack className={className} />;
   return (
     <div className={`relative flex h-[58px] w-[96px] overflow-hidden gold-ticket rounded-[8px] border-[1.5px] shadow-[0_4px_10px_rgba(60,40,20,.3)] ${className}`}>
       {/* stub, perforation, then the title set clear of the tear line */}
@@ -156,5 +160,6 @@ export function HandCard({ card, count, flash }: { card: Card; count: number; fl
 export function Swatch({ card, size = 14 }: { card: Card; size?: number }) {
   if (HSR) return <HsrSwatch card={card} size={size} />;
   if (RAIL) return <RailSwatch card={card} size={size} />;
+  if (MERLION) return <MerlionSwatch card={card} size={size} />;
   return <span className="inline-block shrink-0 rounded-[3px] border border-black/30 align-middle" style={{ width: size, height: size * 1.4, background: cardBackground(card) }} />;
 }

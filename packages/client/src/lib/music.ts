@@ -1,8 +1,9 @@
 import { useSyncExternalStore } from 'react';
-import { HSR, RAIL } from '../theme';
+import { HSR, MERLION, RAIL } from '../theme';
 import { BPM, buildSong, type SongEvent } from './song';
 import { BPM_HSR, buildSongHsr } from './songHsr';
 import { BPM_RAIL, buildSongRail, type RailEvent } from './songRail';
+import { BPM_MERLION, buildSongMerlion, createMerlionVoices, VOLUME_MERLION, type MerlionEvent } from './songMerlion';
 import { load, save } from './storage';
 import { getMuted, getVolume, subscribeMuted, subscribeVolume } from './sound';
 
@@ -13,7 +14,8 @@ import { getMuted, getVolume, subscribeMuted, subscribeVolume } from './sound';
 const KEY = 'boboland.music';
 // The HSR tune is softer and sparser (rms about 0.02 vs 0.03 at 0.35), so it gets a higher master level for equal loudness.
 // The rail waltz is gentler still (rms about 0.014 at 0.35); at 0.66 it renders at rms 0.027, the same as vintage.
-const VOLUME = HSR ? 0.5 : RAIL ? 0.66 : 0.35;
+// The Singapore evening tune is levelled in songMerlion.ts (VOLUME_MERLION; its test renders it offline at rms about 0.027).
+const VOLUME = HSR ? 0.5 : RAIL ? 0.66 : MERLION ? VOLUME_MERLION : 0.35;
 const LOOKAHEAD_S = 0.25;
 const TICK_MS = 60;
 
@@ -21,9 +23,9 @@ let enabled = load<boolean>(KEY, true);
 const listeners = new Set<() => void>();
 
 // The vintage railway tune, the modern HSR tune, or the European musette waltz, fixed by the theme.
-type AnyEvent = SongEvent | RailEvent;
-const song: { events: AnyEvent[]; beats: number } = HSR ? buildSongHsr() : RAIL ? buildSongRail() : buildSong();
-const secPerBeat = 60 / (HSR ? BPM_HSR : RAIL ? BPM_RAIL : BPM);
+type AnyEvent = SongEvent | RailEvent | MerlionEvent;
+const song: { events: AnyEvent[]; beats: number } = HSR ? buildSongHsr() : RAIL ? buildSongRail() : MERLION ? buildSongMerlion() : buildSong();
+const secPerBeat = 60 / (HSR ? BPM_HSR : RAIL ? BPM_RAIL : MERLION ? BPM_MERLION : BPM);
 
 let ctx: AudioContext | null = null;
 let master: GainNode | null = null;
@@ -31,6 +33,8 @@ let master: GainNode | null = null;
 let echo: GainNode | null = null;
 /** Rail only: a send into a short, dark slap-back, the sound of a small café room. */
 let room: GainNode | null = null;
+/** Merlion only: the Singapore tune's voices (bells, gamelan, kompang...), from songMerlion.ts. */
+let merlionVoice: ((e: MerlionEvent, t: number) => void) | null = null;
 let noiseBuf: AudioBuffer | null = null;
 let timer: ReturnType<typeof setInterval> | null = null;
 let loopStart = 0; // audio time at which the current loop began
@@ -47,7 +51,7 @@ function setup(): AudioContext | null {
   }
   const warmth = ctx.createBiquadFilter();
   warmth.type = 'lowpass';
-  warmth.frequency.value = HSR ? 7500 : RAIL ? 5200 : 3800;
+  warmth.frequency.value = HSR ? 7500 : RAIL ? 5200 : MERLION ? 6000 : 3800;
   const comp = ctx.createDynamicsCompressor();
   master = ctx.createGain();
   master.gain.value = 0;
@@ -76,6 +80,17 @@ function setup(): AudioContext | null {
   noiseBuf = ctx.createBuffer(1, Math.ceil(ctx.sampleRate * 0.15), ctx.sampleRate);
   const d = noiseBuf.getChannelData(0);
   for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+  if (MERLION) {
+    // an open, airy room: a longer, darker slap-back for the bells and the metallophone
+    const roomIn = ctx.createGain(), delay = ctx.createDelay(1), tone = ctx.createBiquadFilter(), feedback = ctx.createGain();
+    delay.delayTime.value = 0.21;
+    tone.type = 'lowpass';
+    tone.frequency.value = 2400;
+    feedback.gain.value = 0.32;
+    roomIn.connect(delay).connect(tone).connect(master);
+    tone.connect(feedback).connect(delay);
+    merlionVoice = createMerlionVoices({ ctx, out: master, room: roomIn, secPerBeat, noise: noiseBuf });
+  }
   return ctx;
 }
 
@@ -404,6 +419,7 @@ function pizz(t: number, midi: number, vel: number) {
 }
 
 function play(e: AnyEvent, t: number) {
+  if (merlionVoice) return merlionVoice(e as MerlionEvent, t);
   switch (e.kind) {
     case 'chug': return chug(t, e.accent);
     case 'bass': return bass(t, e.midi, e.beats * secPerBeat);

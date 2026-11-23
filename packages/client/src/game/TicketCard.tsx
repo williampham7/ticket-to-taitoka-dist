@@ -1,9 +1,10 @@
 import type { CSSProperties } from 'react';
 import type { Ticket } from '@boboland/shared';
 import { cityName } from '../lib/skin';
-import { HSR, RAIL } from '../theme';
+import { HSR, MERLION, RAIL } from '../theme';
 import { HsrCompactTicket, HsrCountedTicket, HsrTicketCard } from '../hsr/HsrTicket';
 import { RailCompactTicket, RailCountedTicket, RailTicketCard } from '../rail/RailTicket';
+import { MerlionCompactTicket, MerlionCountedTicket, MerlionTicketCard } from '../merlion/MerlionTicket';
 
 interface Props {
   ticket: Ticket;
@@ -38,6 +39,10 @@ export function TicketCard({ ticket, done, selected, selectable, onToggle, onHov
   if (RAIL) {
     if (compact) return revealed ? <RailCountedTicket ticket={ticket} result={revealed} /> : <RailCompactTicket ticket={ticket} selected={selected} onToggle={onToggle} onHover={onHover} />;
     return <RailTicketCard ticket={ticket} done={done} selected={selected} selectable={selectable} onToggle={onToggle} onHover={onHover} revealed={revealed} />;
+  }
+  if (MERLION) {
+    if (compact) return revealed ? <MerlionCountedTicket ticket={ticket} result={revealed} /> : <MerlionCompactTicket ticket={ticket} selected={selected} onToggle={onToggle} onHover={onHover} />;
+    return <MerlionTicketCard ticket={ticket} done={done} selected={selected} selectable={selectable} onToggle={onToggle} onHover={onHover} revealed={revealed} />;
   }
   if (compact) return revealed ? <CountedTicket ticket={ticket} result={revealed} /> : <CompactTicket ticket={ticket} selected={selected} onToggle={onToggle} onHover={onHover} />;
   const a = { name: cityName(ticket.a) }, b = { name: cityName(ticket.b) };

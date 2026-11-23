@@ -1,0 +1,8 @@
+/* Singapore theme (edition 'singapore' sets <html data-theme="merlion">). One file per area under ./merlion. */
+@import "./merlion/fonts.css";
+@import "./merlion/tokens.css";
+@import "./merlion/cards.css";
+@import "./merlion/fx.css";
+@import "./merlion/screens.css";
+@import "./merlion/map.css";
+@import "./merlion/layout.css";

@@ -23,8 +23,9 @@ import { sfx } from '../lib/sound';
 import { load, save } from '../lib/storage';
 import { MusicButton, VolumeSlider } from '../lib/AudioButtons';
 import { ChatPanel, type ChatProps } from './ChatPanel';
-import { CARD_FILL, HSR, INK, LOCO_BG, RAIL, cardName } from '../theme';
+import { CARD_FILL, HSR, INK, LOCO_BG, MERLION, RAIL, cardName } from '../theme';
 import { RailTurnSign } from '../rail/RailChrome';
+import { MrtTrainIcon } from '../merlion/MerlionChrome';
 import { pick } from '../hsr/pick';
 import { DepartureBoard } from '../hsr/DepartureBoard';
 
@@ -422,7 +423,7 @@ export function GameScreen({ state, playerID, moves, players, onExit, exitLabel,
           <div key={claimBanner.id} role="status" aria-live="polite" data-testid="claim-banner"
             className={`claim-banner pointer-events-none absolute left-1/2 top-3 z-30 flex items-center gap-3 px-5 py-2 ${pick('hsr-claim-banner rounded-[14px] text-white', 'rounded-xl border-[3px] border-ink text-[#fff8e6] shadow-[0_10px_30px_rgba(59,42,30,.45)]')}`}
             style={{ background: claimBanner.fill }} onAnimationEnd={() => setClaimBanner(null)}>
-            {HSR ? <TrainNoseIcon width={40} height={20} fill="#ffffff" /> : <svg width="34" height="20" viewBox="0 0 38 20" aria-hidden><path d="M2,13 V6 H16 V2 H24 V6 H30 L36,13 Z" fill="#fff8e6" /><circle cx="9" cy="16" r="3" fill="#fff8e6" /><circle cx="20" cy="16" r="3" fill="#fff8e6" /><circle cx="30" cy="16" r="2.5" fill="#fff8e6" /></svg>}
+            {HSR ? <TrainNoseIcon width={40} height={20} fill="#ffffff" /> : MERLION ? <MrtTrainIcon width={42} height={21} /> : <svg width="34" height="20" viewBox="0 0 38 20" aria-hidden><path d="M2,13 V6 H16 V2 H24 V6 H30 L36,13 Z" fill="#fff8e6" /><circle cx="9" cy="16" r="3" fill="#fff8e6" /><circle cx="20" cy="16" r="3" fill="#fff8e6" /><circle cx="30" cy="16" r="2.5" fill="#fff8e6" /></svg>}
             <div className="leading-tight">
               <div className="font-display text-[13px] tracking-[0.18em] opacity-90">{HSR && <span className="mr-1.5 tracking-[0.1em]" style={{ fontFamily: 'var(--font-zh)' }}>已占领</span>}ROUTE CLAIMED</div>
               <div className="font-display text-[22px]">{claimBanner.route}</div>

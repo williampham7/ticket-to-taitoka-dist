@@ -46,7 +46,8 @@
   .ep-grid { margin-bottom: auto; }
   .ep-title { font-size: 52px; }
   .ep-head { margin-bottom: 36px; }
-  .ep-grid { grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  .ep-grid { grid-template-columns: repeat(2, 1fr); gap: 24px; max-width: 760px; }
+  .ep-head { max-width: 760px; }
   .ep-card { grid-template-columns: 1fr; grid-template-rows: auto 1fr; min-height: 0; }
   .ep-art { aspect-ratio: 4 / 3; }
   .ep-text { padding: 20px 22px 22px; }
@@ -109,3 +110,41 @@
   .ep-card, .ep-usa-smoke, .ep-china-train, .ep-china-speed, .ep-europe-burst { transition: none; }
   .ep-card:hover { transform: none; }
 }
+
+/* four editions: two by two on tablets, one row on wide screens */
+@media (min-width: 1100px) { .ep-grid { grid-template-columns: repeat(4, 1fr); max-width: 1180px; } .ep-head { max-width: 1180px; } }
+
+/* five editions: two by two on tablets (the last one centred), three and two on wide screens */
+@media (min-width: 720px) {
+  .ep-grid { grid-template-columns: repeat(2, 1fr); max-width: 760px; }
+  .ep-head { max-width: 760px; }
+  .ep-card:last-child:nth-child(odd) { grid-column: 1 / -1; justify-self: center; width: calc(50% - 12px); }
+}
+@media (min-width: 1100px) {
+  .ep-grid { grid-template-columns: repeat(6, 1fr); max-width: 1100px; }
+  .ep-head { max-width: 1100px; }
+  .ep-card { grid-column: span 2; }
+  .ep-card:last-child:nth-child(odd) { grid-column: span 2; width: auto; justify-self: stretch; }
+  .ep-card:nth-child(4) { grid-column: 2 / span 2; }
+  .ep-card:nth-child(5) { grid-column: 4 / span 2; }
+}
+
+/* Singapore: tropical golden hour. White card edged with Peranakan tiles, teal ink, orchid name, the six MRT line colours. */
+.ep-singapore { background: #fffcf5; color: #10343c; border: 3px solid #10343c; border-radius: 18px; box-shadow: 0 6px 0 #10343c, 0 14px 28px rgba(0, 0, 0, .3); }
+.ep-singapore:hover { box-shadow: 0 9px 0 #10343c, 0 20px 34px rgba(0, 0, 0, .38); }
+.ep-singapore .ep-art { border-right: 3px solid #10343c; }
+@media (min-width: 720px) { .ep-singapore .ep-art { border-right: 0; border-bottom: 3px solid #10343c; } }
+.ep-sg-to { font-family: "Poppins", "Segoe UI", sans-serif; font-weight: 600; font-size: 13px; letter-spacing: .16em; text-transform: uppercase; color: #587279; }
+.ep-sg-name { font-family: "Poppins", "Segoe UI", sans-serif; font-weight: 700; font-size: 32px; line-height: 1.1; color: #c2268a; }
+.ep-sg-line { margin-top: 6px; font-family: "Inter", system-ui, sans-serif; font-weight: 500; font-size: 14px; line-height: 1.45; color: #587279; }
+.ep-sg-label {
+  margin-top: auto; padding: 4px 14px; border-radius: 999px; background: #c2268a; color: #fff; border: 2px solid #10343c;
+  font-family: "Poppins", "Segoe UI", sans-serif; font-weight: 600; font-size: 14px; letter-spacing: .02em;
+}
+.ep-sg-rule { display: flex; width: 100%; height: 5px; margin-top: 12px; border-radius: 3px; overflow: hidden; }
+.ep-sg-rule > i { flex: 1; }
+.ep-singapore .ep-text { gap: 2px; }
+.ep-singapore:focus-visible { outline-color: #c2268a; }
+.ep-sg-train, .ep-sg-bay { transition: transform .6s ease; transform-box: view-box; }
+.ep-singapore:hover .ep-sg-train { transform: translateX(14px); }
+@media (prefers-reduced-motion: reduce) { .ep-sg-train, .ep-sg-bay { transition: none; } }

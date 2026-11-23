@@ -3,8 +3,9 @@ import { createMapModel, type MapData, type MapId } from './model';
 import { USA } from './usa';
 import { CHINA } from './china';
 import { EUROPE } from './europe';
+import { SG } from './sg';
 
-export const MAPS: Record<MapId, MapData> = { usa: USA, china: CHINA, europe: EUROPE };
+export const MAPS: Record<MapId, MapData> = { usa: USA, china: CHINA, europe: EUROPE, sg: SG };
 
 export const isMapId = (x: unknown): x is MapId => typeof x === 'string' && Object.prototype.hasOwnProperty.call(MAPS, x);
 
@@ -24,7 +25,7 @@ const modelOf = (id: MapId): Model => {
 
 // Live bindings: they always describe the current map, which `useMap` / `withMap` switch.
 // Read them at call time; a module-level copy (or `const { X } = ...`) would keep the old map.
-/** The map in use right now ('usa', 'china' or 'europe'). */
+/** The map in use right now ('usa', 'china', 'europe' or 'sg'). */
 export let MAP_ID: MapId;
 export let CITIES: MapData['cities'];
 export let ROUTES: MapData['routes'];
@@ -87,3 +88,4 @@ export { createMapModel, bentRect, carsTouch, NODE_R, HUB_R, CAR_GAP, CAR_H, LAN
 export type { MapData, MapId, CarSlot, Lane } from './model';
 export * as USA_GEO from './usa/geo';
 export * as CHINA_GEO from './china/geo';
+export * as SG_GEO from './sg/geo';

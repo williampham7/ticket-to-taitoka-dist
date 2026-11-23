@@ -10,10 +10,11 @@ const theme = (page: Page) => page.locator('html');
 const city = (page: Page, id: string) => page.locator(`[data-city="${id}"]`);
 
 test('picker, menu, switcher, then a pass-and-play game on that map', async ({ page }) => {
-  // the first page is the picker: three editions
+  // the first page is the picker: four editions
   await page.goto('/');
   await expect(page.getByTestId('edition-picker')).toBeVisible();
-  await expect(page.locator('[data-testid^="pick-"]')).toHaveCount(3);
+  await expect(page.locator('[data-testid^="pick-"]')).toHaveCount(4);
+  await expect(page.getByTestId('pick-singapore')).toBeVisible();
 
   // picking one goes to the menu, in that edition's name and theme
   await page.getByTestId('pick-europe').click();
@@ -48,6 +49,18 @@ test('picker, menu, switcher, then a pass-and-play game on that map', async ({ p
   await page.getByTestId('reveal').click();
   await expect(page.getByTestId('ticket-chooser').locator('[data-ticket]')).toHaveCount(4);
   await expect(city(page, 'LON')).toHaveCount(1);
+
+  // Singapore: the fifth edition, with its own theme and map (Marina Bay is the hub)
+  await page.goto('/menu');
+  await page.getByTestId('edition-singapore').click();
+  await expect(page).toHaveTitle('Ticket to Singapore');
+  await expect(theme(page)).toHaveAttribute('data-theme', 'merlion');
+  await page.getByTestId('play-local').click();
+  await page.getByTestId('start-local').click();
+  await page.getByTestId('reveal').click();
+  await expect(page.getByTestId('ticket-chooser').locator('[data-ticket]')).toHaveCount(4);
+  await expect(city(page, 'LON')).toHaveCount(0);
+  await expect(city(page, 'BOB')).toHaveCount(1);
 });
 
 test('LAN: the host switches the map in the waiting room, the joiner follows, and both boards show that map', async ({ browser, baseURL }) => {

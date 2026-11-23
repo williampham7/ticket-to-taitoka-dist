@@ -1,0 +1,31 @@
+/* Tailwind token overrides: crisp white panels, warm sand, lagoon-teal ink, orchid magenta, gold. */
+:root[data-theme="merlion"] {
+  --color-paper: #fbf5e8;
+  --color-panel: #ffffff;
+  --color-panel-2: #f3f8f6;
+  --color-table: #e7dfc9;
+  --color-ticket: #fffcf5;
+  --color-ink: #10343c;
+  --color-muted: #587279;
+  --color-line: #d4e2df;
+  --color-line-strong: #9dbcb8;
+  --color-poster: #c2268a;
+  --color-poster-dark: #96186a;
+  --color-mustard: #f2b632;
+  --color-sea: #8fd2d3;
+  /* merlion-only names */
+  --mrt-orchid: #c2268a;
+  --mrt-jade: #10996a;
+  --mrt-coral: #ef7a68;
+  --mrt-gold: #f2b632;
+  --mrt-teal: #23868a;
+  --mrt-sea: #8fd2d3;
+  --mrt-sand: #efe4c8;
+  /* a Peranakan tile: coral corners, a jade four-petal flower, a gold heart (32px) */
+  --mrt-tile: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23fff7e6'/%3E%3Cg fill='%23ef7a68'%3E%3Cpath d='M0 0h7a7 7 0 0 1-7 7z'/%3E%3Cpath d='M32 0v7a7 7 0 0 1-7-7z'/%3E%3Cpath d='M0 32v-7a7 7 0 0 1 7 7z'/%3E%3Cpath d='M32 32h-7a7 7 0 0 1 7-7z'/%3E%3C/g%3E%3Cg fill='%2310996a'%3E%3Cellipse cx='16' cy='9' rx='3.2' ry='5.5'/%3E%3Cellipse cx='16' cy='23' rx='3.2' ry='5.5'/%3E%3Cellipse cx='9' cy='16' rx='5.5' ry='3.2'/%3E%3Cellipse cx='23' cy='16' rx='5.5' ry='3.2'/%3E%3C/g%3E%3Ccircle cx='16' cy='16' r='3' fill='%23f2b632'/%3E%3Ccircle cx='16' cy='16' r='1.2' fill='%23c2268a'/%3E%3C/svg%3E");
+  /* the same tile as a faint wash over paper (28px) */
+  --mrt-tile-soft: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 32 32'%3E%3Cg fill='%2310996a' fill-opacity='.075'%3E%3Cellipse cx='16' cy='9' rx='3.2' ry='5.5'/%3E%3Cellipse cx='16' cy='23' rx='3.2' ry='5.5'/%3E%3Cellipse cx='9' cy='16' rx='5.5' ry='3.2'/%3E%3Cellipse cx='23' cy='16' rx='5.5' ry='3.2'/%3E%3C/g%3E%3Cg fill='%23ef7a68' fill-opacity='.08'%3E%3Cpath d='M0 0h7a7 7 0 0 1-7 7z'/%3E%3Cpath d='M32 0v7a7 7 0 0 1-7-7z'/%3E%3Cpath d='M0 32v-7a7 7 0 0 1 7 7z'/%3E%3Cpath d='M32 32h-7a7 7 0 0 1 7-7z'/%3E%3C/g%3E%3C/svg%3E");
+}
+[data-theme="merlion"] body { background: var(--mrt-tile-soft), var(--color-table); }
+/* a ribbon of tiles: the border of a shophouse wall */
+[data-theme="merlion"] .mrt-tile-strip { background: var(--mrt-tile) 0 0 / 9px 9px repeat-x; box-shadow: inset 0 -1.5px 0 #10343c; }

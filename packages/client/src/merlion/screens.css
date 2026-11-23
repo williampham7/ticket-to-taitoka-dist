@@ -1,0 +1,131 @@
+/* Merlion theme (screens and game chrome). Scope every rule under [data-theme="merlion"]. */
+
+/* ---------- menu frame: the board under a sea-glass wash, a white shophouse card on top ---------- */
+[data-theme="merlion"] .mrt-frame { background: #8fd2d3; }
+[data-theme="merlion"] .mrt-frame-wash {
+  background: radial-gradient(ellipse 70% 65% at 50% 50%, rgba(255,253,246,.55), rgba(224,246,244,.4) 60%, rgba(16,52,60,.3) 100%);
+}
+[data-theme="merlion"] .mrt-page {
+  background: var(--mrt-tile-soft), var(--color-ticket);
+  border-radius: 22px;
+  box-shadow: 0 0 0 2.5px var(--color-ink), 0 8px 0 rgba(16,52,60,.2), 0 30px 60px -20px rgba(16,52,60,.5);
+  overflow: hidden;
+}
+/* the border of Peranakan tiles along the top of the card, like a shophouse's five-foot-way floor */
+[data-theme="merlion"] .mrt-page-tiles { height: 18px; background: var(--mrt-tile) 0 0 / 18px 18px repeat-x; box-shadow: inset 0 -2px 0 var(--color-ink); }
+[data-theme="merlion"] .mrt-hero { border-bottom: 2.5px solid var(--color-ink); }
+[data-theme="merlion"] .mrt-train { animation: mrt-train-in 1500ms cubic-bezier(.2,.8,.3,1) both; }
+@keyframes mrt-train-in { from { transform: translateX(-220px); opacity: 0; } to { transform: none; opacity: 1; } }
+[data-theme="merlion"] .mrt-jet { stroke-dasharray: 3 4; animation: mrt-jet 1.6s linear infinite; }
+@keyframes mrt-jet { to { stroke-dashoffset: -14; } }
+[data-theme="merlion"] .mrt-twinkle { animation: mrt-twinkle 3.4s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+@keyframes mrt-twinkle { 0%, 100% { opacity: .35; transform: scale(.7); } 50% { opacity: 1; transform: scale(1.15); } }
+
+[data-theme="merlion"] .mrt-title { font-weight: 700; }
+[data-theme="merlion"] .mrt-title > span:first-child { font-weight: 600; letter-spacing: .14em; text-transform: uppercase; }
+[data-theme="merlion"] .mrt-title-name { letter-spacing: -.01em; }
+/* the six MRT line colours as a rule under the title */
+[data-theme="merlion"] .mrt-rule {
+  display: flex; height: 5px; max-width: 300px; border-radius: 3px; overflow: hidden;
+}
+[data-theme="merlion"] .mrt-rule > i { flex: 1; }
+[data-theme="merlion"] .mrt-footnote { border-top: 2px dashed var(--color-line); padding-top: 14px; font-size: 14px; }
+
+/* ---------- buttons, links, inputs: friendly pills with a solid base, like an MRT sign ---------- */
+[data-theme="merlion"] .mrt-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: .5em;
+  border-radius: 14px; padding: 11px 22px; min-height: 48px;
+  font-family: var(--font-display); font-weight: 600; font-size: 16.5px; letter-spacing: .005em; line-height: 1.1;
+  border: 2.5px solid var(--color-ink);
+  transition: background-color .15s, color .15s, box-shadow .12s, transform .12s;
+}
+[data-theme="merlion"] .mrt-btn:enabled:hover { transform: translateY(-1px); }
+[data-theme="merlion"] .mrt-btn:enabled:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--color-ink); }
+[data-theme="merlion"] .mrt-btn-primary { color: #fff; background: #c2268a; box-shadow: 0 4px 0 var(--color-ink); }
+[data-theme="merlion"] .mrt-btn-primary:enabled:hover { background: #d1349a; }
+[data-theme="merlion"] .mrt-btn-primary:disabled { background: #dfe9e8; color: #fff; border-color: #b6c8c5; box-shadow: none; }
+[data-theme="merlion"] .mrt-btn-secondary { color: var(--color-ink); background: #fff; box-shadow: 0 4px 0 #23868a, 0 4px 0 2.5px var(--color-ink); }
+[data-theme="merlion"] .mrt-btn-secondary:hover { background: #eefaf8; }
+[data-theme="merlion"] .mrt-btn:focus-visible { outline: 3px solid #23868a; outline-offset: 3px; }
+[data-theme="merlion"] .mrt-link {
+  font-family: var(--font-display); font-weight: 600; font-size: 15px; color: var(--color-poster);
+  text-decoration: underline; text-decoration-color: #f2b632; text-decoration-thickness: 3px; text-underline-offset: 5px;
+}
+[data-theme="merlion"] .mrt-link:hover { color: var(--color-poster-dark); }
+[data-theme="merlion"] .mrt-input {
+  border-radius: 10px; border: 2px solid var(--color-ink); background: #fff;
+  padding: 7px 12px; font-size: 16px; font-weight: 600; color: var(--color-ink);
+}
+[data-theme="merlion"] .mrt-input:focus { outline: none; border-color: #23868a; box-shadow: 0 0 0 3px rgba(35,134,138,.28); }
+
+/* ---------- game chrome ---------- */
+[data-theme="merlion"] header.bg-panel {
+  background: var(--mrt-tile-soft), #ffffff;
+  border-bottom: 0;
+  box-shadow: inset 0 -2px 0 var(--color-ink), 0 2px 0 rgba(16,52,60,.12);
+}
+[data-theme="merlion"] header.bg-panel > h1 { font-weight: 700; letter-spacing: -.005em; }
+[data-theme="merlion"] header.bg-panel .bg-panel-2 { background: #fff; border-color: var(--color-line-strong); border-radius: 999px; }
+[data-theme="merlion"] header.bg-panel button.bg-panel-2:hover { border-color: #c2268a; }
+[data-theme="merlion"] header [data-testid="status"].bg-poster { background: #c2268a; border-color: var(--color-ink); color: #fff; }
+[data-theme="merlion"] header [data-testid="status"].bg-mustard { background: #f2b632; }
+[data-theme="merlion"] .turn-pulse { animation-name: turn-pulse-mrt; }
+@keyframes turn-pulse-mrt {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(194,38,138,.5); }
+  50% { box-shadow: 0 0 0 8px rgba(194,38,138,0); }
+}
+
+[data-theme="merlion"] [data-testid="side-rail"] {
+  background: var(--mrt-tile-soft), var(--color-panel);
+  border-left: 0; box-shadow: inset 2px 0 0 var(--color-ink);
+  padding-left: 15px;
+}
+[data-theme="merlion"] [data-testid="side-rail"] h2 {
+  font-family: var(--font-display); font-weight: 600; font-size: 14px; color: var(--color-ink);
+  display: flex; align-items: center; gap: 8px;
+}
+[data-theme="merlion"] [data-testid="side-rail"] h2::after { content: ""; flex: 1; height: 0; border-top: 2px dotted #9dbcb8; }
+[data-theme="merlion"] [data-testid="side-rail"] [data-testid="log"] li.bg-panel-2 { background: #fff; border-left: 3px solid #f2b632; border-radius: 8px; }
+[data-theme="merlion"] [data-testid="hand-tray"] {
+  background: var(--mrt-tile-soft), var(--color-panel);
+  border-top: 0; box-shadow: inset 0 2px 0 var(--color-ink);
+}
+[data-theme="merlion"] [data-testid="hand-tray"] h2 { font-family: var(--font-display); font-weight: 600; font-size: 14.5px; }
+[data-theme="merlion"] .ticket-scroll::-webkit-scrollbar-thumb { background: #9dd2cc; border-radius: 99px; }
+[data-theme="merlion"] .ticket-scroll::-webkit-scrollbar-thumb:hover { background: #6cb6ad; }
+[data-theme="merlion"] [data-testid="draw-deck"] > span.bg-ink,
+[data-theme="merlion"] [data-testid="draw-tickets"] > span.bg-ink { background: #c2268a; color: #fff; font-weight: 700; box-shadow: 0 0 0 1.5px var(--color-ink); }
+
+[data-theme="merlion"] [data-testid="spotlight"], [data-theme="merlion"] [data-testid="show-longest"] { border-radius: 999px; }
+[data-theme="merlion"] [data-testid="ticket-chooser"] {
+  background: var(--mrt-tile-soft), var(--color-panel);
+  border: 0; border-radius: 16px;
+  box-shadow: 0 0 0 2.5px var(--color-ink), 0 6px 0 rgba(16,52,60,.15), 0 14px 32px rgba(16,52,60,.32);
+}
+[data-theme="merlion"] [data-testid="ticket-chooser"] [data-testid="keep-tickets"] {
+  border-radius: 12px; font-family: var(--font-display); font-weight: 600; font-size: 15px;
+  background: #c2268a; color: #fff; border: 2px solid var(--color-ink); box-shadow: 0 3px 0 var(--color-ink);
+}
+[data-theme="merlion"] [data-testid="ticket-chooser"] [data-testid="keep-tickets"]:disabled { background: #dfe9e8; border-color: #b6c8c5; box-shadow: none; }
+[data-theme="merlion"] .chooser-glow { animation-name: chooser-glow-mrt; }
+@keyframes chooser-glow-mrt {
+  0%, 100% { box-shadow: 0 0 0 2.5px #10343c, 0 14px 32px rgba(16,52,60,.32), 0 0 0 2.5px rgba(194,38,138,0); }
+  50% { box-shadow: 0 0 0 2.5px #10343c, 0 14px 32px rgba(16,52,60,.32), 0 0 0 9px rgba(194,38,138,.32); }
+}
+[data-theme="merlion"] .final-ribbon { background: repeating-linear-gradient(135deg, #fbd9ee 0 14px, #f7c4e3 14px 28px); }
+
+/* ---------- pass-and-play curtain: a tropical night, deep teal with a haze of stars ---------- */
+[data-theme="merlion"] [data-testid="curtain"] {
+  background:
+    radial-gradient(circle at 20% 30%, rgba(255,255,255,.2) 0 1.4px, transparent 2px) 0 0 / 46px 46px,
+    radial-gradient(circle at 70% 70%, rgba(242,182,50,.25) 0 1.2px, transparent 1.8px) 0 0 / 31px 31px,
+    radial-gradient(ellipse 80% 60% at 50% 100%, #1d6a72, #0b2a33 70%);
+}
+[data-theme="merlion"] [data-testid="recap"] { border-radius: 14px; border-color: rgba(242,182,50,.45); }
+
+[data-theme="merlion"] .volume-range::-webkit-slider-thumb { background: #c2268a; border-color: var(--color-ink); }
+[data-theme="merlion"] .volume-range::-moz-range-thumb { background: #c2268a; border-color: var(--color-ink); }
+
+@media (prefers-reduced-motion: reduce) {
+  [data-theme="merlion"] .mrt-train, [data-theme="merlion"] .mrt-jet, [data-theme="merlion"] .mrt-twinkle { animation: none; }
+}

@@ -4,12 +4,14 @@ import { GAME_TITLE } from '../lib/skin';
 import { VintageCurtain } from './VintageCurtain';
 import { HsrCurtain } from './HsrCurtain';
 import { RailCurtain } from './RailCurtain';
+import { MerlionCurtain } from './MerlionCurtain';
 import { duckMusic } from '../lib/music';
 import { sfxEnv } from '../lib/sound';
 import type { SfxEnv } from '../lib/soundHsr';
 import { playVintageIntro, playVintageWaiting } from './introVintage';
 import { playHsrIntro, playHsrWaiting } from './introHsr';
 import { playRailIntro, playRailWaiting } from './introRail';
+import { playMerlionIntro, playMerlionWaiting } from './introMerlion';
 import './curtain.css';
 
 /**
@@ -25,10 +27,10 @@ export const HOLD_MS = 3200;
 /** The opening animation and its sound cue. */
 export const OPEN_MS = 5200;
 /** Each theme's opening cue (Web Audio, no files), started as the opening begins; it lasts about OPEN_MS. */
-const CUES: Record<ThemeId, (env: SfxEnv) => void> = { vintage: playVintageIntro, hsr: playHsrIntro, rail: playRailIntro };
+const CUES: Record<ThemeId, (env: SfxEnv) => void> = { vintage: playVintageIntro, hsr: playHsrIntro, rail: playRailIntro, merlion: playMerlionIntro };
 /** Optional cue for the closed curtain, played as it appears; it ends within HOLD_MS, before the opening cue. */
-const WAITING_CUES: Partial<Record<ThemeId, (env: SfxEnv) => void>> = { vintage: playVintageWaiting, hsr: playHsrWaiting, rail: playRailWaiting };
-const CURTAINS: Record<ThemeId, ComponentType<CurtainProps>> = { vintage: VintageCurtain, hsr: HsrCurtain, rail: RailCurtain };
+const WAITING_CUES: Partial<Record<ThemeId, (env: SfxEnv) => void>> = { vintage: playVintageWaiting, hsr: playHsrWaiting, rail: playRailWaiting, merlion: playMerlionWaiting };
+const CURTAINS: Record<ThemeId, ComponentType<CurtainProps>> = { vintage: VintageCurtain, hsr: HsrCurtain, rail: RailCurtain, merlion: MerlionCurtain };
 
 const KEY = 'ttb.curtain';
 /** Called by the waiting room just before it navigates into the game. */

@@ -1,6 +1,6 @@
 # Ticket to Taitoka
 
-A railway game for two to five players, with three editions to pick from: **Ticket to Taitoka** on a vintage travel-poster map of the USA, **Ticket to Beijing** on a map of China with a modern high-speed-rail look, and **Ticket to Europa** on a 1930s continental-rail map of Europe. Draw train cards, claim routes between cities, and connect your secret destination tickets before the trains run out.
+A railway game for two to five players, with four editions to pick from: **Ticket to Taitoka** on a vintage travel-poster map of the USA, **Ticket to Beijing** on a map of China with a modern high-speed-rail look, **Ticket to Europa** on a 1930s continental-rail map of Europe, and **Ticket to Singapore** on a tropical map of Singapore with an MRT look. Draw train cards, claim routes between cities, and connect your secret destination tickets before the trains run out.
 
 ## Quick start: paste this repo's link into Claude
 
@@ -57,7 +57,7 @@ Replace `<REPO_URL>` with the GitHub link the user gave you, without `.git` or a
 
 - Double-click the icon. The first start takes a minute while the game builds.
 - Keep the window that opens running while you play.
-- Pick USA, China or Europe in the browser.
+- Pick USA, China, Europe or Singapore in the browser.
 - To play with friends elsewhere, choose *Play online*, host a game and send them the link it shows.
 
 ## Play
@@ -95,15 +95,16 @@ This starts the game together with a free Cloudflare tunnel, which gives this co
 
 ### Editions
 
-One build and one server serve all three editions. When the game opens you pick one, then land on the menu (`/menu`):
+One build and one server serve all four editions. When the game opens you pick one, then land on the menu (`/menu`):
 
 | Edition | Name | Look |
 |---|---|---|
 | USA | Ticket to Taitoka | vintage travel poster |
 | China | Ticket to Beijing | high-speed rail |
 | Europe | Ticket to Europa | 1930s continental rail |
+| Singapore | Ticket to Singapore | tropical, MRT |
 
-A switcher in the top bar of the menu, the pass-and-play setup, and the host and waiting-room screens changes the edition; switching reloads the page. In a waiting room only the host can switch, and everyone's screen follows. After a game, the next waiting room keeps the same map. Adding `?edition=usa`, `?edition=china` or `?edition=europe` to the address also picks one.
+A switcher in the top bar of the menu, the pass-and-play setup, and the host and waiting-room screens changes the edition; switching reloads the page. In a waiting room only the host can switch, and everyone's screen follows. After a game, the next waiting room keeps the same map. Adding `?edition=usa`, `?edition=china`, `?edition=europe` or `?edition=singapore` to the address also picks one.
 
 ### Desktop icon
 

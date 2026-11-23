@@ -33,10 +33,10 @@
    - Longest Continuous Path bonus awards **10 points** (ties split the bonus)[cite: 4].
    - Tie-breakers: 1) Most completed Destination Tickets, 2) Longest Continuous Path card[cite: 4].
 
-## Editions and Skins (USA / China / Europe, chosen at runtime)
-- **One build, one server.** `npm run play` builds the client once and starts the server; the player picks the edition in the browser. There are no per-edition build modes, `.env.*` files or `play:usa|china|europe` scripts.
-- An **edition** (`packages/shared/src/editions.ts`: `EDITIONS`, `EDITION_IDS`, `isEditionId`, `editionFor`) fixes three things together: the map, the skin (game name) and the theme. `usa` = Taitoka skin, USA map, `vintage` theme ("Ticket to Taitoka"); `china` = Beijing skin, China map, `hsr` theme ("Ticket to Beijing"); `europe` = Europa skin, Europe map, `rail` theme ("Ticket to Europa"). Only these three are offered.
-- A **skin** (`packages/shared/src/skins.ts`) changes only the game name (= hub city `BOB`'s name).
+## Editions and Skins (USA / China / Europe / Singapore, chosen at runtime)
+- **One build, one server.** `npm run play` builds the client once and starts the server; the player picks the edition in the browser. There are no per-edition build modes, `.env.*` files or `play:usa|china|europe|singapore` scripts.
+- An **edition** (`packages/shared/src/editions.ts`: `EDITIONS`, `EDITION_IDS`, `isEditionId`, `editionFor`) fixes three things together: the map, the skin (game name) and the theme. `usa` = Taitoka skin, USA map, `vintage` theme ("Ticket to Taitoka"); `china` = Beijing skin, China map, `hsr` theme ("Ticket to Beijing"); `europe` = Europa skin, Europe map, `rail` theme ("Ticket to Europa"); `singapore` = Singapore skin, SG map, `merlion` theme ("Ticket to Singapore"; the hub is named Marina Bay via `skin.hubName`). Only these four are offered.
+- A **skin** (`packages/shared/src/skins.ts`) changes only the game name (= hub city `BOB`'s name, unless `hubName` is set).
 - Client: `packages/client/src/edition.ts` is imported first in `main.tsx`. It resolves the edition (`?edition=` in the URL, else `localStorage` `ttb.edition`, else `usa`), sets `globalThis.__TTB_EDITION__`, `<html data-theme>` and the tab title, and exports `EDITION`. `setEdition(id)` saves the choice and reloads, because many modules read the map and theme once when they load. `/` is the edition picker (`EditionPicker`), `/menu` is the start menu, and `EditionSwitcher` (via `Frame edition`) switches edition on the menu, local setup and waiting room.
 - Client code must use `cityName(id)`, `SKIN` and `GAME_TITLE` from `packages/client/src/lib/skin.ts`, never `CITY_BY_ID[id].name` or a literal game name; `skin.test.ts` enforces this.
 
@@ -50,7 +50,7 @@
 ## Chat
 - LAN, online and pass-and-play: boardgame.io's chat relay (`client.sendChatMessage`, `client.chatMessages`), passed from `screens/Lan.tsx` to `GameScreen` as `chat`. Received payloads are untrusted: always read them through `readChat()` in `packages/client/src/lib/chat.ts` (text capped, emotes from a fixed list). Messages are not stored, so a reload starts with an empty chat.
 
-## Maps (USA / China / Europe)
+## Maps (USA / China / Europe / Singapore)
 - **Runtime maps, one process.** All maps are loaded; the active map is a live binding that `useMap(id)` / `withMap(id, fn)` (`packages/shared/src/map/index.ts`) switch. Every game records its own map in `G.mapId` (set in `setup` from `setupData.map`, default `DEFAULT_MAP_ID`). `BobolandGame` wraps every hook (setup, moves, `playerView`, phases, `endIf`...) in `withMap(G.mapId, ...)`, so one server runs games on different maps at once. Code that runs outside the game hooks (bots, `legalActions`, `chooseBotMove`) uses `withGameMap(G, fn)` / `mapOfGame(G)`. `setupData` is validated (an unknown map is rejected).
 - `DEFAULT_MAP_ID` (`map/index.ts`, from `activeMapId()` in `map/active.ts`) is fixed when the code loads: in the browser it follows the edition (`globalThis.__TTB_EDITION__`, set by `edition.ts` before the map code loads); on the server and in tests it is `TTB_MAP`. The server (`packages/server/src/map.ts` `defaultMap`) takes `--map=`, else `TTB_MAP`, else `usa`; it only decides which map a match gets when `setupData` names none. Clients always send `setupData: { map }`.
 - Pass-and-play: `lib/setupGame.ts` `gameOnMap(game, map)` passes the map into `setup` (boardgame.io's local Client cannot pass `setupData`). LAN: `startLanMatch` sends `setupData: { map }` to `playAgain`, using the room's edition (seat 0 data) when known (`mapForRoom`), else this page's edition.
@@ -58,9 +58,10 @@
 - USA map rules are tests in `packages/shared/test/usa-map.test.ts` (no colour 3+ times into a city; exactly Nashville, Atlanta, Pittsburgh have one colour twice; equal cars per colour; no city easy to cut off; no crossings or touching cars). `fuzz.usa.test.ts` plays 500 games on it. China: `china-map.test.ts`, `fuzz.china.test.ts`. Europe: `europe*.test.ts`. `editions.test.ts` covers runtime switching and `G.mapId`.
 
 ## Themes
-- `THEME_ID` / `HSR` in `packages/client/src/theme.ts` (`vintage` | `hsr` | `rail`) come from the edition (`EDITION.theme`), so they are fixed per page load. Palettes share names, so components read tokens and need no branching.
+- `THEME_ID` / `HSR` in `packages/client/src/theme.ts` (`vintage` | `hsr` | `rail` | `merlion`) come from the edition (`EDITION.theme`), so they are fixed per page load. Palettes share names, so components read tokens and need no branching.
 - Tailwind tokens are overridden in `theme-hsr.css`; per-area HSR styles live in `src/hsr/*.css`, scoped under `[data-theme="hsr"]`.
 - Sounds and music switch by `HSR` (`soundHsr.ts`, `songHsr.ts`).
+- Singapore (`merlion`): `MERLION` flag and palette in `theme.ts`; `theme-merlion.css` imports `merlion/*.css` (Poppins + Inter, Peranakan tile pattern, MRT line colours); `src/merlion/` holds the cards, tickets, menu chrome/hero and board places; `board/SgGeoLayer.tsx` draws the island; `MerlionCelebration` in `ClaimCelebration.tsx`; intro `curtain/MerlionCurtain.tsx`; sounds `lib/soundMerlion.ts`, music `lib/songMerlion.ts`. Map data in `packages/shared/src/map/sg/` (38 places). Tests: `sg-map.test.ts`, `sg-balance.test.ts`, `fuzz.sg.test.ts`, `fuzz.bots.sg.test.ts`, client `merlionFx.test.ts`, e2e `singapore.spec.ts`.
 - Vintage must stay unchanged.
 
 ## Game Modes & LAN Networking

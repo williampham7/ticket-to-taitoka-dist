@@ -3,15 +3,18 @@ import { MAP_ID } from '@boboland/shared';
 import { navigate } from '../lib/router';
 import { useOnline } from '../lib/lobby';
 import { SKIN } from '../lib/skin';
-import { HSR, RAIL } from '../theme';
+import { HSR, MERLION, RAIL } from '../theme';
 import { RailHero } from '../rail/RailChrome';
+import { MerlionHero } from '../merlion/MerlionChrome';
 import { HowToPlay } from '../game/HowToPlay';
 import { Frame, PrimaryButton, SecondaryButton, Title } from './Frame';
 
 export function Home() {
   const [help, setHelp] = useState(false);
   const online = useOnline();
-  const sub = MAP_ID === 'europe'
+  const sub = MAP_ID === 'sg'
+    ? `Ride the MRT from Tuas to Changi, connect Marina Bay, Chinatown and the Gardens, and make it to ${SKIN.name}.`
+    : MAP_ID === 'europe'
     ? `Claim rail lines from Edinburgh to Constantinople, connect your destinations, and make it to ${SKIN.name}.`
     : MAP_ID === 'china'
     ? `Claim high-speed lines from Ngari to Harbin, connect your destinations, and make it to ${SKIN.name}.`
@@ -21,15 +24,16 @@ export function Home() {
       {help && <HowToPlay onClose={() => setHelp(false)} />}
       {HSR && <HsrHero />}
       {RAIL && <RailHero />}
+      {MERLION && <MerlionHero />}
       <Title sub={sub} />
       <div className={`grid gap-3 ${HSR ? 'sm:grid-cols-2' : ''}`}>
         <PrimaryButton onClick={() => navigate('/local' + window.location.search)} data-testid="play-local">Play on this computer</PrimaryButton>
         <SecondaryButton onClick={() => navigate('/host')} data-testid="play-lan">{online ? 'Play online' : 'Play on two computers'}</SecondaryButton>
         <button type="button" onClick={() => setHelp(true)} data-testid="open-help"
-          className={RAIL ? 'rail-link mt-1 justify-self-start' : HSR ? 'hsr-link mt-1 justify-self-start'
+          className={MERLION ? 'mrt-link mt-1 justify-self-start' : RAIL ? 'rail-link mt-1 justify-self-start' : HSR ? 'hsr-link mt-1 justify-self-start'
             : 'mt-1 justify-self-start font-display text-[16px] text-poster underline decoration-2 underline-offset-4 hover:text-poster-dark'}>How to play</button>
       </div>
-      <p className={`mt-5 text-[14px] leading-relaxed text-muted ${HSR ? 'border-t border-line pt-4 text-[13.5px]' : RAIL ? 'rail-footnote' : ''}`}>
+      <p className={`mt-5 text-[14px] leading-relaxed text-muted ${HSR ? 'border-t border-line pt-4 text-[13.5px]' : RAIL ? 'rail-footnote' : MERLION ? 'mrt-footnote' : ''}`}>
         On one computer you pass it back and forth, and a screen hides your cards between turns.{' '}
         {online
           ? 'Online, everyone plays on their own computer from anywhere. You host the game and send the others the link you’ll see next.'

@@ -11,7 +11,7 @@ export const LANE_OFFSET = 7.5;
 const INSET_MAX = 30;
 const HUB_INSET_MAX = 36;
 
-export type MapId = 'usa' | 'china' | 'europe';
+export type MapId = 'usa' | 'china' | 'europe' | 'sg';
 type XY = [number, number];
 type LL = readonly [number, number];
 

@@ -3,15 +3,17 @@ import { EDITION } from './edition';
 
 /**
  * Visual theme, set by the edition (edition.ts): 'vintage' (faded travel poster; USA), 'hsr' (modern
- * high-speed rail; China) or 'rail' (1930s continental railway; Europe). Rules never depend on it, only looks and sounds.
+ * high-speed rail; China), 'rail' (1930s continental railway; Europe) or 'merlion' (tropical Singapore: teal sea, orchid, Peranakan tiles, MRT). Rules never depend on it, only looks and sounds.
  * Every colour below exists in every palette under the same name, so components just import the name.
  * Tailwind tokens (bg-paper, text-ink, font-display, ...) switch through CSS variables scoped by [data-theme].
  */
-export type ThemeId = 'vintage' | 'hsr' | 'rail';
+export type ThemeId = 'vintage' | 'hsr' | 'rail' | 'merlion';
 export const THEME_ID: ThemeId = EDITION.theme;
 export const HSR = THEME_ID === 'hsr';
 /** European retro railway (1930s continental: enamel, brass, deco posters; Europe). */
 export const RAIL = THEME_ID === 'rail';
+/** Singapore theme (edition 'singapore'): tropical teal and orchid, Peranakan tile patterns, the MRT. */
+export const MERLION = THEME_ID === 'merlion';
 
 const VINTAGE = {
   INK: '#3b2a1e',
@@ -97,7 +99,35 @@ export const RAIL_PALETTE: Palette = {
   CARD_INK_LIGHT: '#fbf7ea',
 };
 
-export const PALETTE: Palette = HSR ? HSR_PALETTE : RAIL ? RAIL_PALETTE : VINTAGE;
+/** Tropical Singapore: warm sand paper, deep lagoon-teal ink, orchid magenta, jade, coral and gold; crisp white panels. */
+export const MERLION_PALETTE: Palette = {
+  INK: '#10343c',
+  SOFT_INK: '#3d6068',
+  PAPER: '#fbf5e8',
+  HALO: '#fffdf6',
+  OCEAN: '#8fd2d3',
+  OCEAN_INK: '#23868a',
+  RIVER: '#62bcc0',
+  ACCENT: '#c2268a',
+  TARGET: '#e11d6a',
+  MUSTARD: '#f2b632',
+  /** Pale MRT-line tones, so the players' bright trains stand out on the sand-coloured island. */
+  ROUTE_FILL: {
+    red: '#f19a8e', orange: '#f7c07e', yellow: '#f5e089', green: '#8fd6b2', blue: '#8cc3ee',
+    black: '#3e4a60', white: '#ffffff', gray: '#bfb9ab',
+  },
+  ROUTE_STROKE: '#3c5a60',
+  CARD_FILL: {
+    red: '#dd4637', orange: '#f28a1c', yellow: '#f4c21c', green: '#10996a', blue: '#1b78c6',
+    black: '#202c40', white: '#fffaf0',
+  },
+  /** The MRT line colours: North-South red, East-West green, North-East purple, Circle orange, Downtown blue, Thomson-East Coast brown. */
+  LOCO_BG: 'linear-gradient(135deg,#d42e12 0%,#009645 20%,#9900aa 40%,#fa9e0d 58%,#005ec4 78%,#9d5b25 100%)',
+  CARD_INK_DARK: 'rgba(16,52,60,.9)',
+  CARD_INK_LIGHT: '#fffdf6',
+};
+
+export const PALETTE: Palette = HSR ? HSR_PALETTE : RAIL ? RAIL_PALETTE : MERLION ? MERLION_PALETTE : VINTAGE;
 export const {
   INK, SOFT_INK, PAPER, HALO, OCEAN, OCEAN_INK, RIVER, ACCENT, TARGET, MUSTARD,
   ROUTE_FILL, ROUTE_STROKE, CARD_FILL, LOCO_BG,
