@@ -3,7 +3,7 @@ import { EDITIONS, EDITION_IDS, SKINS, type EditionId } from '@boboland/shared';
 import { EDITION, setEdition, urlWithoutEdition } from '../edition';
 import { navigate } from '../lib/router';
 import { isFollower, usePartyState } from '../lib/party';
-import { SeriesArt, SERIES_CHIP } from './seriesArt';
+import { SeriesArt } from './seriesArt';
 import './EditionPicker.css';
 import './series.css';
 
@@ -57,30 +57,22 @@ const FLAGSHIP = SKINS[EDITIONS.usa.skin].name;
 const SERIES = `Ticket to ${FLAGSHIP}`;
 const COUNT = ['No', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven'][EDITION_IDS.length] ?? String(EDITION_IDS.length);
 
-/** The flagship card: a gold railway ticket with a night route map, the maps it covers, and a tear-off stub. */
+/** The flagship card: an ivory railway ticket with a printed route map, the title with a "Series" stamp, and a perforated tear line. */
 function SeriesCard({ buttonRef, open, onOpen }: { buttonRef: React.Ref<HTMLButtonElement>; open: boolean; onOpen: () => void }) {
   return (
-    <button ref={buttonRef} type="button" className="ep-series" onClick={onOpen} data-testid="series-card"
+    <button ref={buttonRef} type="button" className="ep-card ep-series" onClick={onOpen} data-testid="series-card"
       aria-haspopup="dialog" aria-expanded={open} aria-label={`${SERIES} series: choose a map`}>
-      <span className="eps-ticket">
-        <span className="eps-art" aria-hidden><SeriesArt /></span>
-        <span className="eps-body">
-          <span className="eps-to">Ticket to</span>
-          <span className="eps-titlerow">
-            <span className="eps-name">{FLAGSHIP}</span>
-            <span className="eps-seal">Series</span>
-          </span>
-          <span className="eps-line">Collect cards, claim routes and connect your cities before the trains run out. {COUNT} maps, 2 to 5 players.</span>
-          <span className="eps-chips" aria-hidden>
-            {EDITION_IDS.map((id) => <span key={id} className="eps-chip" style={{ background: SERIES_CHIP[id] }}>{EDITIONS[id].label}</span>)}
-          </span>
-          <span className="eps-cta">Choose a map</span>
+      <span className="ep-art" aria-hidden><SeriesArt /></span>
+      <span className="ep-text eps-text">
+        <span className="eps-to">Ticket to</span>
+        <span className="eps-titlerow">
+          <span className="eps-name">{FLAGSHIP}</span>
+          <span className="eps-seal">Series</span>
         </span>
-        <span className="eps-stub" aria-hidden>
-          <span className="eps-admit">Admit</span>
-          <span className="eps-count">2–5</span>
-          <span className="eps-players">players</span>
-          <span className="eps-serial">No. 000001</span>
+        <span className="eps-line">Collect train cards, claim routes and link your cities before the trains run out.</span>
+        <span className="eps-foot">
+          <span className="eps-cta">Choose a map</span>
+          <span className="eps-meta"><span>{COUNT} maps</span><span>2–5 players</span></span>
         </span>
       </span>
     </button>
@@ -88,7 +80,7 @@ function SeriesCard({ buttonRef, open, onOpen }: { buttonRef: React.Ref<HTMLButt
 }
 
 /**
- * The map chooser: a banner for the series with tracks branching down to one card per map, over a blurred page.
+ * The map chooser: a banner for the series casting a warm light down over one card per map, on a blurred page.
  * Only the map cards pick; a click anywhere else (the backdrop, the banner, the gaps) and Escape close it.
  */
 function MapChooser({ closing, onClose, onPick }: { closing: boolean; onClose: () => void; onPick: (id: EditionId) => void }) {
@@ -112,27 +104,17 @@ function MapChooser({ closing, onClose, onPick }: { closing: boolean; onClose: (
     <div ref={ref} className={`ep-maps${closing ? ' is-closing' : ''}`} role="dialog" aria-modal="true" aria-labelledby="ep-maps-title"
       data-testid="map-chooser" onClick={onClose} style={{ '--n': n } as React.CSSProperties}>
       <div className="ep-maps-inner">
-        <div className="ep-maps-head">
-          <span className="eps-to">Ticket to</span>
-          <span className="eps-titlerow">
-            <span className="eps-name" id="ep-maps-title">{FLAGSHIP}</span>
-            <span className="eps-seal">Series</span>
-          </span>
-          <span className="ep-maps-hint">Choose a map</span>
+        <div className="ep-maps-lamp">
+          <div className="ep-maps-head">
+            <span className="eps-to">Ticket to</span>
+            <span className="eps-titlerow">
+              <span className="eps-name" id="ep-maps-title">{FLAGSHIP}</span>
+              <span className="eps-seal">Series</span>
+            </span>
+            <span className="ep-maps-hint">Choose a map</span>
+          </div>
+          <div className="ep-maps-cone" aria-hidden><span /></div>
         </div>
-        <svg className="ep-maps-ribs" viewBox="0 0 1000 72" preserveAspectRatio="none" aria-hidden>
-          {EDITION_IDS.map((id, i) => {
-            const x = ((i + 0.5) / n) * 1000;
-            const d = `M500 0 C500 44 ${x} 26 ${x} 72`;
-            return (
-              <g key={id}>
-                <path d={d} className="ep-rib-ties" vectorEffect="non-scaling-stroke" />
-                <path d={d} className="ep-rib-rail" vectorEffect="non-scaling-stroke" />
-                <path d={d} className="ep-rib-gap" vectorEffect="non-scaling-stroke" />
-              </g>
-            );
-          })}
-        </svg>
         <div className="ep-maps-row">
           {EDITION_IDS.map((id, i) => (
             <div key={id} className="ep-maps-cell" style={{ '--i': i, '--tilt': `${(i - (n - 1) / 2) * 1.6}deg` } as React.CSSProperties}>

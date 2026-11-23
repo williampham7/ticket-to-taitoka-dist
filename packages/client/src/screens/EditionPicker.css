@@ -111,14 +111,10 @@
   .ep-card:hover { transform: none; }
 }
 
-/* the main page: one card, the Ticket to Taitoka series */
+/* the main page: one card, the Ticket to Taitoka series, the size of a single card */
 @media (min-width: 720px) {
-  .ep-grid { grid-template-columns: 1fr; max-width: 760px; }
-  .ep-head { max-width: 760px; }
-}
-@media (min-width: 1100px) {
-  .ep-grid { max-width: 860px; }
-  .ep-head { max-width: 860px; }
+  .ep-grid { grid-template-columns: 1fr; max-width: 380px; }
+  .ep-head { max-width: 380px; }
 }
 
 /* Singapore: tropical golden hour. White card edged with Peranakan tiles, teal ink, orchid name, the six MRT line colours. */
