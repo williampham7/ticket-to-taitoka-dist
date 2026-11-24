@@ -3,7 +3,9 @@ import serve from 'koa-static';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { BobolandGame } from '@boboland/shared';
+import { BobolandGame, EgyptianGame, FleetGame, FrontlineGame } from '@boboland/shared';
+import { WarfrontGame } from '@boboland/shared'; // Warfront
+import { installWarfrontBots } from './warfrontBots'; // Warfront
 import { lanAddresses } from './lanInfo';
 import { SERVER_TITLE } from './title';
 import { openBrowser } from './openBrowser';
@@ -19,7 +21,15 @@ const indexHtml = path.join(clientDist, 'index.html');
 const game = process.env.SEED ? { ...BobolandGame, seed: process.env.SEED } : BobolandGame;
 
 // LAN-only game: accept any origin (phones/laptops on the home network use the host's IP).
-const server = Server({ games: [game], origins: [/.*/] });
+// Frontline (2-player, hidden pieces) runs on the same server, lobby and chat relay under its own game name.
+const frontline = process.env.SEED ? { ...FrontlineGame, seed: process.env.SEED } : FrontlineGame;
+// Fleet (2-player naval game, hidden fleets) likewise, under the game name `fleet`.
+const fleet = process.env.SEED ? { ...FleetGame, seed: process.env.SEED } : FleetGame;
+// Egyptian War (2-5 players, real time) likewise, under the game name `egyptian`.
+const egyptian = process.env.SEED ? { ...EgyptianGame, seed: process.env.SEED } : EgyptianGame;
+// Warfront (2-6 players, territory conquest), under the game name `warfront`.
+const warfront = process.env.SEED ? { ...WarfrontGame, seed: process.env.SEED } : WarfrontGame;
+const server = Server({ games: [game, frontline, fleet, egyptian, warfront], origins: [/.*/] });
 
 // PUBLIC_URL is set by `npm run play:online` once the Cloudflare tunnel is up.
 const PUBLIC_URL = process.env.PUBLIC_URL || null;
@@ -30,6 +40,7 @@ server.router.get('/api/lan-info', (ctx) => {
 
 installBots(server, { port: PORT });
 installParty(server);
+installWarfrontBots(server, { port: PORT }); // Warfront
 
 if (fs.existsSync(indexHtml)) {
   server.app.use(serve(clientDist));

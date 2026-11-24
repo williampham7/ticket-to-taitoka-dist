@@ -106,6 +106,17 @@ One build and one server serve all four editions. When the game opens you pick o
 
 A switcher in the top bar of the menu, the pass-and-play setup, and the host and waiting-room screens changes the edition; switching reloads the page. In a waiting room only the host can switch, and everyone's screen follows. After a game, the next waiting room keeps the same map. Adding `?edition=usa`, `?edition=china`, `?edition=europe` or `?edition=singapore` to the address also picks one.
 
+### More games
+
+The first page also has four other games, each with its own card. All of them can be played online by sending a link:
+
+| Game | Players | What it is |
+|---|---|---|
+| Frontline | 2 | hidden-army strategy on a 10 by 10 battlefield; also against the computer or on one screen |
+| Fleet | 2 | hide your ships and hunt theirs, with Classic, Salvo and Super Weapons modes; also against the computer or on one screen |
+| Egyptian War | 2 to 5 | real-time card slapping: flip, challenge and slap to win all 52 cards; two players can share one keyboard |
+| Warfront | 2 to 6 | territory conquest on a world map; also against computer generals or on one screen |
+
 ### Desktop icon
 
 The setup scripts above create it. The icon is a combined badge of all three editions, and double-clicking it starts the online game, the same as `npm run play:online`. To make it again, for example after moving the folder:

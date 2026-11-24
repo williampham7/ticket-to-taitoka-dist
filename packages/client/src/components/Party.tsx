@@ -18,10 +18,14 @@ const field = 'min-h-[36px] w-full rounded-md border border-line-strong bg-paper
 const smallBtn = 'rounded-md border border-line px-2.5 py-1 text-[13px] hover:border-ink disabled:opacity-50';
 const PICKER_DARK = { '--color-panel': '#2b3138', '--color-panel-2': '#353c44', '--color-paper': '#1f2429', '--color-ink': '#f1ede4', '--color-line': '#4d5661', '--color-line-strong': '#66707c', '--color-muted': '#b5bcc4' } as CSSProperties;
 const FRONTLINE_DARK = { '--color-panel': '#1e2320', '--color-panel-2': '#2a302b', '--color-paper': '#161a15', '--color-ink': '#e8e6df', '--color-line': '#556b2f', '--color-line-strong': '#6b7f45', '--color-muted': '#b9b6aa' } as CSSProperties;
+const WARFRONT_DARK = { '--color-panel': '#2a1d12', '--color-panel-2': '#3a2818', '--color-paper': '#1d140c', '--color-ink': '#f4e7c8', '--color-line': '#7d5a2a', '--color-line-strong': '#b08a45', '--color-muted': '#cdb990' } as CSSProperties; // Warfront
+const FLEET_DARK = { '--color-panel': '#0f1a26', '--color-panel-2': '#16243a', '--color-paper': '#0a121c', '--color-ink': '#dbe7f3', '--color-line': '#22405c', '--color-line-strong': '#2f5a80', '--color-muted': '#8aa3bb' } as CSSProperties;
 /** Token overrides for the screens drawn in fixed dark colours. */
 function useDarkTokens(): CSSProperties | undefined {
   const path = usePath();
   if (path.startsWith('/frontline')) return FRONTLINE_DARK;
+  if (path.startsWith('/fleet')) return FLEET_DARK;
+  if (path.startsWith('/warfront')) return WARFRONT_DARK; // Warfront
   if (path === '/' || path.startsWith('/party')) return PICKER_DARK;
   return undefined;
 }

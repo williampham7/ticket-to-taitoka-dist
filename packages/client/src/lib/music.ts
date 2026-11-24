@@ -4,6 +4,9 @@ import { BPM, buildSong, type SongEvent } from './song';
 import { BPM_HSR, buildSongHsr } from './songHsr';
 import { BPM_RAIL, buildSongRail, type RailEvent } from './songRail';
 import { BPM_MERLION, buildSongMerlion, createMerlionVoices, VOLUME_MERLION, type MerlionEvent } from './songMerlion';
+import { BPM_FRONTLINE, buildSongFrontline, createFrontlineVoices, VOLUME_FRONTLINE, type FrontlineEvent } from './songFrontline';
+import { BPM_FLEET, buildSongFleet, createFleetVoices, VOLUME_FLEET, type FleetEvent } from './songFleet';
+import { BPM_EGYPTIAN, buildSongEgyptian, createEgyptianVoices, VOLUME_EGYPTIAN, type EgyptianEvent } from './songEgyptian';
 import { onNavigate } from './router';
 import { load, save } from './storage';
 import { getMuted, getVolume, subscribeMuted, subscribeVolume } from './sound';
@@ -24,9 +27,39 @@ let enabled = load<boolean>(KEY, true);
 const listeners = new Set<() => void>();
 
 // The vintage railway tune, the modern HSR tune, or the European musette waltz, fixed by the theme.
-type AnyEvent = SongEvent | RailEvent | MerlionEvent;
+/** every track's events except Fleet's (whose shapes overlap theirs) */
+type MainEvent = SongEvent | RailEvent | MerlionEvent | FrontlineEvent;
+type AnyEvent = MainEvent | FleetEvent | EgyptianEvent;
 const song: { events: AnyEvent[]; beats: number } = HSR ? buildSongHsr() : RAIL ? buildSongRail() : MERLION ? buildSongMerlion() : buildSong();
 const secPerBeat = 60 / (HSR ? BPM_HSR : RAIL ? BPM_RAIL : MERLION ? BPM_MERLION : BPM);
+
+// Frontline (/frontline/...) has its own track on its own bus, whatever the edition; the router switches between them.
+const flSong = buildSongFrontline();
+const flSecPerBeat = 60 / BPM_FRONTLINE;
+// Fleet (/fleet/...) likewise has its own track and bus.
+const fleetSong = buildSongFleet();
+const fleetSecPerBeat = 60 / BPM_FLEET;
+// Egyptian War (/egyptian/...) likewise.
+const egwSong = buildSongEgyptian();
+const egwSecPerBeat = 60 / BPM_EGYPTIAN;
+type Track = 'main' | 'frontline' | 'fleet' | 'egyptian';
+/** The track for this page: Frontline and Fleet each have their own; everything else plays the edition's tune. */
+const trackHere = (): Track => {
+  const p = typeof window === 'undefined' ? '' : window.location.pathname;
+  return p.startsWith('/frontline') ? 'frontline' : p.startsWith('/fleet') ? 'fleet' : p.startsWith('/egyptian') ? 'egyptian' : 'main';
+};
+/** true while the Frontline track is the one playing (or about to). */
+let track: Track = 'main';
+let flBus: GainNode | null = null;
+let flVoice: ((e: FrontlineEvent, t: number) => void) | null = null;
+let fleetBus: GainNode | null = null;
+let fleetVoice: ((e: FleetEvent, t: number) => void) | null = null;
+let egwBus: GainNode | null = null;
+let egwVoice: ((e: EgyptianEvent, t: number) => void) | null = null;
+const cur = () => (track === 'frontline' ? { song: flSong, spb: flSecPerBeat, volume: VOLUME_FRONTLINE }
+  : track === 'fleet' ? { song: fleetSong, spb: fleetSecPerBeat, volume: VOLUME_FLEET }
+  : track === 'egyptian' ? { song: egwSong, spb: egwSecPerBeat, volume: VOLUME_EGYPTIAN }
+    : { song, spb: secPerBeat, volume: VOLUME });
 
 let ctx: AudioContext | null = null;
 let master: GainNode | null = null;
@@ -57,6 +90,15 @@ function setup(): AudioContext | null {
   master = ctx.createGain();
   master.gain.value = 0;
   master.connect(warmth).connect(comp).connect(ctx.destination);
+  flBus = ctx.createGain();
+  flBus.gain.value = 0;
+  flBus.connect(comp);
+  fleetBus = ctx.createGain();
+  fleetBus.gain.value = 0;
+  fleetBus.connect(comp);
+  egwBus = ctx.createGain();
+  egwBus.gain.value = 0;
+  egwBus.connect(comp);
   if (HSR) {
     // dotted-eighth echo, darker on every repeat
     echo = ctx.createGain();
@@ -91,6 +133,39 @@ function setup(): AudioContext | null {
     roomIn.connect(delay).connect(tone).connect(master);
     tone.connect(feedback).connect(delay);
     merlionVoice = createMerlionVoices({ ctx, out: master, room: roomIn, secPerBeat, noise: noiseBuf });
+  }
+  {
+    // a dark hall echo for the horns and drums
+    const hall = ctx.createGain(), delay = ctx.createDelay(1), tone = ctx.createBiquadFilter(), feedback = ctx.createGain();
+    delay.delayTime.value = 0.27;
+    tone.type = 'lowpass';
+    tone.frequency.value = 1600;
+    feedback.gain.value = 0.3;
+    hall.connect(delay).connect(tone).connect(flBus);
+    tone.connect(feedback).connect(delay);
+    flVoice = createFrontlineVoices({ ctx, out: flBus, room: hall, secPerBeat: flSecPerBeat, noise: noiseBuf });
+  }
+  {
+    // a long, dark echo for the sonar and the cello (Fleet)
+    const room = ctx.createGain(), delay = ctx.createDelay(1), tone = ctx.createBiquadFilter(), feedback = ctx.createGain();
+    delay.delayTime.value = 0.51;
+    tone.type = 'lowpass';
+    tone.frequency.value = 1900;
+    feedback.gain.value = 0.42;
+    room.connect(delay).connect(tone).connect(fleetBus);
+    tone.connect(feedback).connect(delay);
+    fleetVoice = createFleetVoices({ ctx, out: fleetBus, room, secPerBeat: fleetSecPerBeat, noise: noiseBuf });
+  }
+  {
+    // a warm, short slap-back echo for the lute and the flute (Egyptian War)
+    const room = ctx.createGain(), delay = ctx.createDelay(1), tone = ctx.createBiquadFilter(), feedback = ctx.createGain();
+    delay.delayTime.value = egwSecPerBeat * 0.75;
+    tone.type = 'lowpass';
+    tone.frequency.value = 2400;
+    feedback.gain.value = 0.3;
+    room.connect(delay).connect(tone).connect(egwBus);
+    tone.connect(feedback).connect(delay);
+    egwVoice = createEgyptianVoices({ ctx, out: egwBus, room, secPerBeat: egwSecPerBeat, noise: noiseBuf });
   }
   return ctx;
 }
@@ -420,37 +495,42 @@ function pizz(t: number, midi: number, vel: number) {
 }
 
 function play(e: AnyEvent, t: number) {
+  if (track === 'frontline') return flVoice?.(e as FrontlineEvent, t);
+  if (track === 'fleet') return fleetVoice?.(e as FleetEvent, t);
+  if (track === 'egyptian') return egwVoice?.(e as EgyptianEvent, t);
   if (merlionVoice) return merlionVoice(e as MerlionEvent, t);
-  switch (e.kind) {
-    case 'chug': return chug(t, e.accent);
-    case 'bass': return bass(t, e.midi, e.beats * secPerBeat);
-    case 'chord': return chord(t, e.midis);
-    case 'melody': return melody(t, e.midi, e.beats * secPerBeat);
+  const m = e as MainEvent;
+  switch (m.kind) {
+    case 'chug': return chug(t, m.accent);
+    case 'bass': return bass(t, m.midi, m.beats * secPerBeat);
+    case 'chord': return chord(t, m.midis);
+    case 'melody': return melody(t, m.midi, m.beats * secPerBeat);
     case 'whistle': return whistle(t);
-    case 'pad': return pad(t, e.midis, e.beats * secPerBeat);
-    case 'sub': return sub(t, e.midi, e.beats * secPerBeat);
-    case 'pluck': return pluck(t, e.midi, e.beats, e.vel, e.role);
+    case 'pad': return pad(t, m.midis, m.beats * secPerBeat);
+    case 'sub': return sub(t, m.midi, m.beats * secPerBeat);
+    case 'pluck': return pluck(t, m.midi, m.beats, m.vel, m.role);
     case 'kick': return kick(t);
-    case 'hat': return hat(t, e.accent);
+    case 'hat': return hat(t, m.accent);
     case 'rim': return rim(t);
-    case 'reed': return reed(t, e.midi, e.beats * secPerBeat, e.vel);
-    case 'oom': return oom(t, e.midi, e.beats * secPerBeat);
-    case 'pah': return pah(t, e.midis);
-    case 'brush': return brush(t, e.accent);
-    case 'pizz': return pizz(t, e.midi, e.vel);
+    case 'reed': return reed(t, m.midi, m.beats * secPerBeat, m.vel);
+    case 'oom': return oom(t, m.midi, m.beats * secPerBeat);
+    case 'pah': return pah(t, m.midis);
+    case 'brush': return brush(t, m.accent);
+    case 'pizz': return pizz(t, m.midi, m.vel);
   }
 }
 
 function tick() {
   if (!ctx) return;
   const horizon = ctx.currentTime + LOOKAHEAD_S;
+  const { song, spb } = cur();
   for (;;) {
     if (cursor >= song.events.length) {
       cursor = 0;
-      loopStart += song.beats * secPerBeat;
+      loopStart += song.beats * spb;
     }
     const e = song.events[cursor];
-    const t = loopStart + e.beat * secPerBeat;
+    const t = loopStart + e.beat * spb;
     if (t > horizon) break;
     if (t >= ctx.currentTime - 0.05) play(e, t);
     cursor++;
@@ -458,21 +538,25 @@ function tick() {
 }
 
 function start() {
+  if (window.location.pathname.startsWith('/warfront')) return; // Warfront: its own score
   const a = setup();
   if (!a || timer) return;
   if (a.state === 'suspended') void a.resume();
+  track = trackHere();
   loopStart = a.currentTime + 0.1;
   cursor = 0;
-  master!.gain.cancelScheduledValues(a.currentTime);
-  master!.gain.setValueAtTime(0.0001, a.currentTime);
-  master!.gain.exponentialRampToValueAtTime(level(), a.currentTime + 2.5);
+  bus().gain.cancelScheduledValues(a.currentTime);
+  bus().gain.setValueAtTime(0.0001, a.currentTime);
+  bus().gain.exponentialRampToValueAtTime(level(), a.currentTime + 2.5);
   timer = setInterval(tick, TICK_MS);
   tick();
 }
 
 /** The music's loudness at the current volume and mute setting (never exactly 0: gain ramps need a positive value). */
 let ducked = false;
-const level = () => (getMuted() || ducked ? 0.0001 : Math.max(0.0001, VOLUME * getVolume()));
+const level = () => (getMuted() || ducked ? 0.0001 : Math.max(0.0001, cur().volume * getVolume()));
+/** The gain of the track that is playing. */
+const bus = () => (track === 'frontline' ? flBus : track === 'fleet' ? fleetBus : track === 'egyptian' ? egwBus : master)!;
 
 /**
  * Silence the soundtrack for a while (the enter-the-game curtain plays its own cue): fades out quickly,
@@ -482,15 +566,15 @@ export function duckMusic(on: boolean) {
   if (ducked === on) return;
   ducked = on;
   if (!ctx || !timer || !master) return;
-  master.gain.cancelScheduledValues(ctx.currentTime);
-  master.gain.setTargetAtTime(level(), ctx.currentTime, on ? 0.12 : 1.1);
+  bus().gain.cancelScheduledValues(ctx.currentTime);
+  bus().gain.setTargetAtTime(level(), ctx.currentTime, on ? 0.12 : 1.1);
 }
 
 // Follow the volume slider and the mute button while playing.
 const follow = () => {
   if (!ctx || !timer || !master) return;
-  master.gain.cancelScheduledValues(ctx.currentTime);
-  master.gain.setTargetAtTime(level(), ctx.currentTime, 0.05);
+  bus().gain.cancelScheduledValues(ctx.currentTime);
+  bus().gain.setTargetAtTime(level(), ctx.currentTime, 0.05);
 };
 subscribeVolume(follow);
 subscribeMuted(follow);
@@ -499,17 +583,20 @@ function stop() {
   if (!ctx || !timer) return;
   clearInterval(timer);
   timer = null;
-  master!.gain.cancelScheduledValues(ctx.currentTime);
-  master!.gain.setTargetAtTime(0.0001, ctx.currentTime, 0.15);
+  bus().gain.cancelScheduledValues(ctx.currentTime);
+  bus().gain.setTargetAtTime(0.0001, ctx.currentTime, 0.15);
 }
 
-// The edition picker (/) is the main menu: all music stops there, and waits until a game's screens open.
+// Entering or leaving Frontline or Fleet swaps the track (a quick crossfade between the buses).
+// The edition picker (/) chooses a game first, so music waits until a game's screens open.
 let armed = false;
-const onPicker = () => window.location.pathname === '/';
+// Warfront (/warfront/...) plays its own score (warfront/music.ts), so the soundtrack rests there too.
+const onPicker = () => window.location.pathname === '/' || window.location.pathname.startsWith('/warfront');
 onNavigate(() => {
   if (!armed || !enabled) return;
   if (onPicker()) stop();
   else if (!timer) start();
+  else if (trackHere() !== track) { stop(); start(); }
 });
 
 export function setMusicOn(on: boolean) {

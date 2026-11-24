@@ -46,8 +46,7 @@
   .ep-grid { margin-bottom: auto; }
   .ep-title { font-size: 52px; }
   .ep-head { margin-bottom: 36px; }
-  .ep-grid { grid-template-columns: repeat(2, 1fr); gap: 24px; max-width: 760px; }
-  .ep-head { max-width: 760px; }
+  .ep-grid { grid-template-columns: repeat(3, 1fr); gap: 24px; }
   .ep-card { grid-template-columns: 1fr; grid-template-rows: auto 1fr; min-height: 0; }
   .ep-art { aspect-ratio: 4 / 3; }
   .ep-text { padding: 20px 22px 22px; }
@@ -111,10 +110,14 @@
   .ep-card:hover { transform: none; }
 }
 
-/* the main page: one card, the Ticket to Taitoka series, the size of a single card */
+/* the main page: the series card, Frontline and Fleet, the same size side by side */
 @media (min-width: 720px) {
-  .ep-grid { grid-template-columns: 1fr; max-width: 380px; }
-  .ep-head { max-width: 380px; }
+  .ep-grid { grid-template-columns: repeat(2, 1fr); max-width: 760px; }
+  .ep-head { max-width: 760px; }
+}
+@media (min-width: 1280px) {
+  .ep-grid { grid-template-columns: repeat(4, 1fr); max-width: 1360px; }
+  .ep-head { max-width: 1360px; }
 }
 
 /* Singapore: tropical golden hour. White card edged with Peranakan tiles, teal ink, orchid name, the six MRT line colours. */
@@ -134,3 +137,45 @@
 .ep-sg-train, .ep-sg-bay { transition: transform .6s ease; transform-box: view-box; }
 .ep-singapore:hover .ep-sg-train { transform: translateX(14px); }
 @media (prefers-reduced-motion: reduce) { .ep-sg-train, .ep-sg-bay { transition: none; } }
+
+/* Frontline: a tactical night map. Olive drab, brass HUD, a stencil-like condensed display face, a slowly turning radar. */
+.ep-fl { background: #1c221b; color: #e8e6df; border: 2px solid #556b2f; border-radius: 6px; }
+.ep-fl-to { font-family: "Barlow Condensed", "Arial Narrow", sans-serif; font-weight: 600; font-size: 13px; letter-spacing: .22em; text-transform: uppercase; color: #c8ad7f; }
+.ep-fl-name { font-family: "Barlow Condensed", "Arial Narrow", sans-serif; font-weight: 700; font-size: 40px; line-height: 1; letter-spacing: .1em; text-transform: uppercase; color: #e3d6a8; }
+.ep-fl-line { margin: 6px 0 14px; font-family: "Inter", system-ui, sans-serif; font-size: 14px; line-height: 1.45; color: #b9b6aa; }
+.ep-fl-label {
+  margin-top: auto; padding: 3px 10px; border: 1.5px solid #d6452f; color: #ff7a5c;
+  font-family: "Barlow Condensed", "Arial Narrow", sans-serif; font-weight: 700; font-size: 13px; letter-spacing: .2em; text-transform: uppercase;
+}
+.ep-fl-sweep { animation: ep-fl-radar 6s linear infinite; transform-box: view-box; transform-origin: 0 0; }
+.ep-fl:hover .ep-fl-sweep { animation-duration: 2s; }
+.ep-fl-tank { transition: transform .6s ease; transform-box: view-box; }
+.ep-fl:hover .ep-fl-tank { transform: translateX(10px); }
+@keyframes ep-fl-radar { to { transform: rotate(-360deg); } }
+@media (prefers-reduced-motion: reduce) { .ep-fl-sweep { animation: none; } .ep-fl-tank { transition: none; } }
+
+/* Fleet: a combat plot seen from above. Navy-black water, a cyan grid, steel ships, amber deck lines, a red hit. */
+.ep-flt { background: #0a121c; color: #dbe7f3; border: 2px solid #22405c; border-radius: 6px; }
+.ep-flt-to { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 12px; color: #8aa3bb; }
+.ep-flt-name { font-family: "Oswald", "Barlow Condensed", "Arial Narrow", sans-serif; font-weight: 600; font-size: 40px; line-height: 1.05; letter-spacing: .14em; text-transform: uppercase; color: #e6f6ff; text-shadow: 0 0 18px rgba(56, 225, 255, .35); }
+.ep-flt-line { margin: 6px 0 14px; font-family: "Inter", system-ui, sans-serif; font-size: 14px; line-height: 1.45; color: #a9bccd; }
+.ep-flt-label {
+  margin-top: auto; padding: 3px 10px; border: 1.5px solid #38e1ff; border-radius: 3px; color: #7fecff;
+  font-family: "Oswald", "Arial Narrow", sans-serif; font-weight: 500; font-size: 13px; letter-spacing: .14em;
+}
+.ep-flt-reticle { transition: transform .5s cubic-bezier(.2, .9, .3, 1.2); transform-box: fill-box; transform-origin: center; }
+.ep-flt:hover .ep-flt-reticle { transform: translate(-76px, -40px) scale(.8); }
+.ep-flt-fire { animation: ep-flt-flicker 1.4s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: center; }
+@keyframes ep-flt-flicker { from { opacity: .7; transform: scale(.92); } to { opacity: 1; transform: scale(1.08); } }
+@media (prefers-reduced-motion: reduce) { .ep-flt-reticle { transition: none; } .ep-flt-fire { animation: none; } }
+
+/* Egyptian War: a fanned hand of the Egyptian deck's court cards on a dark card-room felt */
+.ep-egw { background: radial-gradient(ellipse at 50% 0%, #2a2033, #120f17 70%); color: #f1e9d8; border: 2px solid #5b4523; border-radius: 10px; }
+.ep-egw .ep-art { background: radial-gradient(ellipse 80% 70% at 50% 75%, #1c5a4e, #0d2f29 70%, #0a1714); border-right: 2px solid #5b4523; }
+@media (min-width: 720px) { .ep-egw .ep-art { border-right: 0; border-bottom: 2px solid #5b4523; } }
+.ep-egw .ep-art svg { position: static; inset: auto; width: 100%; height: auto; }
+.ep-egw .ep-art svg[width="0"] { position: absolute; width: 0; height: 0; }
+.ep-egw-to { font-family: "Inter", system-ui, sans-serif; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: #c99a2e; }
+.ep-egw-name { font-family: "Cinzel", Georgia, serif; font-weight: 700; font-size: 34px; line-height: 1.1; letter-spacing: .06em; background: linear-gradient(180deg, #fff1bf, #e9c46a 50%, #b9862b); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.ep-egw-line { margin: 6px 0 14px; font-family: "Inter", system-ui, sans-serif; font-size: 14px; line-height: 1.45; color: #b9ae9a; }
+.ep-egw-label { margin-top: auto; padding: 3px 10px; border: 1.5px solid #c99a2e; border-radius: 3px; color: #f3d98a; font-family: "Cinzel", Georgia, serif; font-weight: 600; font-size: 13px; letter-spacing: .14em; }

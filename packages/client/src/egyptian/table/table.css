@@ -1,0 +1,200 @@
+/* The table: felt oval, seats, the pile and every animation. Timings come from fx.ts as --egw-* vars. */
+
+.egw-table {
+  position: relative; width: 100%; height: clamp(380px, 70vh, 820px);
+  container-type: size;
+  --card-w: clamp(78px, min(11.5cqw, 21cqh), 156px);
+  --mini-w: clamp(34px, min(4.6cqw, 8.5cqh), 58px);
+}
+.egw-felt {
+  position: absolute; inset: 11% 9%; border-radius: 50%;
+  background:
+    radial-gradient(ellipse 60% 55% at 50% 42%, rgba(255, 255, 255, .07), transparent 70%),
+    repeating-radial-gradient(circle at 50% 50%, rgba(255, 255, 255, .012) 0 2px, transparent 2px 5px),
+    radial-gradient(ellipse at 50% 45%, #1c5a4e, #123f37 55%, #0a2823 100%);
+  box-shadow:
+    inset 0 0 0 2px rgba(0, 0, 0, .35), inset 0 18px 60px rgba(0, 0, 0, .5), inset 0 -10px 40px rgba(0, 0, 0, .35),
+    0 0 0 14px var(--egw-rail-2), 0 0 0 16px #1a110a, 0 0 0 17px color-mix(in srgb, var(--egw-gold) 55%, transparent),
+    0 40px 90px rgba(0, 0, 0, .65);
+}
+.egw-felt::before {
+  content: ''; position: absolute; inset: -14px; border-radius: 50%; pointer-events: none;
+  background: linear-gradient(170deg, rgba(255, 220, 170, .14), transparent 30%, transparent 70%, rgba(0, 0, 0, .3));
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 15px), #000 calc(100% - 14px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 15px), #000 calc(100% - 14px));
+}
+.egw-felt-ring {
+  position: absolute; left: 50%; top: 50%; width: calc(var(--card-w) * 2.7); aspect-ratio: 1.45; translate: -50% -50%;
+  border-radius: 50%; border: 1px solid color-mix(in srgb, var(--egw-gold) 30%, transparent);
+  box-shadow: 0 0 0 6px rgba(0, 0, 0, .08), inset 0 0 40px rgba(0, 0, 0, .25);
+}
+
+/* turn pointer: a gold wedge on the ring, turned toward the player to act */
+.egw-pointer {
+  position: absolute; left: 50%; top: 50%; width: calc(var(--card-w) * 2.95); height: 0;
+  transition: transform .35s cubic-bezier(.3, 1.4, .5, 1); pointer-events: none; z-index: 1;
+}
+.egw-pointer span {
+  position: absolute; right: 0; top: 0; width: 0; height: 0; translate: 0 -50%;
+  border-left: 18px solid var(--egw-gold-hi); border-top: 11px solid transparent; border-bottom: 11px solid transparent;
+  filter: drop-shadow(0 0 8px var(--egw-glow));
+}
+
+/* seats */
+.egw-seat {
+  position: absolute; translate: -50% -50%; z-index: 3;
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+}
+.egw-stack { position: relative; width: var(--mini-w); aspect-ratio: 250 / 350; transition: opacity .4s; }
+.egw-stack.is-dealing { opacity: 0; }
+.egw-stack-card { position: absolute; inset: 0; }
+.egw-stack-card .egw-card { width: 100%; height: auto; }
+.egw-stack-empty { position: absolute; inset: 0; border-radius: 8px; border: 1.5px dashed rgba(255, 255, 255, .18); }
+.egw-count {
+  position: absolute; right: -14px; bottom: -8px; min-width: 26px; height: 22px; padding: 0 6px; border-radius: 11px;
+  display: grid; place-items: center; font: 700 12px/1 var(--egw-ui); font-variant-numeric: tabular-nums;
+  background: #0c0b10; color: var(--egw-ink); border: 1px solid color-mix(in srgb, var(--seat) 60%, #000);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, .5); z-index: 6;
+}
+.egw-plate {
+  display: flex; align-items: center; gap: 9px; padding: 6px 12px 6px 6px; border-radius: 999px;
+  background: linear-gradient(180deg, rgba(30, 26, 38, .96), rgba(18, 16, 24, .96));
+  border: 1px solid color-mix(in srgb, var(--seat) 35%, var(--egw-line)); box-shadow: 0 8px 22px rgba(0, 0, 0, .45);
+  transition: box-shadow .25s, border-color .25s, transform .25s; white-space: nowrap;
+}
+.egw-avatar {
+  position: relative; width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; flex: none;
+  font: 700 15px/1 var(--egw-display); color: #111; background: var(--seat);
+  box-shadow: inset 0 -3px 0 rgba(0, 0, 0, .25), 0 0 0 2px rgba(0, 0, 0, .4);
+}
+.egw-seat-text { display: grid; gap: 2px; }
+.egw-name { font-weight: 600; font-size: 14px; }
+.egw-you { color: var(--egw-muted); font-weight: 500; }
+.egw-tags { display: flex; gap: 4px; }
+.egw-tags:empty { display: none; }
+.egw-tag {
+  font-size: 10.5px; font-weight: 600; letter-spacing: .03em; padding: 2px 7px; border-radius: 6px;
+  background: rgba(255, 255, 255, .08); color: var(--egw-muted);
+}
+.egw-tag.bad { background: rgba(255, 93, 82, .16); color: #ff8f86; }
+.egw-tag.gold { background: rgba(233, 196, 106, .18); color: var(--egw-gold-hi); }
+.egw-seat.is-turn .egw-plate {
+  border-color: var(--egw-gold-hi); transform: translateY(-2px);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--egw-gold) 35%, transparent), 0 0 30px var(--egw-glow), 0 8px 22px rgba(0, 0, 0, .45);
+}
+.egw-seat.is-challenged .egw-plate { animation: egw-pulse 1s ease-in-out infinite; }
+.egw-seat.is-out .egw-stack, .egw-seat.is-left { opacity: .55; }
+.egw-seat.is-start .egw-plate { animation: egw-pulse .8s ease-in-out 2; }
+.egw-seat.is-winner .egw-stack { animation: egw-receive .5s ease-out var(--egw-sweep) both; }
+@keyframes egw-pulse { 50% { box-shadow: 0 0 0 6px color-mix(in srgb, var(--egw-gold) 30%, transparent), 0 0 34px var(--egw-glow); } }
+@keyframes egw-receive { 50% { transform: scale(1.12); } }
+
+.egw-lock-ring { position: absolute; inset: -5px; width: calc(100% + 10px); height: calc(100% + 10px); rotate: -90deg; animation: egw-drain linear forwards; }
+.egw-lock-ring circle { fill: none; stroke: var(--egw-bad); stroke-width: 3.5; stroke-dasharray: 100; stroke-dashoffset: 0; stroke-linecap: round; animation: inherit; animation-name: egw-drain-stroke; }
+@keyframes egw-drain { to { opacity: .2; } }
+@keyframes egw-drain-stroke { to { stroke-dashoffset: 100; } }
+
+/* pile */
+.egw-pile-wrap { position: absolute; left: 50%; top: 50%; translate: -50% -50%; z-index: 4; }
+.egw-pile-wrap.is-sweeping { animation: egw-sweep var(--egw-sweep) cubic-bezier(.5, 0, .7, .4) forwards; }
+.egw-pile-wrap.is-gone { opacity: 0; }
+.fx-off .egw-pile-wrap.is-sweeping { animation: none; }
+@keyframes egw-sweep { to { transform: translate(calc(var(--sx) * 1cqw), calc(var(--sy) * 1cqh)) scale(.3); opacity: 0; } }
+.egw-pile-wrap.is-shaking { animation: egw-shake var(--egw-crack) ease-out; }
+@keyframes egw-shake { 15%, 55% { transform: translateX(-7px) rotate(-1deg); } 35%, 75% { transform: translateX(7px) rotate(1deg); } }
+
+.egw-pile { position: relative; width: var(--card-w); aspect-ratio: 250 / 350; transition: filter .3s; }
+.egw-pile.is-dim { filter: brightness(.55) saturate(.8); }
+.egw-pile-slot { position: absolute; inset: 0; border-radius: 9%/6.5%; border: 1.5px dashed color-mix(in srgb, var(--egw-gold) 35%, transparent); }
+.egw-pile-card { position: absolute; inset: 0; transition: transform .28s cubic-bezier(.3, 1.2, .5, 1); }
+.egw-pile-card .egw-card, .egw-burned .egw-card, .egw-peek .egw-card, .egw-lifted-card .egw-card, .egw-fx-burn .egw-card, .egw-deal-card .egw-card { width: 100%; height: auto; }
+.egw-fly { position: absolute; inset: 0; transform-style: preserve-3d; }
+.egw-face { position: absolute; inset: 0; backface-visibility: hidden; }
+.egw-face-back { transform: rotateY(180deg); }
+.egw-fly.is-in { animation: egw-fly var(--egw-flip) cubic-bezier(.25, .7, .35, 1) both; }
+@keyframes egw-fly {
+  0% { transform: translate(calc(var(--sx) * 1cqw), calc(var(--sy) * 1cqh)) rotateY(180deg) scale(.42); }
+  62% { transform: translate(0, 0) rotateY(0deg) scale(1.16); }
+  100% { transform: translate(0, 0) rotateY(0deg) scale(1); }
+}
+.egw-burned { position: absolute; width: 62%; left: 58%; top: 52%; rotate: 14deg; opacity: .9; }
+.egw-burned-n {
+  position: absolute; right: -8px; bottom: -6px; padding: 2px 6px; border-radius: 6px; font: 700 11px/1.2 var(--egw-ui);
+  background: #3a1210; color: #ffb3ad; border: 1px solid #7c2a25;
+}
+.egw-peek { position: absolute; width: 74%; left: -46%; top: 30%; rotate: -12deg; }
+.egw-peek span {
+  position: absolute; left: 50%; bottom: -18px; translate: -50% 0; font: 600 10px/1 var(--egw-ui); letter-spacing: .14em;
+  text-transform: uppercase; color: var(--egw-gold-hi);
+}
+
+/* grace: a ring that drains around the pile */
+.egw-grace { position: absolute; left: 50%; top: 50%; width: calc(var(--card-w) * 2.1); translate: -50% -50%; rotate: -90deg; animation: egw-tick linear forwards; pointer-events: none; }
+.egw-grace circle { fill: none; stroke: var(--egw-gold-hi); stroke-width: 2.5; stroke-dasharray: 100; stroke-linecap: round; filter: drop-shadow(0 0 6px var(--egw-glow)); animation: inherit; animation-name: egw-drain-stroke; }
+@keyframes egw-tick { from { opacity: 1; } to { opacity: .6; } }
+
+/* challenge banner */
+.egw-challenge {
+  position: absolute; left: 50%; top: calc(50% - var(--card-w) * 1.05); translate: -50% -100%; z-index: 6;
+  display: flex; align-items: center; gap: 10px; padding: 7px 14px; border-radius: 12px;
+  background: linear-gradient(180deg, #2a2115, #19140d); border: 1px solid color-mix(in srgb, var(--egw-gold) 60%, #000);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, .5), 0 0 24px rgba(233, 196, 106, .15); animation: egw-drop .35s cubic-bezier(.3, 1.5, .5, 1);
+}
+.egw-challenge-face { font: 700 15px/1 var(--egw-display); letter-spacing: .08em; color: var(--egw-gold-hi); text-transform: uppercase; }
+.egw-challenge-who { font-weight: 600; font-size: 14px; }
+.egw-ankhs { display: flex; gap: 3px; }
+.egw-ankh { width: 13px; height: 22px; transition: color .3s, opacity .3s, transform .3s; }
+.egw-ankh.lit { color: var(--egw-gold-hi); filter: drop-shadow(0 0 4px var(--egw-glow)); }
+.egw-ankh.spent { color: #4c4235; opacity: .6; transform: scale(.85); }
+@keyframes egw-drop { from { opacity: 0; transform: translateY(-12px) scale(.9); } }
+
+/* won pile: lifted cards and the ribbon */
+.egw-reveal { position: absolute; left: 50%; top: 50%; translate: -50% -50%; z-index: 8; display: grid; justify-items: center; gap: 14px; pointer-events: none; }
+.egw-lifted { display: flex; gap: 12px; }
+.egw-lifted-card { width: calc(var(--card-w) * 1.02); animation: egw-lift .45s cubic-bezier(.3, 1.4, .5, 1) both; filter: drop-shadow(0 14px 22px rgba(0, 0, 0, .6)); }
+.fx-off .egw-lifted-card, .fx-off .egw-ribbon { animation: none; }
+@keyframes egw-lift { from { transform: translateY(40px) scale(.7); opacity: 0; } }
+.egw-ribbon {
+  display: grid; justify-items: center; gap: 3px; padding: 10px 26px; text-align: center;
+  background: linear-gradient(180deg, #f5dc8a, #cf9f36 60%, #a9781f); color: #20160a;
+  clip-path: polygon(0 0, 100% 0, 96% 50%, 100% 100%, 0 100%, 4% 50%);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, .5); animation: egw-drop .4s cubic-bezier(.3, 1.5, .5, 1) both;
+}
+.egw-ribbon-kicker { font: 600 11px/1 var(--egw-ui); letter-spacing: .16em; text-transform: uppercase; opacity: .75; }
+.egw-ribbon-main { font: 700 clamp(17px, 2.3cqw, 24px)/1.15 var(--egw-display); letter-spacing: .04em; }
+.egw-ribbon-more { font: 600 12px/1.2 var(--egw-ui); opacity: .8; }
+.egw-reveal.is-slapin .egw-ribbon { background: linear-gradient(180deg, #fff3c4, #f2c94c 55%, #d49b1c); }
+
+/* hands, cracks, burns, flashes */
+.egw-fx-hand { position: absolute; left: 50%; top: 50%; width: calc(var(--card-w) * .95); translate: -50% -55%; z-index: 9; pointer-events: none; animation: egw-slam var(--egw-hand) cubic-bezier(.6, 0, .9, .6) both, egw-fade .4s ease-in calc(var(--egw-hand) + 60ms) forwards; }
+.egw-fx-hand.ok { color: #f0c27a; filter: drop-shadow(0 0 18px rgba(255, 214, 120, .8)); }
+.egw-fx-hand.bad { color: #e8b48c; filter: drop-shadow(0 0 16px rgba(255, 75, 62, .9)); }
+.egw-hand-art { width: 100%; height: auto; }
+@keyframes egw-slam {
+  0% { transform: translate(calc(var(--sx) * 1cqw), calc(var(--sy) * 1cqh)) scale(1.5) rotate(-12deg); opacity: 0; }
+  30% { opacity: 1; }
+  85% { transform: translate(0, 0) scale(.94); }
+  100% { transform: translate(0, 0) scale(1); }
+}
+@keyframes egw-fade { to { opacity: 0; } }
+.egw-fx-crack { position: absolute; left: 50%; top: 50%; width: calc(var(--card-w) * 2); translate: -50% -50%; z-index: 9; pointer-events: none; animation: egw-crack var(--egw-crack) ease-out forwards; }
+@keyframes egw-crack { 0% { opacity: 0; transform: scale(.5); } 20% { opacity: 1; transform: scale(1.05); } 100% { opacity: 0; transform: scale(1.12); } }
+.egw-fx-burn { position: absolute; left: 50%; top: 50%; width: var(--mini-w); translate: -50% -50%; z-index: 2; pointer-events: none; animation: egw-burn var(--egw-burn) ease-in var(--egw-hand) both; }
+@keyframes egw-burn {
+  from { transform: translate(calc(var(--sx) * 1cqw), calc(var(--sy) * 1cqh)); opacity: 1; }
+  to { transform: translate(calc(var(--card-w) * .45), calc(var(--card-w) * .35)) rotate(14deg) scale(1.6); opacity: 0; }
+}
+.egw-fx-flash { position: absolute; left: 50%; top: 50%; width: calc(var(--card-w) * 4); aspect-ratio: 1; translate: -50% -50%; z-index: 7; pointer-events: none; border-radius: 50%; background: radial-gradient(circle, rgba(255, 226, 140, .85), rgba(255, 200, 80, .25) 40%, transparent 70%); animation: egw-flash var(--egw-flash) ease-out forwards; }
+@keyframes egw-flash { from { opacity: 0; transform: scale(.4); } 25% { opacity: 1; } to { opacity: 0; transform: scale(1.2); } }
+
+/* deal */
+.egw-deal-card { position: absolute; left: 50%; top: 50%; width: var(--mini-w); translate: -50% -50%; z-index: 5; opacity: 0; animation: egw-deal .5s cubic-bezier(.3, .7, .4, 1) both; }
+@keyframes egw-deal {
+  0% { opacity: 1; transform: translate(0, 0) rotate(0); }
+  90% { opacity: 1; }
+  100% { opacity: 0; transform: translate(calc(var(--sx) * 1cqw), calc(var(--sy) * 1cqh)) rotate(200deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .egw-pointer { transition: none; }
+}

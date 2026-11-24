@@ -1,0 +1,94 @@
+/* Menu, setup, rule checklist, waiting room. */
+.egw-menu { display: flex; flex-direction: column; align-items: center; padding: 0 20px 48px; }
+.egw-menu-bar { width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 14px 150px 0 0; }
+.egw-hero { display: grid; justify-items: center; text-align: center; gap: 8px; margin: 8px 0 26px; }
+.egw-hero-art { width: 360px; height: 200px; position: relative; margin-bottom: 34px; }
+.egw-hero-title {
+  font-size: clamp(44px, 7vw, 76px); line-height: 1; letter-spacing: .08em;
+  background: linear-gradient(180deg, #fff1bf, #e9c46a 45%, #b9862b); -webkit-background-clip: text; background-clip: text; color: transparent;
+  filter: drop-shadow(0 4px 24px rgba(233, 196, 106, .25));
+}
+.egw-hero-line { color: var(--egw-muted); font-size: 16px; max-width: 600px; }
+.egw-center-text { text-align: center; max-width: 520px; }
+
+/* the fanned hand (menu hero and the picker card) */
+.egw-fan { position: absolute; inset: 0; display: block; }
+.egw-fan-card {
+  position: absolute; left: 50%; bottom: 6%; width: 27%; translate: -50% 0;
+  transform-origin: 50% 160%; transform: rotate(calc(var(--i) * 13deg)) translateY(calc(abs(var(--i)) * 4%));
+  transition: transform .45s cubic-bezier(.3, 1.3, .5, 1);
+}
+.egw-fan-card .egw-card { width: 100%; height: auto; filter: drop-shadow(0 6px 10px rgba(0, 0, 0, .5)); }
+.egw-hero-art:hover .egw-fan-card, .ep-egw:hover .egw-fan-card { transform: rotate(calc(var(--i) * 17deg)) translateY(calc(abs(var(--i)) * 5% - 4%)); }
+
+.egw-modes { width: min(780px, 100%); display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.egw-mode {
+  display: grid; gap: 8px; padding: 22px 22px 24px; text-align: left; cursor: pointer; color: var(--egw-ink);
+  border-radius: 18px; border: 1px solid var(--egw-line); background: linear-gradient(160deg, #282233, #17141f);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, .06) inset, 0 16px 36px rgba(0, 0, 0, .4); transition: transform .15s, border-color .15s;
+}
+.egw-mode:hover { transform: translateY(-3px); border-color: color-mix(in srgb, var(--egw-gold) 70%, var(--egw-line)); }
+.egw-mode-kicker { font-size: 12px; letter-spacing: .16em; text-transform: uppercase; color: var(--egw-gold); }
+.egw-mode-name { font: 700 26px/1.1 var(--egw-display); letter-spacing: .04em; }
+.egw-mode-line { color: var(--egw-muted); font-size: 14px; line-height: 1.5; }
+.egw-link { margin-top: 22px; background: none; border: 0; color: var(--egw-muted); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; font: 500 13px var(--egw-ui); }
+.egw-link:hover { color: var(--egw-gold-hi); }
+
+.egw-setup { width: min(900px, 100%); padding: 22px 24px; display: grid; gap: 14px; }
+.egw-setup-names { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.egw-field { display: grid; gap: 6px; font-size: 12px; color: var(--egw-muted); }
+.egw-field input {
+  height: 42px; padding: 0 12px; border-radius: 10px; border: 1px solid var(--egw-line); background: rgba(0, 0, 0, .3);
+  color: var(--egw-ink); font: 500 15px var(--egw-ui);
+}
+.egw-field input:focus { outline: 2px solid var(--egw-gold); outline-offset: 0; }
+
+/* rule checklist */
+.egw-rules { border: 0; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; }
+.egw-rule {
+  position: relative; display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 12px; padding: 10px 40px 10px 12px;
+  border-radius: 12px; border: 1px solid var(--egw-line); background: rgba(0, 0, 0, .22); cursor: pointer; transition: border-color .15s, background .15s;
+}
+.egw-rule input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: inherit; z-index: 1; }
+.egw-rule:has(input:focus-visible) { outline: 2px solid var(--egw-gold-hi); outline-offset: 2px; }
+.egw-rule.is-on { border-color: color-mix(in srgb, var(--egw-gold) 70%, transparent); background: linear-gradient(160deg, rgba(233, 196, 106, .14), rgba(233, 196, 106, .03)); }
+.egw-rules.is-readonly .egw-rule { cursor: default; }
+.egw-rules.is-readonly .egw-rule:not(.is-on) { opacity: .45; }
+.egw-rule-cards { display: flex; }
+.egw-rule-cards .egw-card + .egw-card { margin-left: -22px; }
+.egw-rule-text { display: grid; gap: 2px; }
+.egw-rule-name { font-weight: 600; font-size: 14px; }
+.egw-rule-desc { font-size: 12px; color: var(--egw-muted); line-height: 1.35; }
+.egw-rule-tick {
+  position: absolute; right: 12px; top: 50%; translate: 0 -50%; width: 20px; height: 20px; border-radius: 6px;
+  border: 1.5px solid var(--egw-dim);
+}
+.egw-rule.is-on .egw-rule-tick { border-color: var(--egw-gold-hi); background: var(--egw-gold-hi); }
+.egw-rule.is-on .egw-rule-tick::after { content: ''; position: absolute; left: 6px; top: 2px; width: 5px; height: 10px; border: solid #1d1408; border-width: 0 2px 2px 0; rotate: 45deg; }
+
+.egw-howto { width: min(600px, 100%); padding: 22px 26px; display: grid; gap: 14px; }
+.egw-howto header { display: flex; justify-content: space-between; align-items: center; }
+.egw-howto ol { display: grid; gap: 10px; padding-left: 20px; color: var(--egw-muted); line-height: 1.5; }
+.egw-howto b { color: var(--egw-ink); }
+
+/* waiting room */
+.egw-room { width: min(1040px, 100%); display: grid; grid-template-columns: 1.1fr 1fr; gap: 18px; align-items: start; }
+.egw-room-col { display: grid; gap: 16px; }
+.egw-room .egw-panel { padding: 18px 20px; display: grid; gap: 12px; }
+.egw-room-seats { display: grid; gap: 8px; }
+.egw-room-seat { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 12px; background: rgba(0, 0, 0, .25); border: 1px solid var(--egw-line); }
+.egw-room-seat.is-empty { border-style: dashed; color: var(--egw-dim); }
+.egw-room-seat .egw-avatar { width: 34px; height: 34px; }
+.egw-room-seat-name { flex: 1; font-weight: 600; }
+.egw-swatches { display: flex; gap: 6px; }
+.egw-swatch { width: 22px; height: 22px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; padding: 0; }
+.egw-swatch.on { border-color: #fff; box-shadow: 0 0 0 2px rgba(0, 0, 0, .5); }
+.egw-swatch:disabled { opacity: .25; cursor: not-allowed; }
+.egw-invite { display: grid; grid-template-columns: auto 1fr; gap: 14px; align-items: center; }
+.egw-invite-qr { background: #fff; padding: 8px; border-radius: 10px; line-height: 0; }
+.egw-url { font: 500 12px/1.4 ui-monospace, Menlo, monospace; word-break: break-all; color: var(--egw-muted); }
+
+@media (max-width: 760px) {
+  .egw-modes, .egw-setup-names, .egw-room { grid-template-columns: 1fr; }
+  .egw-menu-bar { padding-right: 120px; }
+}

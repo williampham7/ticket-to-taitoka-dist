@@ -1,0 +1,152 @@
+/* Frontline board: a tactical map in a bezel with coordinates. */
+.flb {
+  --rim: 18px;
+  position: relative; padding: var(--rim); border-radius: 7px;
+  background:
+    repeating-linear-gradient(90deg, rgba(255,255,255,.015) 0 1px, transparent 1px 4px),
+    linear-gradient(180deg, #1d241b, #11150f);
+  box-shadow: 0 0 0 1px #3a4536, inset 0 1px 0 rgba(255,255,255,.06), 0 26px 60px rgba(0,0,0,.6);
+}
+@media (max-width: 599px) { .flb { --rim: 12px; } }
+
+.flb-rim-cols, .flb-rim-rows {
+  position: absolute; display: grid; place-items: center; pointer-events: none;
+  font-family: "Barlow Condensed", "Arial Narrow", sans-serif; font-weight: 600; font-size: 11px; letter-spacing: .08em; color: #84907a;
+}
+.flb-rim-cols { left: var(--rim); width: calc(var(--cell) * 10); height: var(--rim); grid-template-columns: repeat(10, 1fr); }
+.flb-rim-cols.top { top: 0; } .flb-rim-cols.bottom { bottom: 0; }
+.flb-rim-rows { top: var(--rim); height: calc(var(--cell) * 10); width: var(--rim); grid-template-rows: repeat(10, 1fr); }
+.flb-rim-rows.left { left: 0; } .flb-rim-rows.right { right: 0; }
+@media (max-width: 599px) { .flb-rim-cols, .flb-rim-rows { font-size: 9px; } }
+
+.flb-field {
+  position: relative; display: grid; background: #273022;
+  box-shadow: 0 0 0 1px #0b0e0a, 0 0 0 2px rgba(200,173,127,.18);
+}
+/* registration corners */
+.flb-field::before {
+  content: ""; position: absolute; inset: -7px; pointer-events: none; z-index: 7;
+  --c: rgba(200,173,127,.75);
+  background:
+    linear-gradient(var(--c), var(--c)) top left / 14px 2px no-repeat, linear-gradient(var(--c), var(--c)) top left / 2px 14px no-repeat,
+    linear-gradient(var(--c), var(--c)) top right / 14px 2px no-repeat, linear-gradient(var(--c), var(--c)) top right / 2px 14px no-repeat,
+    linear-gradient(var(--c), var(--c)) bottom left / 14px 2px no-repeat, linear-gradient(var(--c), var(--c)) bottom left / 2px 14px no-repeat,
+    linear-gradient(var(--c), var(--c)) bottom right / 14px 2px no-repeat, linear-gradient(var(--c), var(--c)) bottom right / 2px 14px no-repeat;
+}
+
+/* terrain */
+.flb-terrain { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+.flb-nml { fill: rgba(205,184,128,.055); }
+.flb-contour { fill: none; stroke: rgba(196,218,150,.1); stroke-width: 1.2; vector-effect: non-scaling-stroke; }
+.flb-contour.major { stroke: rgba(196,218,150,.18); stroke-width: 1.6; }
+.flb-scrub { fill: rgba(8,12,6,.22); }
+.flb-shore { fill: none; stroke: rgba(205,186,132,.38); stroke-width: 16; }
+.flb-water { fill: #3d6170; stroke: #2a4652; stroke-width: 3; }
+.flb-ripples path { fill: none; stroke: rgba(225,240,245,.22); stroke-width: 3; stroke-linecap: round; stroke-dasharray: 26 18; animation: flb-ripple 7s linear infinite; }
+.flb-ripples path:nth-child(2) { animation-duration: 9s; animation-direction: reverse; }
+@keyframes flb-ripple { to { stroke-dashoffset: -176; } }
+
+/* squares */
+.flb-cell { position: relative; z-index: 2; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 0 0 .5px rgba(0,0,0,.42); }
+.flb-cell.odd { background: rgba(255,255,255,.022); }
+.flb-cell.lake { box-shadow: none; }
+.flb-cell[data-legal] { background: rgba(155,224,107,.1); }
+.flb-cell.zone::before { content: ""; position: absolute; inset: 12%; border: 1px dashed rgba(201,214,163,.42); border-radius: 5px; }
+.flb-cell.drop { box-shadow: inset 0 0 0 3px #7fd36b; background: rgba(127,211,107,.15); }
+
+/* the last move: a faint track and an empty ring where the piece came from */
+.flb-track { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
+.flb-track line { stroke-width: .07; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 1; animation: flb-draw .45s ease-out forwards; }
+.flb-track.mine line { stroke: rgba(155,224,107,.42); }
+.flb-track.theirs line { stroke: rgba(255,154,120,.5); }
+@keyframes flb-draw { to { stroke-dashoffset: 0; } }
+.flb-from { position: absolute; inset: 32%; border: 1.5px dashed rgba(232,230,223,.35); border-radius: 50%; pointer-events: none; }
+
+/* where a fight happened: scorched ground (a crater after a mine) */
+.flb-scorch {
+  position: absolute; inset: 2%; border-radius: 50%; pointer-events: none;
+  background: radial-gradient(circle, rgba(12,9,5,.72) 0 28%, rgba(46,28,12,.42) 50%, transparent 70%);
+  animation: flb-scorch-in .7s ease-out both;
+}
+.flb-scorch.crater { inset: -12%; background: radial-gradient(circle, rgba(6,5,3,.85) 0 24%, rgba(150,120,80,.28) 32%, rgba(40,25,10,.4) 46%, transparent 70%); }
+.flb-scorch::after {
+  content: ""; position: absolute; inset: -20%; border-radius: 50%;
+  background: radial-gradient(circle, rgba(190,190,180,.45), transparent 65%);
+  animation: flb-smoke 1.1s ease-out forwards;
+}
+@keyframes flb-scorch-in { from { opacity: 0; transform: scale(1.5); } }
+@keyframes flb-smoke { from { opacity: .9; transform: scale(.6); } to { opacity: 0; transform: scale(1.5) translateY(-18%); } }
+
+/* pieces */
+.flp { position: relative; width: 86%; height: 86%; z-index: 2; transition: transform .16s ease, filter .16s ease; }
+@media (hover: hover) {
+  .flp.movable:hover { transform: translateY(-5%); filter: drop-shadow(0 5px 4px rgba(0,0,0,.45)); }
+}
+.flp.selected { transform: translateY(-8%) scale(1.06); filter: drop-shadow(0 9px 7px rgba(0,0,0,.55)) brightness(1.08); }
+.flp.sliding { animation: flp-slide var(--ms) cubic-bezier(.25,.8,.25,1) both; }
+@keyframes flp-slide {
+  from { transform: translate(calc(var(--dx) * var(--cell)), calc(var(--dy) * var(--cell))) scale(1.1); filter: drop-shadow(0 14px 9px rgba(0,0,0,.55)); }
+  80% { transform: translate(0, 0) scale(1.04); }
+  to { transform: none; filter: none; }
+}
+.flp.lunging { animation: flp-lunge .42s cubic-bezier(.55,0,.8,.3) forwards; }
+@keyframes flp-lunge {
+  0% { transform: none; }
+  35% { transform: translate(calc(var(--dx) * -.12 * var(--cell)), calc(var(--dy) * -.12 * var(--cell))) scale(1.05); }
+  100% { transform: translate(calc(var(--dx) * var(--cell)), calc(var(--dy) * var(--cell))) scale(1.12); filter: drop-shadow(0 12px 9px rgba(0,0,0,.6)) brightness(1.15); }
+}
+/* a hidden piece is identified: it flips over with a ping */
+.flp.flipping .flt { animation: flt-flip .65s var(--flip-delay, 0ms) cubic-bezier(.3,.7,.3,1) both; }
+.flp.flipping::after {
+  content: ""; position: absolute; inset: -6%; border-radius: 14%; pointer-events: none;
+  border: 2px solid #9be06b; box-shadow: 0 0 14px #9be06b, inset 0 0 10px rgba(155,224,107,.6);
+  animation: flp-ping .75s var(--flip-delay, 0ms) ease-out both;
+}
+@keyframes flt-flip {
+  0% { transform: perspective(240px) rotateY(90deg); filter: brightness(2.4) saturate(.3); }
+  55% { transform: perspective(240px) rotateY(-14deg); filter: brightness(1.35); }
+  100% { transform: none; filter: none; }
+}
+@keyframes flp-ping { 0% { opacity: 0; transform: scale(.8); } 20% { opacity: 1; } 100% { opacity: 0; transform: scale(1.35); } }
+
+/* move targets: a diamond on empty ground, red brackets on an enemy */
+.flb-dest {
+  position: absolute; width: 20%; height: 20%; transform: rotate(45deg); pointer-events: none;
+  border: 2px solid #9be06b; background: rgba(155,224,107,.25); box-shadow: 0 0 10px rgba(155,224,107,.6);
+  animation: flb-pulse 1.2s ease-in-out infinite;
+}
+@keyframes flb-pulse { 50% { opacity: .45; transform: rotate(45deg) scale(.8); } }
+
+.flb-attack, .flb-sel, .flb-reticle { position: absolute; inset: 2%; z-index: 3; pointer-events: none; }
+.flb-attack i, .flb-sel i, .flb-reticle i { position: absolute; width: 28%; height: 28%; border: 0 solid var(--bc); }
+.flb-attack i:nth-child(1), .flb-sel i:nth-child(1), .flb-reticle i:nth-child(1) { top: 0; left: 0; border-width: 3px 0 0 3px; }
+.flb-attack i:nth-child(2), .flb-sel i:nth-child(2), .flb-reticle i:nth-child(2) { top: 0; right: 0; border-width: 3px 3px 0 0; }
+.flb-attack i:nth-child(3), .flb-sel i:nth-child(3), .flb-reticle i:nth-child(3) { bottom: 0; left: 0; border-width: 0 0 3px 3px; }
+.flb-attack i:nth-child(4), .flb-sel i:nth-child(4), .flb-reticle i:nth-child(4) { bottom: 0; right: 0; border-width: 0 3px 3px 0; }
+.flb-attack { --bc: #ff5a3c; animation: flb-lock 1.1s ease-in-out infinite alternate; }
+.flb-attack::before { content: ""; position: absolute; inset: 7%; border-radius: 10%; background: rgba(255,70,40,.2); }
+@keyframes flb-lock { to { inset: 9%; } }
+.flb-sel { --bc: #ffd54a; inset: -3%; filter: drop-shadow(0 0 4px rgba(255,213,74,.7)); }
+
+/* the reticle that locks on to a piece under attack */
+.flb-reticle { --bc: #ff4b2e; inset: -4%; z-index: 8; animation: flb-reticle-in .38s cubic-bezier(.2,.9,.3,1.2) both; filter: drop-shadow(0 0 6px rgba(255,75,46,.8)); }
+.flb-reticle b { position: absolute; inset: 18%; border-radius: 50%; border: 1.5px solid rgba(255,75,46,.85); }
+.flb-reticle b::before, .flb-reticle b::after { content: ""; position: absolute; background: #ff4b2e; }
+.flb-reticle b::before { left: 50%; top: -22%; bottom: -22%; width: 1.5px; transform: translateX(-50%); }
+.flb-reticle b::after { top: 50%; left: -22%; right: -22%; height: 1.5px; transform: translateY(-50%); }
+@keyframes flb-reticle-in { from { opacity: 0; transform: scale(2.2) rotate(45deg); } }
+
+/* an attack is under way: the rest of the field goes dark */
+.flb.engaged .flb-field::after { content: ""; position: absolute; inset: 0; z-index: 5; pointer-events: none; background: rgba(4,6,4,.5); animation: flb-dim .3s ease-out both; }
+@keyframes flb-dim { from { opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .flp.sliding, .flp.lunging, .flp.flipping .flt, .flp.flipping::after, .flb-ripples path, .flb-dest, .flb-attack, .flb-reticle, .flb-scorch, .flb-scorch::after { animation: none; }
+  .flp.flipping::after { opacity: 0; }
+  .flb-track line { animation: none; stroke-dashoffset: 0; }
+}
+
+/* a mine's light blinks on the board */
+.flp .fl-led { animation: fl-led 2.2s steps(1) infinite; }
+@keyframes fl-led { 50% { opacity: .2; } }
+@media (prefers-reduced-motion: reduce) { .flp .fl-led { animation: none; } }

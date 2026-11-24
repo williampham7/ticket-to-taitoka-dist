@@ -11,3 +11,7 @@ export { buildPlayerGraph, isTicketComplete, ticketPath } from './graph/playerGr
 export { longestTrail, longestTrailRoutes } from './graph/longest';
 export * from './lobbyRules';
 export * from './bot';
+export { FrontlineGame, FRONTLINE_GAME_NAME } from './frontline/game';
+export { FleetGame, FLEET_GAME_NAME } from './fleet/game';
+export { EgyptianGame, EGYPTIAN_GAME_NAME } from './egyptian/game';
+export { WarfrontGame, WARFRONT_GAME_NAME } from './warfront/game'; // Warfront

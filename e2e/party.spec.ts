@@ -95,3 +95,15 @@ test('the party follows the host through maps and the waiting room, keeps the ro
 
   await close();
 });
+
+test('Frontline: the next person in the party takes the second seat', async ({ browser }) => {
+  const { host, guest, close } = await party(browser);
+  await host.getByTestId('frontline-card').click();
+  await expect(guest).toHaveURL(/\/frontline$/, { timeout: 15_000 });
+  await host.getByTestId('fl-host').click();
+  await expect(host).toHaveURL(/\/frontline\/play\//);
+  const game = new URL(host.url()).pathname;
+  await expect(guest).toHaveURL(game, { timeout: 15_000 });
+  await expect(host.getByTestId('fl-invite')).toHaveCount(0);
+  await close();
+});

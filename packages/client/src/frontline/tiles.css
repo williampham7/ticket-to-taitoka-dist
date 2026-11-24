@@ -1,0 +1,74 @@
+/* Frontline army tiles: a chunky wargame counter with a stencil illustration. Sizes inside use cq units of the tile. */
+@import "@fontsource/barlow-condensed/600.css";
+@import "@fontsource/barlow-condensed/700.css";
+
+.flt {
+  --ink: #eff1e2; --acc: #f2d88e; --cut: #576e2e; --edge: #2c3816;
+  position: relative; width: 100%; height: 100%; container-type: size; overflow: hidden;
+  border-radius: 10%; color: var(--ink); user-select: none;
+  font-family: "Barlow Condensed", "Oswald", "Arial Narrow", sans-serif;
+  background:
+    repeating-linear-gradient(115deg, rgba(255,255,255,.035) 0 2px, transparent 2px 5px),
+    linear-gradient(160deg, #728b45 0%, #586f2f 55%, #485b24 100%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.3), inset 0 -1.5px 0 rgba(0,0,0,.3), 0 2px 0 var(--edge), 0 4px 7px rgba(0,0,0,.5);
+}
+.flt[data-army="tan"] {
+  --ink: #2b2417; --acc: #8b2f19; --cut: #cdb487; --edge: #7a6443;
+  background:
+    repeating-linear-gradient(115deg, rgba(255,255,255,.06) 0 2px, transparent 2px 5px),
+    linear-gradient(160deg, #e4cfa4 0%, #ccb283 55%, #b89d70 100%);
+}
+/* stencil frame */
+.flt::before {
+  content: ""; position: absolute; inset: 5%; border-radius: 7%; pointer-events: none;
+  border: 1px solid color-mix(in srgb, var(--ink) 20%, transparent);
+}
+/* sheen */
+.flt::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(135deg, rgba(255,255,255,.16) 0%, transparent 38%, transparent 70%, rgba(0,0,0,.12) 100%);
+}
+
+.flt-rank {
+  position: absolute; left: 9cqw; top: 4cqh; z-index: 1;
+  font-weight: 700; font-size: 27cqw; line-height: 1; color: var(--acc);
+  text-shadow: 0 1px 0 color-mix(in srgb, var(--cut) 60%, black);
+}
+.flt-eye { position: absolute; right: 9cqw; top: 9cqh; width: 20cqw; height: 12cqw; color: var(--acc); z-index: 1; }
+.flt-art { position: absolute; left: 50%; top: 7cqh; width: 68cqw; height: 68cqw; transform: translateX(-50%); overflow: visible; }
+.flt-name {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 22cqh; display: flex; align-items: center; justify-content: center;
+  padding: 0 6cqw; white-space: nowrap; overflow: hidden;
+  font-weight: 600; font-size: 15cqw; line-height: 1; letter-spacing: .05em; text-transform: uppercase;
+  background: color-mix(in srgb, var(--cut) 55%, black 45%); color: var(--ink);
+}
+.flt[data-army="tan"] .flt-name { background: color-mix(in srgb, var(--cut) 70%, #5b4528 30%); }
+.flt-name.long { font-size: 12.5cqw; letter-spacing: .02em; }
+
+/* small tiles: number and picture only */
+@container (max-width: 52px) {
+  .flt-name { display: none; }
+  .flt-art { top: 15cqh; width: 78cqw; height: 78cqw; }
+  .flt-rank { font-size: 32cqw; left: 6cqw; top: 2cqh; }
+  .flt-eye { top: 6cqh; right: 6cqw; }
+}
+
+/* the illustration's colours */
+.fla .k { fill: var(--ink); }
+.fla .a { fill: var(--acc); }
+.fla .c { fill: var(--cut); }
+.fla .k-s { fill: none; stroke: var(--ink); }
+.fla .a-s { fill: none; stroke: var(--acc); }
+.fla .c-s { fill: none; stroke: var(--cut); }
+.fla .fl-led { fill: #ff4a2e; filter: drop-shadow(0 0 2px #ff4a2e); }
+
+/* hidden enemy tile: the crest */
+.flt[data-hidden] { --cut: #4e6329; background:
+  repeating-linear-gradient(45deg, rgba(0,0,0,.09) 0 1.5px, transparent 1.5px 6px),
+  linear-gradient(160deg, #627a3a 0%, #4c6027 60%, #3f5020 100%); }
+.flt[data-army="tan"][data-hidden] { --cut: #c2a777; background:
+  repeating-linear-gradient(45deg, rgba(60,40,10,.10) 0 1.5px, transparent 1.5px 6px),
+  linear-gradient(160deg, #d8c194 0%, #c2a777 60%, #ad9165 100%); }
+.flt-crest { position: absolute; inset: 9%; width: 82%; height: 82%; opacity: .62; }
+
+.flt-chip { position: relative; display: inline-block; flex-shrink: 0; vertical-align: middle; }

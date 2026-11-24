@@ -1,0 +1,102 @@
+/* The game screen: bar, table stage, action buttons, legend, side column, dialogs. */
+.egw-game { display: grid; grid-template-rows: auto 1fr; height: 100dvh; overflow: hidden; }
+.egw-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 150px 12px clamp(14px, 2.4vw, 28px); }
+.egw-brand { display: flex; align-items: baseline; gap: 14px; }
+.egw-brand .egw-display { font-size: 20px; color: var(--egw-gold-hi); text-shadow: 0 0 22px rgba(233, 196, 106, .25); }
+.egw-round { font-size: 12px; color: var(--egw-muted); letter-spacing: .08em; text-transform: uppercase; }
+.egw-bar-actions { display: flex; align-items: center; gap: 8px; }
+
+.egw-stage { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 18px; padding: 0 clamp(14px, 2.4vw, 28px) 16px; min-height: 0; }
+.egw-stage.is-local { grid-template-columns: 190px minmax(0, 1fr) 190px; }
+.egw-center { display: flex; flex-direction: column; align-items: center; gap: 10px; min-width: 0; min-height: 0; }
+.egw-status {
+  min-height: 1.5em; font: 600 16px/1.4 var(--egw-ui); text-align: center; color: var(--egw-ink);
+  text-shadow: 0 2px 10px rgba(0, 0, 0, .6);
+}
+.egw-side { display: flex; flex-direction: column; gap: 14px; min-height: 0; padding-top: 12px; }
+.egw-chat { padding: 10px; flex: 1; min-height: 200px; display: flex; flex-direction: column; }
+
+/* action buttons */
+.egw-ctl { display: flex; gap: 12px; justify-content: center; }
+.egw-ctl.side-left, .egw-ctl.side-right { flex-direction: column; justify-content: center; gap: 16px; }
+.egw-ctl-who {
+  text-align: center; font: 700 15px/1 var(--egw-display); letter-spacing: .06em; color: var(--seat);
+  padding-bottom: 6px; border-bottom: 2px solid color-mix(in srgb, var(--seat) 50%, transparent);
+}
+.egw-act {
+  position: relative; display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 12px;
+  min-width: 170px; padding: 14px 16px; border-radius: 16px; cursor: pointer; color: var(--egw-ink);
+  font: 700 18px/1 var(--egw-display); letter-spacing: .08em; text-transform: uppercase;
+  border: 1px solid var(--egw-line); background: linear-gradient(180deg, #2b2536, #1b1824);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, .07) inset, 0 -3px 0 rgba(0, 0, 0, .35) inset, 0 10px 24px rgba(0, 0, 0, .4);
+  transition: transform .08s, box-shadow .15s, border-color .15s, opacity .2s; touch-action: manipulation; user-select: none;
+}
+.side-left .egw-act, .side-right .egw-act { min-height: 22vh; grid-template-columns: 1fr; justify-items: center; gap: 10px; font-size: 22px; }
+.egw-act:active:not(:disabled) { transform: translateY(2px) scale(.98); }
+.egw-act:disabled { opacity: .4; cursor: default; }
+.egw-act-icon { display: grid; place-items: center; width: 30px; height: 34px; }
+.side-left .egw-act-icon, .side-right .egw-act-icon { width: 44px; height: 50px; }
+.egw-act-icon svg { width: 100%; height: 100%; }
+.egw-act-flip.is-ready { border-color: var(--egw-gold-hi); box-shadow: 0 0 0 3px color-mix(in srgb, var(--egw-gold) 30%, transparent), 0 0 30px var(--egw-glow), 0 10px 24px rgba(0, 0, 0, .4); }
+.egw-act-slap { color: #ffe2d2; border-color: #7a3328; background: linear-gradient(180deg, #5d2620, #3b1613); }
+.egw-act-slap .egw-act-icon { color: #f0c27a; }
+.egw-act-slap:hover:not(:disabled) { border-color: #d0614f; }
+
+/* legend */
+.egw-legend { padding: 14px 16px; border-radius: 14px; background: rgba(20, 18, 27, .75); border: 1px solid var(--egw-line); }
+.egw-legend ul { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 8px; }
+.egw-legend li { display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: 14px; }
+.egw-legend-name { font-weight: 600; }
+.egw-legend-ex { display: flex; gap: 3px; }
+.egw-legend.is-compact { padding: 8px 14px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; justify-content: center; }
+.egw-legend.is-compact ul { margin: 0; display: flex; flex-wrap: wrap; gap: 8px 18px; }
+.egw-chip {
+  display: inline-block; min-width: 26px; padding: 2px 5px; border-radius: 4px; text-align: center;
+  font: 700 13px/1.2 'Barlow Condensed', var(--egw-ui); background: #f1e6c8; color: #18140f; box-shadow: 0 1px 0 rgba(0, 0, 0, .4);
+}
+.egw-chip.red { color: #b3231b; }
+
+/* dialogs */
+.egw-modal { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; padding: 20px; background: rgba(5, 4, 8, .62); backdrop-filter: blur(6px); }
+.egw-settings { width: min(560px, 100%); max-height: 90dvh; overflow: auto; padding: 22px 24px; display: grid; gap: 20px; }
+.egw-settings header { display: flex; justify-content: space-between; align-items: center; }
+.egw-settings h2 { font-size: 22px; }
+.egw-settings section { display: grid; gap: 10px; }
+.egw-keys { display: grid; gap: 14px; }
+.egw-keys-group h3 { font-size: 13px; font-weight: 600; color: var(--egw-muted); margin-bottom: 6px; }
+.egw-keys-row { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; border-bottom: 1px solid rgba(255, 255, 255, .05); }
+.egw-keys-row.is-bad span:first-child { color: #ff8f86; }
+.egw-bind { min-width: 110px; padding: 6px 10px; border-radius: 8px; background: rgba(0, 0, 0, .3); border: 1px solid var(--egw-line); color: var(--egw-ink); cursor: pointer; font: 600 13px var(--egw-ui); }
+.egw-bind[data-conflict] { border-color: var(--egw-bad); }
+.egw-warn { color: #ff8f86; font-size: 13px; }
+.egw-seg { display: inline-flex; padding: 3px; border-radius: 10px; background: rgba(0, 0, 0, .3); border: 1px solid var(--egw-line); width: fit-content; }
+.egw-seg button { padding: 7px 16px; border-radius: 8px; color: var(--egw-muted); font: 600 13px var(--egw-ui); background: none; border: 0; cursor: pointer; }
+.egw-seg button.on { background: var(--egw-panel-2); color: var(--egw-ink); box-shadow: 0 0 0 1px color-mix(in srgb, var(--egw-gold) 50%, transparent); }
+.egw-audio { display: flex; align-items: center; gap: 12px; }
+.egw-confirm { padding: 24px 28px; display: grid; gap: 10px; max-width: 420px; }
+
+/* result */
+.egw-result { width: min(620px, 100%); padding: 26px 30px; display: grid; justify-items: center; gap: 10px; text-align: center; animation: egw-drop .5s cubic-bezier(.3, 1.4, .5, 1); }
+.egw-result-title { font-size: clamp(26px, 4vw, 38px); }
+.egw-victory { position: relative; width: 160px; height: 150px; }
+.egw-rays { position: absolute; inset: -30px; background: repeating-conic-gradient(from 0deg, rgba(243, 217, 138, .22) 0 8deg, transparent 8deg 20deg); border-radius: 50%; -webkit-mask: radial-gradient(circle, #000 25%, transparent 70%); mask: radial-gradient(circle, #000 25%, transparent 70%); animation: egw-spin 18s linear infinite; }
+@keyframes egw-spin { to { rotate: 360deg; } }
+.egw-tower { position: absolute; left: 50%; bottom: 10px; width: 62px; translate: -50% 0; }
+.egw-tower-card { position: absolute; left: 0; width: 62px; animation: egw-stack-in .35s cubic-bezier(.3, 1.4, .5, 1) both; }
+.egw-tower-card .egw-card { width: 100%; height: auto; }
+@keyframes egw-stack-in { from { opacity: 0; transform: translateY(-60px) rotate(-20deg); } }
+.egw-stats { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 14px; }
+.egw-stats th, .egw-stats td { padding: 7px 8px; border-bottom: 1px solid rgba(255, 255, 255, .06); }
+.egw-stats tbody th { text-align: left; font-weight: 500; color: var(--egw-muted); }
+.egw-stats td { font-variant-numeric: tabular-nums; font-weight: 600; }
+.egw-result-actions { display: flex; gap: 10px; justify-content: center; margin-top: 6px; }
+
+@media (max-width: 960px) {
+  .egw-game { height: auto; min-height: 100dvh; overflow: visible; }
+  .egw-stage { grid-template-columns: 1fr; }
+  .egw-stage.is-local { grid-template-columns: 1fr 1fr; }
+  .egw-stage.is-local .egw-center { grid-column: 1 / -1; grid-row: 1; }
+  .side-left .egw-act, .side-right .egw-act { min-height: 90px; }
+  .egw-act { min-width: 140px; }
+}
+.egw-watch-link { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 6px 8px 16px; border-radius: 14px; border: 1px solid var(--egw-line); background: rgba(20, 18, 27, .75); }

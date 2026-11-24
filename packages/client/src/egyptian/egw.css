@@ -1,0 +1,83 @@
+/*
+ * Egyptian War: a dark, rich card room. The chrome is deck-neutral (warm night, felt, brass); the active deck's
+ * --deck-* tokens tint it lightly. Cinzel for display, Inter for UI, Barlow Condensed for card indices.
+ */
+@import "@fontsource/cinzel/600.css";
+@import "@fontsource/cinzel/700.css";
+@import "@fontsource/barlow-condensed/700.css";
+@import "@fontsource/inter/400.css";
+@import "@fontsource/inter/500.css";
+@import "@fontsource/inter/600.css";
+
+.egw {
+  --egw-night: #0b0a0f; --egw-night-2: #14121b; --egw-panel: #1b1824; --egw-panel-2: #241f2f; --egw-line: #3a3346;
+  --egw-ink: #f1e9d8; --egw-muted: #a89f8e; --egw-dim: #6f6779;
+  --egw-felt: #123d36; --egw-felt-2: #0b2a25; --egw-rail: #2a1d14; --egw-rail-2: #4a3220;
+  --egw-gold: var(--deck-accent, #c99a2e); --egw-gold-hi: #f3d98a; --egw-glow: var(--deck-glow, rgba(233, 196, 106, .35));
+  --egw-ok: #7fd6a2; --egw-bad: #ff5d52; --egw-warn: #f2b84b;
+  --egw-display: 'Cinzel', 'Trajan Pro', Georgia, serif;
+  --egw-ui: 'Inter', system-ui, sans-serif;
+  /* the shared chat panel reads the app's tokens: dark set */
+  --color-panel: #1b1824; --color-panel-2: #241f2f; --color-paper: #14121b; --color-ink: #f1e9d8;
+  --color-line: #3a3346; --color-line-strong: #5a4f6a; --color-muted: #a89f8e; --color-ticket: #241f2f;
+  min-height: 100dvh;
+  color: var(--egw-ink);
+  font-family: var(--egw-ui);
+  background:
+    radial-gradient(ellipse 90% 60% at 50% -10%, rgba(201, 154, 46, .14), transparent 60%),
+    radial-gradient(ellipse 70% 50% at 50% 110%, rgba(40, 71, 154, .16), transparent 60%),
+    var(--egw-night);
+  isolation: isolate;
+}
+.egw *:focus-visible { outline: 2px solid var(--egw-gold-hi); outline-offset: 2px; }
+
+.egw-display { font-family: var(--egw-display); font-weight: 700; letter-spacing: .06em; }
+.egw-sub { color: var(--egw-muted); font-size: 14px; }
+.egw-eyebrow { font-family: var(--egw-display); font-size: 12px; letter-spacing: .28em; text-transform: uppercase; color: var(--egw-gold); }
+
+/* buttons */
+.egw-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: .5em;
+  min-height: 40px; padding: 0 18px; border-radius: 10px;
+  font: 600 14px/1 var(--egw-ui); letter-spacing: .02em; color: var(--egw-ink);
+  background: linear-gradient(180deg, var(--egw-panel-2), var(--egw-panel)); border: 1px solid var(--egw-line);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, .06) inset, 0 6px 16px rgba(0, 0, 0, .3);
+  cursor: pointer; transition: transform .12s, border-color .15s, background .15s, box-shadow .15s;
+}
+.egw-btn:hover:not(:disabled) { border-color: color-mix(in srgb, var(--egw-gold) 60%, var(--egw-line)); transform: translateY(-1px); }
+.egw-btn:active:not(:disabled) { transform: translateY(1px); }
+.egw-btn:disabled { opacity: .45; cursor: not-allowed; }
+.egw-btn-gold {
+  color: #1d1408; border-color: #e9c76a;
+  background: linear-gradient(180deg, #f6dd8c, #d4a63a 55%, #b8862a);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, .5) inset, 0 8px 22px rgba(201, 154, 46, .28);
+}
+.egw-btn-gold:hover:not(:disabled) { border-color: #fff0b8; }
+.egw-btn-ghost { background: transparent; box-shadow: none; }
+.egw-btn-danger { border-color: #7c2a25; background: linear-gradient(180deg, #4a1c19, #331311); }
+.egw-key {
+  display: inline-grid; place-items: center; min-width: 1.9em; height: 1.75em; padding: 0 .4em; border-radius: 6px;
+  font: 700 .78em/1 var(--egw-ui); color: var(--egw-ink); background: rgba(0, 0, 0, .35);
+  border: 1px solid rgba(255, 255, 255, .18); border-bottom-width: 2px;
+}
+.egw-btn-gold .egw-key { color: #1d1408; background: rgba(255, 255, 255, .35); border-color: rgba(0, 0, 0, .25); }
+
+.egw-panel {
+  background: linear-gradient(180deg, rgba(36, 31, 47, .92), rgba(27, 24, 36, .92));
+  border: 1px solid var(--egw-line); border-radius: 16px;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, .05) inset, 0 20px 50px rgba(0, 0, 0, .45);
+}
+
+.egw-card { display: block; filter: drop-shadow(0 2px 3px rgba(0, 0, 0, .45)); }
+
+/* deck gallery */
+.egw-gallery { padding: 28px clamp(16px, 4vw, 48px) 60px; }
+.egw-gallery-head { display: grid; grid-template-columns: auto 1fr; gap: 4px 18px; align-items: center; margin-bottom: 24px; }
+.egw-gallery-head h1 { font-size: 30px; }
+.egw-gallery-head .egw-sub { grid-column: 2; }
+.egw-gallery-row { margin-bottom: 28px; }
+.egw-gallery-house { font-family: var(--egw-display); font-size: 18px; letter-spacing: .08em; margin-bottom: 12px; color: var(--egw-gold-hi); }
+.egw-gallery-house span { color: var(--egw-muted); font-family: var(--egw-ui); font-size: 13px; letter-spacing: 0; }
+.egw-gallery-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 16px; }
+.egw-gallery-card { margin: 0; }
+.egw-gallery-card figcaption { margin-top: 6px; text-align: center; font-size: 12px; color: var(--egw-muted); }

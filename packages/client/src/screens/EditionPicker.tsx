@@ -4,8 +4,10 @@ import { EDITION, setEdition, urlWithoutEdition } from '../edition';
 import { navigate } from '../lib/router';
 import { isFollower, usePartyState } from '../lib/party';
 import { SeriesArt } from './seriesArt';
+import { PickerArt as EgyptianArt } from '../egyptian/PickerArt';
 import './EditionPicker.css';
 import './series.css';
+import { WarfrontCard } from '../warfront/PickerCard'; // Warfront
 
 /**
  * The first screen. The route-building games sit behind one flagship card, the Ticket to Taitoka series; opening it
@@ -42,10 +44,38 @@ export function EditionPicker() {
     <main className="ep" data-testid="edition-picker" inert={maps !== 'closed' ? true : undefined}>
       <header className="ep-head">
         <h1 className="ep-title">Where to?</h1>
-        <p className="ep-sub" data-testid={follower ? 'party-waiting' : undefined}>{follower ? `You're in ${hostName}'s party. They pick the game, and your screen follows.` : 'Pick a game. You can switch maps later from the menu.'}</p>
+        {follower && <p className="ep-sub" data-testid="party-waiting">You're in {hostName}'s party. They pick the game, and your screen follows.</p>}
       </header>
       <div className="ep-grid">
         <SeriesCard buttonRef={seriesRef} open={maps !== 'closed'} onOpen={() => setMaps('open')} />
+        <button type="button" className="ep-card ep-fl" onClick={() => !follower && navigate('/frontline')} data-testid="frontline-card" aria-label="Frontline: two-player strategy">
+          <span className="ep-art" aria-hidden>{FrontlineArt}</span>
+          <span className="ep-text">
+            <span className="ep-fl-to">Classified · 2 players</span>
+            <span className="ep-fl-name">Frontline</span>
+            <span className="ep-fl-line">Two hidden armies, one front. Outthink the enemy before they read your lines.</span>
+            <span className="ep-fl-label">Strategy</span>
+          </span>
+        </button>
+        <button type="button" className="ep-card ep-flt" onClick={() => !follower && navigate('/fleet')} data-testid="fleet-card" aria-label="Fleet: two-player naval battle">
+          <span className="ep-art" aria-hidden>{FleetArt}</span>
+          <span className="ep-text">
+            <span className="ep-flt-to">2 players</span>
+            <span className="ep-flt-name">Fleet</span>
+            <span className="ep-flt-line">Hide your ships on a 10 by 10 sea and hunt theirs, one shell, salvo or super weapon at a time.</span>
+            <span className="ep-flt-label">Naval</span>
+          </span>
+        </button>
+        <button type="button" className="ep-card ep-egw" onClick={() => !follower && navigate('/egyptian')} data-testid="egyptian-card" aria-label="Egyptian War: card slapping for 2 to 5 players">
+          <span className="ep-art" aria-hidden><EgyptianArt /></span>
+          <span className="ep-text">
+            <span className="ep-egw-to">2 to 5 players · real time</span>
+            <span className="ep-egw-name">Egyptian War</span>
+            <span className="ep-egw-line">Flip, challenge and slap your way to all 52 cards. The quickest hand takes the pile.</span>
+            <span className="ep-egw-label">Cards</span>
+          </span>
+        </button>
+        <WarfrontCard follower={follower} /> {/* Warfront */}
       </div>
     </main>
     {maps !== 'closed' && <MapChooser closing={maps === 'closing'} onClose={closeMaps} onPick={pick} />}
@@ -322,6 +352,101 @@ const SgArt = (
         <path d="M112 4 H118 C125 4 132 8 135 12 H112Z" fill="#2b5a78" stroke="#10343c" strokeWidth=".8" />
         <circle cx="139" cy="20" r="1.8" fill="#ffe27a" stroke="#10343c" strokeWidth=".6" />
         <rect x="0" y="24" width="144" height="2.4" fill="#10343c" />
+      </g>
+    </g>
+  </svg>
+);
+
+/** Tactical night map: contour lines, a radar sweep with contacts, the red front line and a tank on the ridge, framed by HUD brackets. */
+const FrontlineArt = (
+  <svg viewBox="0 0 240 180" preserveAspectRatio="xMidYMid slice">
+    <defs>
+      <radialGradient id="ep-fl-bg" cx=".7" cy=".35" r=".9">
+        <stop offset="0" stopColor="#263222" />
+        <stop offset="1" stopColor="#0e120e" />
+      </radialGradient>
+      <linearGradient id="ep-fl-sweep" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stopColor="#9be06b" stopOpacity="0" />
+        <stop offset="1" stopColor="#9be06b" stopOpacity=".55" />
+      </linearGradient>
+    </defs>
+    <rect width="240" height="180" fill="url(#ep-fl-bg)" />
+    <g stroke="#9be06b" strokeWidth=".4" opacity=".12">
+      {[30, 60, 90, 120, 150, 180, 210].map((x) => <line key={x} x1={x} y1="0" x2={x} y2="180" />)}
+      {[30, 60, 90, 120, 150].map((y) => <line key={y} x1="0" y1={y} x2="240" y2={y} />)}
+    </g>
+    <g fill="none" stroke="#5f7444" strokeWidth="1" opacity=".55">
+      <path d="M-10 40 C30 20 60 60 100 44 S160 10 250 30" />
+      <path d="M-10 62 C34 44 66 84 108 66 S170 32 250 54" />
+      <path d="M-10 150 C40 120 80 140 120 128 S190 150 250 120" />
+      <path d="M20 100 C40 84 70 92 72 108 C74 124 40 126 20 100Z" />
+      <path d="M32 102 C44 94 60 98 60 106 C60 114 42 116 32 102Z" />
+    </g>
+    <g transform="translate(170 70)">
+      {[16, 32, 48].map((r) => <circle key={r} r={r} fill="none" stroke="#9be06b" strokeWidth=".8" opacity=".45" />)}
+      <path d="M-52 0H52M0 -52V52" stroke="#9be06b" strokeWidth=".6" opacity=".35" />
+      <g className="ep-fl-sweep"><path d="M0 0 L48 0 A48 48 0 0 0 33.9 -33.9 Z" fill="url(#ep-fl-sweep)" /></g>
+      {[[22, -18], [-30, 12], [10, 34]].map(([x, y]) => <circle key={x} cx={x} cy={y} r="2.2" fill="#d4ff9a" />)}
+    </g>
+    <path d="M0 118 L40 110 L70 122 L104 104 L140 116 L176 100 L210 112 L240 104" fill="none" stroke="#d6452f" strokeWidth="2.2" strokeDasharray="7 4" />
+    <path d="M0 180 V150 L40 138 L90 146 L140 134 L190 144 L240 136 V180Z" fill="#141a13" stroke="#3d4a32" strokeWidth="1" />
+    <g className="ep-fl-tank" fill="#2d3826" stroke="#c8ad7f" strokeWidth="1.2" strokeLinejoin="round">
+      <path d="M62 128 L118 128 L126 134 L120 142 L58 142 L52 134Z" />
+      <path d="M72 128 L76 118 L102 118 L106 128Z" />
+      <line x1="104" y1="121" x2="142" y2="117" strokeWidth="2.4" strokeLinecap="round" />
+      {[62, 74, 86, 98, 110].map((x) => <circle key={x} cx={x} cy="139" r="3" fill="#1b2218" />)}
+    </g>
+    <g fill="none" stroke="#c8ad7f" strokeWidth="2">
+      <path d="M8 22V8H22M218 8H232V22M232 158V172H218M22 172H8V158" />
+    </g>
+  </svg>
+);
+
+/** Combat plot from above: a lettered grid over dark water, a carrier with its air wing, miss rings, a burning hit, and a reticle locking on. */
+const FleetArt = (
+  <svg viewBox="0 0 240 180" preserveAspectRatio="xMidYMid slice">
+    <defs>
+      <radialGradient id="ep-flt-sea" cx=".55" cy=".45" r=".85">
+        <stop offset="0" stopColor="#0f2a40" />
+        <stop offset="1" stopColor="#050b13" />
+      </radialGradient>
+      <radialGradient id="ep-flt-fire" cx=".5" cy=".5" r=".5">
+        <stop offset="0" stopColor="#ffd27a" />
+        <stop offset=".45" stopColor="#ff6a3d" stopOpacity=".85" />
+        <stop offset="1" stopColor="#ff4d4d" stopOpacity="0" />
+      </radialGradient>
+    </defs>
+    <rect width="240" height="180" fill="url(#ep-flt-sea)" />
+    <g stroke="#38e1ff" strokeWidth=".5" opacity=".18">
+      {Array.from({ length: 11 }, (_, i) => 20 + i * 20).map((x) => <line key={`x${x}`} x1={x} y1="20" x2={x} y2="180" />)}
+      {Array.from({ length: 9 }, (_, i) => 20 + i * 20).map((y) => <line key={`y${y}`} x1="20" y1={y} x2="240" y2={y} />)}
+    </g>
+    <g fill="#38e1ff" opacity=".55" fontFamily="ui-monospace, Menlo, monospace" fontSize="8" textAnchor="middle">
+      {'ABCDEFGHIJ'.split('').map((c, i) => <text key={c} x={30 + i * 20} y="14">{c}</text>)}
+      {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => <text key={n} x="10" y={33 + (n - 1) * 20}>{n}</text>)}
+    </g>
+    <g stroke="#cfefff" strokeWidth="1" fill="none" opacity=".35" strokeLinecap="round">
+      <path d="M44 104 C32 102 22 98 6 96" />
+      <path d="M44 116 C32 118 22 122 6 126" />
+    </g>
+    <g className="ep-flt-ship">
+      <path d="M46 96 L168 92 C184 92 198 100 206 110 C198 120 184 128 168 128 L46 124 Z" fill="#46596b" stroke="#a9c1d6" strokeWidth="1.2" strokeLinejoin="round" />
+      <path d="M52 99 L166 96 L192 110 L166 124 L52 121 Z" fill="#2c3a48" />
+      <path d="M60 116 L150 98" stroke="#ffb547" strokeWidth="1" strokeDasharray="5 4" opacity=".8" />
+      <path d="M56 110 H186" stroke="#e8f1f8" strokeWidth=".8" strokeDasharray="3 5" opacity=".55" />
+      <rect x="128" y="120" width="22" height="9" rx="1.5" fill="#7d93a7" stroke="#cfe0ee" strokeWidth=".8" />
+      <circle cx="136" cy="124.5" r="1.8" fill="#38e1ff" />
+      {[[74, 104], [90, 101], [106, 112], [158, 106], [170, 113]].map(([x, y]) => (
+        <path key={x} d={`M${x} ${y} l6 -1.5 l-1 1.5 l3 0 l0 1 l-3 0 l1 1.5 Z M${x + 1} ${y - 3} l1 6`} fill="#dbe7f3" stroke="#dbe7f3" strokeWidth=".5" strokeLinejoin="round" />
+      ))}
+    </g>
+    <circle cx="114" cy="110" r="13" fill="url(#ep-flt-fire)" className="ep-flt-fire" />
+    <path d="M108 104 L120 116 M120 104 L108 116" stroke="#ff4d4d" strokeWidth="2.6" strokeLinecap="round" />
+    {[[70, 50], [150, 150], [210, 70]].map(([x, y]) => <circle key={x} cx={x} cy={y} r="5" fill="none" stroke="#38e1ff" strokeWidth="1.4" opacity=".8" />)}
+    <g transform="translate(190 150)">
+      <g className="ep-flt-reticle">
+        <path d="M-14 -6V-14H-6M6 -14H14V-6M14 6V14H6M-6 14H-14V6" fill="none" stroke="#38e1ff" strokeWidth="1.6" />
+        <path d="M-4 0H4M0 -4V4" stroke="#ffb547" strokeWidth="1.2" />
       </g>
     </g>
   </svg>

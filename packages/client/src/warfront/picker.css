@@ -1,0 +1,13 @@
+/* Warfront's card on the / picker */
+.wf-ep { background: radial-gradient(120% 90% at 20% 0%, #5a3820 0%, #3b2414 55%, #24150b 100%); color: #f4e7c8; border: 2px solid #8a6630; border-radius: 6px; box-shadow: inset 0 0 0 1px rgba(246, 220, 147, .25); }
+.wf-ep-art svg { display: block; width: 100%; height: auto; }
+.wf-ep-to { font-family: "Manrope", system-ui, sans-serif; font-size: 12px; font-weight: 700; letter-spacing: .04em; color: #d8bd7e; }
+.wf-ep-name { font-family: "Saira Stencil One", "Sora", sans-serif; font-size: 42px; line-height: 1.05; letter-spacing: .08em; text-transform: uppercase; background: linear-gradient(#fbe7a6, #c99a3c 60%, #8a6226); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.wf-ep-line { margin: 6px 0 14px; font-family: "Manrope", system-ui, sans-serif; font-size: 14px; line-height: 1.45; color: #e3d2ac; }
+.wf-ep-label { align-self: flex-start; padding: 3px 10px; border-radius: 3px; background: linear-gradient(#f6dc93, #c99a3c); color: #3b2606; font: 800 11px "Sora", sans-serif; letter-spacing: .14em; text-transform: uppercase; }
+.wf-ep-arrow { stroke-dasharray: 160; stroke-dashoffset: 0; transition: stroke-dashoffset .6s; }
+.wf-ep:hover .wf-ep-arrow { animation: wf-ep-draw .9s ease-out; }
+.wf-ep-pin { transition: transform .3s cubic-bezier(.3, 1.6, .5, 1); }
+.wf-ep:hover .wf-ep-pin { transform: translate(240px, 64px); }
+@keyframes wf-ep-draw { from { stroke-dashoffset: 160; } to { stroke-dashoffset: 0; } }
+@media (prefers-reduced-motion: reduce) { .wf-ep:hover .wf-ep-arrow { animation: none; } .wf-ep-pin { transition: none; } }
