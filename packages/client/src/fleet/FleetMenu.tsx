@@ -142,7 +142,7 @@ export function FleetMenu() {
               </Param>
               <Param name="Weapons" off={c.mode !== 'super'}>
                 <label className="fleet-toggle" data-testid="fleet-all-unlocked">
-                  <input type="checkbox" checked={c.mode === 'super' && c.allUnlocked} disabled={c.mode !== 'super'} onChange={(e) => set({ allUnlocked: e.target.checked })} />
+                  <input type="checkbox" checked={c.mode === 'super'} disabled readOnly />
                   <span className="fleet-toggle-track" aria-hidden><span /></span>
                   <span>{c.mode === 'super' ? 'Every weapon unlocked' : 'Super Weapons only'}</span>
                 </label>

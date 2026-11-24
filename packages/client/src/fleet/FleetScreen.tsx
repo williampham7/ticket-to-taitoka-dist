@@ -121,7 +121,7 @@ function PlacementStage({ view, me, spectator, kind, allUnlocked, controls, them
       </Waiting>
     );
   }
-  return <Deploy key={`${view.round}-${me}`} mode={view.mode} allUnlocked={kind === 'local' || !!allUnlocked} onDeploy={controls.deploy} />;
+  return <Deploy key={`${view.round}-${me}`} mode={view.mode} allUnlocked /* every weapon is always unlocked, for everyone */ onDeploy={controls.deploy} />;
 }
 
 /** Super Weapons: the loadout first, then the placement. Other modes go straight to placement. */
