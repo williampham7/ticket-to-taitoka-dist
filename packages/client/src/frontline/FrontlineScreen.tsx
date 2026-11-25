@@ -1,12 +1,15 @@
 import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent, type ReactNode } from 'react';
-import { ARMY, inZone, kindOf, legalMoves, randomPlacement, validatePlacement, type Combat, type FrontlineView, type Placement, type PlayerID, type Rank, type ViewPiece } from '@boboland/shared/src/frontline';
+import {
+  ARMIES, ARMY_IDS, armyKinds, armySize, badgeOf, inZone, kindOf, legalMoves, randomPlacement, spotGuesses, spotTargets, validatePlacement, zoneRows,
+  type ArmyId, type Combat, type FrontlineView, type PieceKind, type Placement, type PlayerID, type Rank, type Spot, type ViewPiece,
+} from '@boboland/shared/src/frontline';
 import { ChatPanel, type ChatProps } from '../game/ChatPanel';
 import { Board, coordOf, OWNER_STYLE } from './Board';
-import { combatSentence, combatSentenceNamed, layoutFromPlacement, placementFromLayout, secondsLeft } from './helpers';
-import { PRESETS, fillRest, moveTo, placeAt, presetPlacement, remaining, removeAt } from './presets';
-import { Chip } from './Tile';
+import { combatSentence, combatSentenceNamed, layoutFromPlacement, placementFromLayout, secondsLeft, spotSentence, spotSentenceNamed } from './helpers';
+import { fillRest, moveTo, placeAt, presetPlacement, presetsFor, remaining, removeAt } from './presets';
+import { ArmyContext, Chip } from './Tile';
 import { Duel, timelineVars, verdict } from './Duel';
-import { combatOutcome, fxFor, prefersReducedMotion, type Fx } from './fx';
+import { combatOutcome, fxFor, prefersReducedMotion, SPOT_MS, SPOT_T, spotVars, type Fx } from './fx';
 import { sound } from './sound';
 import { FrontlineAudio } from './FrontlineAudio';
 import { useNow } from './timer';
@@ -52,15 +55,17 @@ export const btnPrimary = 'fls-btn primary';
 
 export const TURN_LIMITS = [0, 30, 60, 120] as const;
 
-const SAVED_KEY = 'frontline.layouts';
+/** Saved layouts are kept per army (the classic key is unchanged, so older saves still load). */
+const savedKey = (army: ArmyId) => (army === 'classic' ? 'frontline.layouts' : `frontline.layouts.${army}`);
 interface SavedLayout { name: string; ranks: Rank[] }
-const loadLayouts = (): SavedLayout[] => {
-  const v = load<unknown>(SAVED_KEY, []);
-  return Array.isArray(v) ? v.filter((s): s is SavedLayout => !!s && typeof s.name === 'string' && Array.isArray(s.ranks) && s.ranks.length === 40).slice(0, 3) : [];
+const loadLayouts = (army: ArmyId): SavedLayout[] => {
+  const v = load<unknown>(savedKey(army), []);
+  return Array.isArray(v) ? v.filter((s): s is SavedLayout => !!s && typeof s.name === 'string' && Array.isArray(s.ranks) && s.ranks.length === armySize(army)).slice(0, 3) : [];
 };
+const ROWS_WORD: Record<number, string> = { 3: 'three', 4: 'four' };
 
 const clock = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
-const firstLeft = (pl: Placement): Rank | null => { const left = remaining(pl); return ARMY.find((k) => (left.get(k.rank) ?? 0) > 0)?.rank ?? null; };
+const firstLeft = (pl: Placement, army: ArmyId): Rank | null => { const left = remaining(pl, army); return armyKinds(army).find((k) => (left.get(k.rank) ?? 0) > 0)?.rank ?? null; };
 
 type DragSrc = { kind: 'tray'; rank: Rank } | { kind: 'cell'; pos: number };
 interface Drag { src: DragSrc; rank: Rank; x0: number; y0: number; x: number; y: number; moved: boolean; over: number | 'tray' | null }
@@ -72,6 +77,9 @@ export function FrontlineScreen({ state, playerID: me, moves, names, chat, onExi
   const over = !!G.result;
   const foe: PlayerID = me === '0' ? '1' : '0';
   const name = (id: string) => names[id] || `Player ${Number(id) + 1}`;
+  const army: ArmyId = G.army ?? 'classic';
+  const size = armySize(army);
+  const rows = zoneRows(army);
 
   // setup: my placement (starts empty), editable until I confirm
   const [placement, setPlacement] = useState<Placement>([]);
@@ -83,63 +91,93 @@ export function FrontlineScreen({ state, playerID: me, moves, names, chat, onExi
   const myTurn = !spectator && ctx.phase === 'play' && !over && ctx.currentPlayer === me;
   const legal = useMemo(() => (myTurn ? legalMoves(G as never, me) : []), [G, me, myTurn]);
   const legalTo = useMemo(() => new Set(legal.filter((m) => m.from === selected).map((m) => m.to)), [legal, selected]);
+  // Spotter army: who can spot whom now, and the target whose guess is being picked
+  const spots = useMemo(() => (myTurn ? spotTargets(G as never, me) : []), [G, me, myTurn]);
+  const spotTo = useMemo(() => new Set(spots.filter((t) => t.from === selected).map((t) => t.at)), [spots, selected]);
+  const [picking, setPicking] = useState<{ from: number; at: number } | null>(null);
 
   const iAmReady = G.ready[me];
   const deploying = setup && !iAmReady && !spectator;
   const pieces: ViewPiece[] = deploying
     ? placement.map((p) => ({ id: `setup-${p.pos}`, owner: me, pos: p.pos, revealed: false, rank: p.rank }))
     : G.pieces;
-  const zone = useMemo(() => (deploying ? new Set(Array.from({ length: 100 }, (_, i) => i).filter((p) => inZone(me, p))) : undefined), [deploying, me]);
+  const zone = useMemo(() => (deploying ? new Set(Array.from({ length: 100 }, (_, i) => i).filter((p) => inZone(me, p, rows))) : undefined), [deploying, me, rows]);
 
   // every edit of the placement goes through here, so the armed piece is always one still in the tray
   const edit = (next: Placement, keepPreset = false) => {
     setPlacement(next);
     if (!keepPreset) setPresetId(null);
-    const left = remaining(next);
-    setArmed((a) => (a !== null && (left.get(a) ?? 0) > 0 ? a : firstLeft(next)));
+    const left = remaining(next, army);
+    setArmed((a) => (a !== null && (left.get(a) ?? 0) > 0 ? a : firstLeft(next, army)));
   };
 
   // saved layouts
-  const [saved, setSaved] = useState<SavedLayout[]>(loadLayouts);
+  const [saved, setSaved] = useState<SavedLayout[]>(() => loadLayouts(army));
   const [layoutName, setLayoutName] = useState('');
   const [layoutNote, setLayoutNote] = useState<string | null>(null);
-  const complete = placement.length === 40 && !validatePlacement(me, placement);
+  // the host may switch armies during the briefing: start the tray and the saved layouts over for the new one
+  const [layoutArmy, setLayoutArmy] = useState(army);
+  if (layoutArmy !== army) { setLayoutArmy(army); setSaved(loadLayouts(army)); setPlacement([]); setArmed('F'); setPresetId(null); }
+  const complete = placement.length === size && !validatePlacement(me, placement, army);
   const saveLayout = () => {
     const nm = layoutName.trim() || `Layout ${saved.length + 1}`;
-    const next = [...saved.filter((s) => s.name !== nm), { name: nm, ranks: layoutFromPlacement(me, placement) }].slice(-3);
-    setSaved(next); save(SAVED_KEY, next); setLayoutName(''); setLayoutNote(`Saved "${nm}"`);
+    const next = [...saved.filter((s) => s.name !== nm), { name: nm, ranks: layoutFromPlacement(me, placement, size) }].slice(-3);
+    setSaved(next); save(savedKey(army), next); setLayoutName(''); setLayoutNote(`Saved "${nm}"`);
   };
   const loadLayout = (s: SavedLayout) => {
     const p = placementFromLayout(me, s.ranks);
-    if (validatePlacement(me, p)) { setLayoutNote('That layout is not valid'); return; }
+    if (validatePlacement(me, p, army)) { setLayoutNote('That layout is not valid'); return; }
     edit(p); setLayoutNote(`Loaded "${s.name}"`);
   };
-  const deleteLayout = (nm: string) => { const next = saved.filter((s) => s.name !== nm); setSaved(next); save(SAVED_KEY, next); };
+  const deleteLayout = (nm: string) => { const next = saved.filter((s) => s.name !== nm); setSaved(next); save(savedKey(army), next); };
 
   // ---- animation: a new move slides into place; an attack plays the duel over the board ----
   // The board keeps showing the position from before the attack (this screen's own view of it) until the duel is over.
   const reduced = useMemo(prefersReducedMotion, []);
   const [seenMoves, setSeenMoves] = useState(G.moves);
-  const [anim, setAnim] = useState<{ fx: Fx; prev: ViewPiece[]; key: number } | null>(null);
+  const [anim, setAnim] = useState<{ fx: Fx; prev: ViewPiece[]; fallen: FrontlineView['fallen']; key: number } | null>(null);
   const snap = useRef(G.pieces);
+  const snapFallen = useRef(G.fallen);
   if (G.moves !== seenMoves) {
     setSeenMoves(G.moves);
     const f = ctx.phase === 'play' ? fxFor(seenMoves, G, reduced) : null;
-    setAnim(f && f.ms > 0 ? { fx: f, prev: snap.current, key: G.moves } : null);
+    setAnim(f && f.ms > 0 ? { fx: f, prev: snap.current, fallen: snapFallen.current, key: G.moves } : null);
     setSelected(null);
+    setPicking(null);
   }
-  useEffect(() => { snap.current = G.pieces; });
+  useEffect(() => { snap.current = G.pieces; snapFallen.current = G.fallen; });
   useEffect(() => {
     if (!anim) return;
     const t = setTimeout(() => setAnim(null), anim.fx.ms);
     return () => clearTimeout(t);
   }, [anim]);
   const combatAnim = anim && anim.fx.kind === 'combat' ? anim.fx : null;
+  const spotAnim = anim && anim.fx.kind === 'spot' ? anim.fx : null;
+  // while a duel or a spot plays, the board holds the position from before it
+  const frozen = !!combatAnim || !!spotAnim;
+  // losses are not told (forces, strength bars) until the duel or spot has shown them
+  const fallen = frozen ? anim!.fallen : G.fallen;
   const prevMoves = useRef(G.moves);
   useEffect(() => {
-    if (G.moves > prevMoves.current && !G.lastCombat) sound.move();
+    if (G.moves > prevMoves.current && !G.lastCombat && !G.lastSpot) sound.move();
     prevMoves.current = G.moves;
-  }, [G.moves, G.lastCombat]);
+  }, [G.moves, G.lastCombat, G.lastSpot]);
+  // a spot's sound track follows its timeline: scope up, the call, then the verdict
+  useEffect(() => {
+    if (!spotAnim) return;
+    const sp = spotAnim.spot;
+    const k = reduced ? spotAnim.ms / SPOT_MS : 1;
+    sound.scope();
+    const ts = [
+      window.setTimeout(() => sound.call(), SPOT_T.call * k),
+      window.setTimeout(() => {
+        if (!sp.hit) { sound.negative(); return; }
+        sound.eliminate();
+        if (!spectator) (sp.player === me ? sound.good : sound.bad)();
+      }, SPOT_T.result * k),
+    ];
+    return () => ts.forEach((t) => clearTimeout(t));
+  }, [anim?.key]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // the end: once the last duel is over, a stamp over the board and a fanfare (or not)
   const wasOver = useRef(over);
@@ -165,15 +203,15 @@ export function FrontlineScreen({ state, playerID: me, moves, names, chat, onExi
   // ---- setup: taps ----
   const suppressClick = useRef(false);
   const onSetupCell = (pos: number) => {
-    if (!inZone(me, pos)) return;
+    if (!inZone(me, pos, rows)) return;
     const here = placement.find((p) => p.pos === pos);
     // a tap on a placed piece sends it back to the tray (and picks that rank, so the next tap puts it elsewhere)
     if (here) { edit(removeAt(placement, pos)); setArmed(here.rank); sound.select(); return; }
-    if (armed !== null) { edit(placeAt(placement, pos, armed)); sound.move(); }
+    if (armed !== null) { edit(placeAt(placement, pos, armed, army)); sound.move(); }
   };
   const onTrayKind = (rank: Rank) => {
     if (suppressClick.current) return;
-    if ((remaining(placement).get(rank) ?? 0) > 0) setArmed(rank);
+    if ((remaining(placement, army).get(rank) ?? 0) > 0) setArmed(rank);
   };
 
   // ---- setup: drag (tray -> board, board -> board, board -> tray) ----
@@ -189,7 +227,7 @@ export function FrontlineScreen({ state, playerID: me, moves, names, chat, onExi
     if (el?.closest('[data-fl-tray]')) return 'tray';
     const cell = el?.closest('[data-testid^="fl-cell-"]');
     const pos = cell ? Number(cell.getAttribute('data-testid')!.slice('fl-cell-'.length)) : NaN;
-    return Number.isInteger(pos) && inZone(me, pos) ? pos : null;
+    return Number.isInteger(pos) && inZone(me, pos, rows) ? pos : null;
   };
   const dragging = !!drag;
   useEffect(() => {
@@ -209,14 +247,14 @@ export function FrontlineScreen({ state, playerID: me, moves, names, chat, onExi
       const to = dropTarget(e.clientX, e.clientY);
       setPlacement((pl) => {
         let next = pl;
-        if (d.src.kind === 'tray' && typeof to === 'number') next = placeAt(pl, to, d.src.rank);
+        if (d.src.kind === 'tray' && typeof to === 'number') next = placeAt(pl, to, d.src.rank, army);
         else if (d.src.kind === 'cell' && to === 'tray') next = removeAt(pl, d.src.pos);
         else if (d.src.kind === 'cell' && typeof to === 'number') next = moveTo(pl, d.src.pos, to);
         if (next !== pl) {
           sound.move();
           if (!(d.src.kind === 'cell' && typeof to === 'number')) setPresetId(null);
-          const leftNow = remaining(next);
-          setArmed((a) => (a !== null && (leftNow.get(a) ?? 0) > 0 ? a : firstLeft(next)));
+          const leftNow = remaining(next, army);
+          setArmed((a) => (a !== null && (leftNow.get(a) ?? 0) > 0 ? a : firstLeft(next, army)));
         }
         return next;
       });
@@ -240,10 +278,12 @@ export function FrontlineScreen({ state, playerID: me, moves, names, chat, onExi
       onSetupCell(pos);
       return;
     }
-    if (!myTurn || combatAnim) return;
+    if (!myTurn || frozen || picking) return;
+    // a Spotter's target: pick what to call it (or attack it instead)
+    if (selected !== null && spotTo.has(pos)) { setPicking({ from: selected, at: pos }); sound.scope(); return; }
     if (legalTo.has(pos) && selected !== null) { moves.move(selected, pos); setSelected(null); return; }
     const mine = G.pieces.find((p) => p.pos === pos && p.owner === me);
-    const next = mine && legal.some((m) => m.from === pos) ? pos : null;
+    const next = mine && (legal.some((m) => m.from === pos) || spots.some((t) => t.from === pos)) ? pos : null;
     if (next !== null) sound.select();
     setSelected(next);
   };
@@ -263,8 +303,8 @@ export function FrontlineScreen({ state, playerID: me, moves, names, chat, onExi
   }, [leaving, over]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // while a duel plays, the panel still tells the moment before it: whose attack it is, no result yet
-  const duelOn = !!combatAnim;
-  const turnOf = duelOn && G.lastMove ? G.lastMove.player : ctx.currentPlayer;
+  const duelOn = frozen;
+  const turnOf = combatAnim && G.lastMove ? G.lastMove.player : spotAnim ? spotAnim.spot.player : ctx.currentPlayer;
   const shownOver = over && !duelOn;
   let banner: string;
   if (shownOver) {
@@ -275,7 +315,8 @@ export function FrontlineScreen({ state, playerID: me, moves, names, chat, onExi
   else if (setup) banner = iAmReady ? 'Waiting for opponent…' : 'Deploy your army';
   else banner = turnOf === me ? 'Your turn' : "Opponent's turn";
   const bannerSub = shownOver ? REASON[G.result!.reason] ?? G.result!.reason : null;
-  const sentence = (c: Combat) => (spectator ? combatSentenceNamed(c, { '0': name('0'), '1': name('1') }) : combatSentence(c, me));
+  const sentence = (c: Combat) => (spectator ? combatSentenceNamed(c, { '0': name('0'), '1': name('1') }, army) : combatSentence(c, me, army));
+  const spotLine = (sp: Spot) => (spectator ? spotSentenceNamed(sp, { '0': name('0'), '1': name('1') }, army) : spotSentence(sp, me, army));
 
   const sideStatus = (id: PlayerID): { text: string; go?: boolean } => {
     if (shownOver) return { text: G.result!.winner === id ? 'Victor' : G.result!.winner === null ? 'Draw' : 'Defeated', go: G.result!.winner === id };
@@ -283,19 +324,19 @@ export function FrontlineScreen({ state, playerID: me, moves, names, chat, onExi
     if (setup) return { text: G.ready[id] ? 'Ready' : 'Deploying', go: G.ready[id] };
     return turnOf === id ? { text: 'To move', go: true } : { text: 'Waiting' };
   };
-  const alive = (id: PlayerID) => 40 - G.fallen.filter((f) => f.owner === id).length;
+  const alive = (id: PlayerID) => size - fallen.filter((f) => f.owner === id).length;
   const viewer: PlayerID = spectator ? '0' : me;
-  const movable = useMemo(() => new Set(legal.map((m) => m.from)), [legal]);
+  const movable = useMemo(() => new Set([...legal.map((m) => m.from), ...spots.map((t) => t.from)]), [legal, spots]);
 
-  const briefingPanel = briefing ?? <BriefingPanel turnSeconds={G.turnSeconds} waiting="Waiting for the host to start the game…" />;
+  const briefingPanel = briefing ?? <BriefingPanel turnSeconds={G.turnSeconds} army={army} waiting="Waiting for the host to start the game…" />;
   const leftPanel = inBriefing ? null
     : deploying ? (
-      <Deploy me={me} placement={placement} armed={armed} presetId={presetId} complete={complete}
+      <Deploy me={me} army={army} placement={placement} armed={armed} presetId={presetId} complete={complete}
         trayDrop={drag?.moved && drag.src.kind === 'cell' && drag.over === 'tray'}
-        onArm={onTrayKind} onTrayPointerDown={(rank, e) => { if ((remaining(placement).get(rank) ?? 0) > 0) startDrag({ kind: 'tray', rank }, rank, e); }}
-        onPreset={(id) => { const p = PRESETS.find((x) => x.id === id)!; edit(presetPlacement(me, p)); setPresetId(id); }}
-        onRandom={() => { edit(randomPlacement(me, Math.random)); }}
-        onFill={() => { edit(fillRest(me, placement, Math.random), true); }}
+        onArm={onTrayKind} onTrayPointerDown={(rank, e) => { if ((remaining(placement, army).get(rank) ?? 0) > 0) startDrag({ kind: 'tray', rank }, rank, e); }}
+        onPreset={(id) => { const p = presetsFor(army).find((x) => x.id === id)!; edit(presetPlacement(me, p)); setPresetId(id); }}
+        onRandom={() => { edit(randomPlacement(me, Math.random, army)); }}
+        onFill={() => { edit(fillRest(me, placement, Math.random, army), true); }}
         onClear={() => { edit([]); }}
         onConfirm={() => moves.submitSetup(placement)}
         layouts={{ saved, name: layoutName, setName: setLayoutName, note: layoutNote, save: saveLayout, load: loadLayout, remove: deleteLayout }} />
@@ -303,24 +344,34 @@ export function FrontlineScreen({ state, playerID: me, moves, names, chat, onExi
       <section className="fls-panel" data-testid="fl-deployed">
         <div className="fls-kicker"><span>Deployment</span><span className="fls-live">Locked</span></div>
         <h2 className="fls-h mt-2">Army in position</h2>
-        <p className="mt-2 text-[13px] leading-snug opacity-80">Your 40 pieces are set. The enemy's deployment stays hidden until both armies are in place.</p>
+        <p className="mt-2 text-[13px] leading-snug opacity-80">Your {size} pieces are set. The enemy's deployment stays hidden until both armies are in place.</p>
       </section>
-    ) : <Forces fallen={G.fallen} me={viewer} spectator={!!spectator} name={name} />;
+    ) : <Forces army={army} fallen={fallen} me={viewer} spectator={!!spectator} name={name} />;
 
-  // the duel outcome is not shown in the panel until the duel has played
-  const shownCombat = ctx.phase === 'play' && !combatAnim ? G.lastCombat : null;
+  // the duel (or spot) outcome is not shown in the panel until it has played
+  const shownCombat = ctx.phase === 'play' && !frozen ? G.lastCombat : null;
+  const shownSpot = ctx.phase === 'play' && !frozen ? G.lastSpot ?? null : null;
   const clockTone = left === null ? '' : left <= 10 ? 'warn' : G.turnSeconds && left / G.turnSeconds < 0.5 ? 'mid' : '';
 
   return (
-    <main className="fls" data-testid="fl-screen">
+    <ArmyContext.Provider value={army}>
+    <main className="fls" data-testid="fl-screen" data-army={army}>
       <div className="fls-left">{leftPanel}</div>
 
       <div className={`fls-board ${combatAnim ? 'fx-combat' : ''} ${combatAnim?.outcome === 'blast' ? 'fx-blast' : ''}`}
-        style={combatAnim ? timelineVars(combatAnim.outcome) : undefined}>
-        <Board pieces={combatAnim ? anim!.prev : pieces} me={viewer} selected={setup ? null : selected} legalTo={legalTo} movable={myTurn && selected === null ? movable : undefined}
+        style={combatAnim ? timelineVars(combatAnim.outcome) : spotAnim ? spotVars(reduced) : undefined}>
+        <Board pieces={frozen ? anim!.prev : pieces} me={viewer} selected={setup ? null : selected} legalTo={legalTo} movable={myTurn && selected === null ? movable : undefined}
           lastMove={ctx.phase === 'play' ? G.lastMove : null} lastCombat={ctx.phase === 'play' ? G.lastCombat : null}
           onCell={spectator ? undefined : onCell} onCellPointerDown={deploying ? onCellPointerDown : undefined}
-          zone={zone} dropAt={drag?.moved && typeof drag.over === 'number' ? drag.over : null} fx={anim?.fx ?? null} />
+          zone={zone} dropAt={drag?.moved && typeof drag.over === 'number' ? drag.over : null} fx={anim?.fx ?? null}
+          spotTo={picking ? undefined : spotTo} lastSpot={ctx.phase === 'play' ? G.lastSpot ?? null : null} ruledOut={G.ruledOut} />
+        {picking && (
+          <SpotPicker army={army} G={G} me={me} target={picking.at}
+            attack={legal.some((m) => m.from === picking.from && m.to === picking.at)}
+            onGuess={(guess) => { moves.spot(picking.from, picking.at, guess); setPicking(null); setSelected(null); }}
+            onAttack={() => { moves.move(picking.from, picking.at); setPicking(null); setSelected(null); }}
+            onCancel={() => setPicking(null)} />
+        )}
         {inBriefing && (
           <div className="fls-brief-center" data-testid="fl-board-clear">{briefingPanel}</div>
         )}
@@ -354,7 +405,7 @@ export function FrontlineScreen({ state, playerID: me, moves, names, chat, onExi
           <div className="flc-sides">
             {([viewer, viewer === '0' ? '1' : '0'] as PlayerID[]).map((id) => {
               const st = sideStatus(id);
-              const n = ctx.phase === 'play' ? alive(id) : 40;
+              const n = ctx.phase === 'play' ? alive(id) : size;
               return (
                 <div key={id} className={`flc-side ${ctx.phase === 'play' && !shownOver && turnOf === id ? 'active' : ''}`} data-testid={`fl-side-${id}`}>
                   <Chip owner={id} size={34} />
@@ -363,7 +414,7 @@ export function FrontlineScreen({ state, playerID: me, moves, names, chat, onExi
                       <span className="nm">{name(id)}{!spectator && id === me ? ' (you)' : ''}</span>
                       <span className={`tag ${st.go ? 'go' : ''}`}>{st.text}</span>
                     </div>
-                    <div className="flc-strength" title={`${n} of 40 pieces left`} data-army={id === '0' ? 'olive' : 'tan'}><i style={{ width: `${(n / 40) * 100}%` }} /></div>
+                    <div className="flc-strength" title={`${n} of ${size} pieces left`} data-army={id === '0' ? 'olive' : 'tan'}><i style={{ width: `${(n / size) * 100}%` }} /></div>
                   </div>
                   <span className="flc-count" title="Pieces left">{n}</span>
                 </div>
@@ -388,6 +439,7 @@ export function FrontlineScreen({ state, playerID: me, moves, names, chat, onExi
             </dl>
           </div>
           {shownCombat && <LastEngagement combat={shownCombat} me={viewer} sentence={sentence(shownCombat)} />}
+          {shownSpot && <LastSpot spot={shownSpot} me={viewer} sentence={spotLine(shownSpot)} />}
           {notice && <div className="mt-3 grid gap-2">{notice}</div>}
           {shownOver && (
             <div className="mt-3 grid gap-2">
@@ -419,15 +471,19 @@ export function FrontlineScreen({ state, playerID: me, moves, names, chat, onExi
       )}
       {confirmLeave && <ConfirmLeave onCancel={() => setConfirmLeave(false)} onConfirm={reallyLeave} />}
     </main>
+    </ArmyContext.Provider>
   );
 }
 
-/** Pre-game settings: names (where this device owns them), the turn limit, and Start. */
-export function BriefingPanel({ fields, turnSeconds, onTurnSeconds, start, waiting, children }: {
+/** Pre-game settings: names (where this device owns them), the army, the turn limit, and Start. */
+export function BriefingPanel({ fields, turnSeconds, onTurnSeconds, army = 'classic', onArmy, start, waiting, children }: {
   fields?: { label: string; value: string; onChange: (v: string) => void; testid: string }[];
   turnSeconds: number | null;
   /** Absent: read-only (only the host changes settings). */
   onTurnSeconds?: (s: number) => void;
+  army?: ArmyId;
+  /** Absent: read-only. */
+  onArmy?: (a: ArmyId) => void;
   start?: { onClick: () => void; disabled?: boolean; hint?: string };
   waiting?: string;
   children?: ReactNode;
@@ -445,6 +501,18 @@ export function BriefingPanel({ fields, turnSeconds, onTurnSeconds, start, waiti
         </label>
       ))}
       <div className="fls-field">
+        <span>Army</span>
+        <div className="fls-seg" role="radiogroup" aria-label="Army" data-testid="fl-army">
+          {ARMY_IDS.map((id) => (
+            <button key={id} type="button" role="radio" aria-checked={army === id} disabled={!onArmy}
+              className={`fls-btn ${army === id ? 'on' : ''}`} onClick={() => onArmy?.(id)} data-testid={`fl-army-${id}`}>
+              {ARMIES[id].name} · {armySize(id)}
+            </button>
+          ))}
+        </div>
+        <span className="text-[12.5px] normal-case leading-snug tracking-normal opacity-75" data-testid="fl-army-blurb">{ARMIES[army].blurb}</span>
+      </div>
+      <div className="fls-field">
         <span>Turn time limit</span>
         <div className="fls-seg" role="radiogroup" aria-label="Turn time limit" data-testid="fl-timer">
           {TURN_LIMITS.map((s) => (
@@ -457,7 +525,7 @@ export function BriefingPanel({ fields, turnSeconds, onTurnSeconds, start, waiti
       </div>
       {children}
       <p className="text-[12.5px] leading-snug opacity-70">
-        Once the game starts, each commander deploys 40 pieces on their own four rows. Neither side sees the other's deployment until both have confirmed.
+        Once the game starts, each commander deploys {armySize(army)} pieces on their own {ROWS_WORD[zoneRows(army)]} rows. Neither side sees the other's deployment until both have confirmed.
       </p>
       {start && (
         <div className="grid gap-1">
@@ -497,26 +565,27 @@ interface LayoutsApi {
   save: () => void; load: (s: SavedLayout) => void; remove: (nm: string) => void;
 }
 
-function Deploy({ me, placement, armed, presetId, complete, trayDrop, onArm, onTrayPointerDown, onPreset, onRandom, onFill, onClear, onConfirm, layouts }: {
-  me: PlayerID; placement: Placement; armed: Rank | null; presetId: string | null; complete: boolean; trayDrop?: boolean;
+function Deploy({ me, army, placement, armed, presetId, complete, trayDrop, onArm, onTrayPointerDown, onPreset, onRandom, onFill, onClear, onConfirm, layouts }: {
+  me: PlayerID; army: ArmyId; placement: Placement; armed: Rank | null; presetId: string | null; complete: boolean; trayDrop?: boolean;
   onArm: (r: Rank) => void; onTrayPointerDown: (r: Rank, e: ReactPointerEvent) => void;
   onPreset: (id: string) => void; onRandom: () => void; onFill: () => void; onClear: () => void; onConfirm: () => void; layouts: LayoutsApi;
 }) {
-  const left = remaining(placement);
+  const left = remaining(placement, army);
   const placed = placement.length;
+  const size = armySize(army);
   const hint = armed !== null
     ? `Tap an empty square to place: ${kindOf(armed).name}. Tap a placed piece to send it back; hold and drag it onto another square to swap.`
     : 'All pieces placed. Hold and drag a piece onto another to swap them; tap one to send it back to the tray.';
   return (
     <section className="fls-panel fls-scroll grid content-start gap-3" data-testid="fl-deploy">
       <div>
-        <div className="fls-kicker"><span>Deployment</span><span data-testid="fl-placed">{placed}/40</span></div>
-        <div className="fls-meter mt-2"><i style={{ width: `${(placed / 40) * 100}%` }} /></div>
+        <div className="fls-kicker"><span>Deployment</span><span data-testid="fl-placed">{placed}/{size}</span></div>
+        <div className="fls-meter mt-2"><i style={{ width: `${(placed / size) * 100}%` }} /></div>
       </div>
       <div>
         <div className="fls-sub mb-1.5">Presets</div>
         <div className="fls-presets">
-          {PRESETS.map((p) => (
+          {presetsFor(army).map((p) => (
             <button key={p.id} type="button" className={`fls-preset ${presetId === p.id ? 'on' : ''}`} onClick={() => onPreset(p.id)} title={p.blurb} data-testid={`fl-preset-${p.id}`}>
               <b>{p.name}</b><span>{p.blurb}</span>
             </button>
@@ -527,12 +596,12 @@ function Deploy({ me, placement, armed, presetId, complete, trayDrop, onArm, onT
         <div className="fls-sub mb-1.5 flex items-center justify-between"><span>Tray</span>
         </div>
         <div className={`fls-tray ${trayDrop ? 'fls-tray-drop' : ''}`} data-fl-tray>
-          {ARMY.map((k) => {
+          {armyKinds(army).map((k) => {
             const n = left.get(k.rank) ?? 0;
             return (
               <button key={String(k.rank)} type="button" className={`fls-kind ${armed === k.rank ? 'armed' : ''} ${n === 0 ? 'empty' : ''}`}
                 onClick={() => onArm(k.rank)} onPointerDown={(e) => onTrayPointerDown(k.rank, e)} aria-pressed={armed === k.rank}
-                data-testid={`fl-tray-${k.rank}`} title={`${k.name} (${k.rank})`}>
+                data-testid={`fl-tray-${k.rank}`} title={`${k.name} (${badgeOf(k.rank, army) || k.rank})`}>
                 <Chip owner={me} rank={k.rank} size={32} />
                 <span className="nm">{k.name}</span>
                 <span className="ct">×{n}</span>
@@ -544,7 +613,7 @@ function Deploy({ me, placement, armed, presetId, complete, trayDrop, onArm, onT
       </div>
       <div className="fls-actions grid grid-cols-3 gap-1.5">
         <button type="button" className="fls-btn" data-testid="fl-randomize" onClick={onRandom}>Random</button>
-        <button type="button" className="fls-btn" data-testid="fl-fill" onClick={onFill} disabled={placed === 40}>Fill rest</button>
+        <button type="button" className="fls-btn" data-testid="fl-fill" onClick={onFill} disabled={placed === size}>Fill rest</button>
         <button type="button" className="fls-btn" data-testid="fl-clear" onClick={onClear} disabled={placed === 0}>Clear</button>
       </div>
       <details className="text-[13px]" data-testid="fl-layouts">
@@ -574,14 +643,14 @@ function Deploy({ me, placement, armed, presetId, complete, trayDrop, onArm, onT
 }
 
 /** Pieces left per rank, both sides (losses are public: combat reveals both ranks). */
-function Forces({ fallen, me, spectator, name }: { fallen: FrontlineView['fallen']; me: PlayerID; spectator: boolean; name: (id: string) => string }) {
+function Forces({ army, fallen, me, spectator, name }: { army: ArmyId; fallen: FrontlineView['fallen']; me: PlayerID; spectator: boolean; name: (id: string) => string }) {
   const foe: PlayerID = me === '0' ? '1' : '0';
   const lost = (owner: PlayerID, rank: Rank) => fallen.filter((f) => f.owner === owner && f.rank === rank).length;
-  const total = (owner: PlayerID) => 40 - fallen.filter((f) => f.owner === owner).length;
+  const total = (owner: PlayerID) => armySize(army) - fallen.filter((f) => f.owner === owner).length;
   const [a, b] = [total(me), total(foe)];
   const mineLabel = spectator ? name(me) : 'Yours';
   const theirLabel = spectator ? name(foe) : 'Theirs';
-  const col = (owner: PlayerID, k: (typeof ARMY)[number], testid: string) => {
+  const col = (owner: PlayerID, k: PieceKind, testid: string) => {
     const left = k.count - lost(owner, k.rank);
     return (
       <span className={`flf-col ${left === 0 ? 'out' : ''}`} data-testid={testid}>
@@ -603,7 +672,7 @@ function Forces({ fallen, me, spectator, name }: { fallen: FrontlineView['fallen
         </div>
       </div>
       <ul className="flf-list">
-        {ARMY.map((k) => {
+        {armyKinds(army).map((k) => {
           const gone = lost(me, k.rank) === k.count && lost(foe, k.rank) === k.count;
           return (
             <li key={String(k.rank)} className={`flf-row ${gone ? 'gone' : ''}`}>
@@ -638,6 +707,75 @@ function LastEngagement({ combat, me, sentence }: { combat: Combat; me: PlayerID
         <span className={`flc-eng-v ${won === null ? '' : won === me ? 'good' : 'bad'}`}>{verdict(combat, o).main}</span>
       </div>
       <p className="mt-1.5 text-[12.5px] leading-snug opacity-75">{sentence}</p>
+    </div>
+  );
+}
+
+/** The latest spot in small: the Spotter, the rank it called, and whether it was right. */
+function LastSpot({ spot, me, sentence }: { spot: Spot; me: PlayerID; sentence: string }) {
+  const foe: PlayerID = spot.player === '0' ? '1' : '0';
+  const good = spot.hit === (spot.player === me);
+  return (
+    <div className="flc-eng" data-testid="fl-last-spot">
+      <div className="fls-sub">Last spot <span className="normal-case tracking-normal opacity-70">at {coordOf(spot.at)}</span></div>
+      <div className="flc-spot-row">
+        <Chip owner={spot.player} rank="P" size={36} />
+        <svg viewBox="0 0 24 24" className="scope" aria-hidden="true"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" strokeWidth="1.8" /><path d="M12 1.5v6M12 16.5v6M1.5 12h6M16.5 12h6" stroke="currentColor" strokeWidth="1.8" /></svg>
+        <span className={`flc-eng-tile ${spot.hit ? 'lost' : ''}`}><Chip owner={foe} rank={spot.guess} size={36} /></span>
+        <span className={`flc-eng-v ${good ? 'good' : 'bad'}`}>{spot.hit ? 'Confirmed' : 'Negative'}</span>
+      </div>
+      <p className="mt-1.5 text-[12.5px] leading-snug opacity-75">{sentence}</p>
+    </div>
+  );
+}
+
+/**
+ * Choose what to call the enemy piece next to the Spotter. Every rank of the army is listed in its order;
+ * ranks already named wrongly against this piece are struck out. "Unseen" counts what the enemy may still
+ * have hidden (their army, minus losses, minus pieces already shown): all of it public knowledge.
+ */
+function SpotPicker({ army, G, me, target, attack, onGuess, onAttack, onCancel }: {
+  army: ArmyId; G: FrontlineView; me: PlayerID; target: number; attack: boolean;
+  onGuess: (r: Rank) => void; onAttack: () => void; onCancel: () => void;
+}) {
+  const foe: PlayerID = me === '0' ? '1' : '0';
+  const allowed = new Set(spotGuesses(G as never, target));
+  const piece = G.pieces.find((p) => p.pos === target);
+  const unseen = (r: Rank) => armyKinds(army).find((k) => k.rank === r)!.count
+    - G.fallen.filter((f) => f.owner === foe && f.rank === r).length
+    - G.pieces.filter((p) => p.owner === foe && p.rank === r).length;
+  const box = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    box.current?.querySelector<HTMLButtonElement>('button:not(:disabled)')?.focus({ preventScroll: true });
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onCancel();
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onCancel]);
+  return (
+    <div className="fls-spotpick" onClick={onCancel}>
+      <div ref={box} className="fls-spotpick-box" role="dialog" aria-modal="true" aria-label={`Spot the piece at ${coordOf(target)}`} data-testid="fl-spot-picker" onClick={(e) => e.stopPropagation()}>
+        <div className="fls-kicker"><span>Spotter</span><span>Target {coordOf(target)}</span></div>
+        <h2 className="fls-h mt-1.5">Name the target</h2>
+        <p className="mt-1 text-[13px] leading-snug opacity-80">Right, and it is removed while your Spotter stays put. Wrong, and your Spotter is revealed; the target stays hidden.</p>
+        <div className="fls-spotpick-grid">
+          {armyKinds(army).map((k) => {
+            const ok = allowed.has(k.rank);
+            const n = unseen(k.rank);
+            const ruled = piece && !ok;
+            return (
+              <button key={String(k.rank)} type="button" className="fls-guess" disabled={!ok} onClick={() => onGuess(k.rank)}
+                data-testid={`fl-guess-${k.rank}`} title={ruled ? 'Already ruled out' : undefined}>
+                <Chip owner={foe} rank={k.rank} size={34} />
+                <span>{k.name}<small>{ruled ? 'Ruled out' : `${Math.max(0, n)} unseen`}</small></span>
+              </button>
+            );
+          })}
+        </div>
+        <div className="mt-3 flex justify-end gap-2">
+          <button type="button" className="fls-btn" onClick={onCancel} data-testid="fl-spot-cancel">Cancel</button>
+          {attack && <button type="button" className="fls-btn danger" onClick={onAttack} data-testid="fl-spot-attack">Attack instead</button>}
+        </div>
+      </div>
     </div>
   );
 }

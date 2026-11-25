@@ -150,15 +150,16 @@ function PlaySeat({ seat }: { seat: FlSeat }) {
   ) : null;
   const briefing = host ? (
     <BriefingPanel turnSeconds={raw.G.turnSeconds} onTurnSeconds={(s) => client.moves.setTurnLimit(s)}
+      army={raw.G.army} onArmy={(a) => client.moves.setArmy(a)}
       start={{ onClick: () => client.moves.begin(), disabled: !bothSeated, hint: bothSeated ? `${info.names['1']} is here. Start when ready.` : 'Waiting for an opponent to join…' }}>
       {invite}
     </BriefingPanel>
   ) : (
-    <BriefingPanel turnSeconds={raw.G.turnSeconds} waiting={`Waiting for ${info.names['0'] || 'the host'} to start the game…`} />
+    <BriefingPanel turnSeconds={raw.G.turnSeconds} army={raw.G.army} waiting={`Waiting for ${info.names['0'] || 'the host'} to start the game…`} />
   );
   return (
     <FrontlineScreen state={raw} playerID={seat.playerID as PlayerID} moves={client.moves} chat={chat} notice={notice} briefing={briefing}
       names={info.names} onExit={() => navigate('/frontline')}
-      rematch={{ waiting: asked, onClick: () => { setAsked(true); rematchFor(seat, raw.G.turnSeconds ?? 0).catch(() => setAsked(false)); } }} />
+      rematch={{ waiting: asked, onClick: () => { setAsked(true); rematchFor(seat, raw.G.turnSeconds ?? 0, raw.G.army).catch(() => setAsked(false)); } }} />
   );
 }

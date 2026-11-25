@@ -1,15 +1,15 @@
-import { ARMY, randomPlacement, type Placement, type PlayerID, type Rank } from '@boboland/shared/src/frontline';
+import { armyKinds, randomPlacement, type ArmyId, type Placement, type PlayerID, type Rank } from '@boboland/shared/src/frontline';
 import { placementFromLayout } from './helpers';
 
 /**
- * Ready-made deployments. Each is 4 rows of 10 as the owner sees them, front row (next to the lakes) first;
- * 'F' = command post, 'B' = mine, numbers = ranks. Lakes sit in front of columns 3-4 and 7-8 (1-based),
+ * Ready-made deployments. Each is 4 rows of 10 (3 for the Spotter army) as the owner sees them, front row first;
+ * 'F' = command post, 'B' = mine, 'P' = Spotter, numbers = ranks (1 = Operative). Lakes sit in front of columns 3-4 and 7-8 (1-based),
  * so pieces there are shielded and the lanes are columns 1-2, 5-6 and 9-10.
  */
 export interface Preset { id: string; name: string; blurb: string; ranks: Rank[] }
 
 const parse = (rows: string[]): Rank[] =>
-  rows.flatMap((r) => r.trim().split(/\s+/).map((t) => (t === 'F' || t === 'B' ? t : (Number(t) as Rank))));
+  rows.flatMap((r) => r.trim().split(/\s+/).map((t) => (t === 'F' || t === 'B' || t === 'P' ? t : (Number(t) as Rank))));
 
 export const PRESETS: readonly Preset[] = [
   {
@@ -50,18 +50,48 @@ export const PRESETS: readonly Preset[] = [
   },
 ];
 
+/** Spotter army: 3 rows of 10. The empty row in front of them gives the Spotters room to step up. */
+export const SPOTTER_PRESETS: readonly Preset[] = [
+  {
+    id: 'watch', name: 'Watchtower', blurb: 'Spotters lead the outer lanes; the command post sits in a corner beside a mine.',
+    ranks: parse([
+      '2 P 5 6 2 3 6 7 P 2',
+      '4 10 3 5 8 9 4 3 8 2',
+      'F B 1 3 B 7 5 4 6 B',
+    ]),
+  },
+  {
+    id: 'bastion', name: 'Bastion', blurb: 'Command post capped by three mines; Spotters on both flanks.',
+    ranks: parse([
+      'P 2 6 2 7 2 5 2 6 P',
+      '4 3 B 8 10 9 8 3 5 4',
+      '3 B F B 1 7 6 5 4 3',
+    ]),
+  },
+  {
+    id: 'ambush', name: 'Ambush', blurb: 'Mines build a decoy on the right; the real command post hides unmined on the left.',
+    ranks: parse([
+      '5 2 7 P 3 3 P 6 2 4',
+      '2 8 4 10 6 5 9 8 B 2',
+      'F 3 1 6 5 7 4 B 3 B',
+    ]),
+  },
+];
+
+export const presetsFor = (army: ArmyId = 'classic'): readonly Preset[] => (army === 'spotter' ? SPOTTER_PRESETS : PRESETS);
+
 export const presetPlacement = (me: PlayerID, p: Preset): Placement => placementFromLayout(me, p.ranks);
 
 /** How many of each rank are still to be placed. */
-export function remaining(placement: Placement): Map<Rank, number> {
-  const left = new Map<Rank, number>(ARMY.map((k) => [k.rank, k.count]));
+export function remaining(placement: Placement, army: ArmyId = 'classic'): Map<Rank, number> {
+  const left = new Map<Rank, number>(armyKinds(army).map((k) => [k.rank, k.count]));
   for (const p of placement) left.set(p.rank, (left.get(p.rank) ?? 0) - 1);
   return left;
 }
 
 /** Put a piece of `rank` on `pos` (an own-zone square); a piece already there goes back to the tray. */
-export function placeAt(placement: Placement, pos: number, rank: Rank): Placement {
-  if ((remaining(placement).get(rank) ?? 0) <= 0) return placement;
+export function placeAt(placement: Placement, pos: number, rank: Rank, army: ArmyId = 'classic'): Placement {
+  if ((remaining(placement, army).get(rank) ?? 0) <= 0) return placement;
   return [...placement.filter((p) => p.pos !== pos), { pos, rank }];
 }
 
@@ -76,11 +106,11 @@ export function moveTo(placement: Placement, from: number, to: number): Placemen
 }
 
 /** Fill every empty square of my zone with the pieces still in the tray, at random. */
-export function fillRest(me: PlayerID, placement: Placement, rnd: () => number): Placement {
+export function fillRest(me: PlayerID, placement: Placement, rnd: () => number, army: ArmyId = 'classic'): Placement {
   const taken = new Set(placement.map((p) => p.pos));
-  const empty = randomPlacement(me, rnd).map((p) => p.pos).filter((pos) => !taken.has(pos));
+  const empty = randomPlacement(me, rnd, army).map((p) => p.pos).filter((pos) => !taken.has(pos));
   const bag: Rank[] = [];
-  for (const [rank, n] of remaining(placement)) for (let i = 0; i < n; i++) bag.push(rank);
+  for (const [rank, n] of remaining(placement, army)) for (let i = 0; i < n; i++) bag.push(rank);
   for (let i = bag.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [bag[i], bag[j]] = [bag[j], bag[i]]; }
   return [...placement, ...bag.map((rank, i) => ({ pos: empty[i], rank }))];
 }

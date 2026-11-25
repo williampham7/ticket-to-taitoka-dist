@@ -2,7 +2,7 @@
  * Frontline rules, pure functions on the full (server-side) state. No boardgame.io, no maps.
  */
 import { DIRS, SIZE, colOf, inZone, isLake, onBoard, other, pos, rowOf, zoneSquares, type PlayerID, type Pos } from './board';
-import { ARMY, ARMY_SIZE, ENGINEER, MARSHAL, OPERATIVE, SCOUT, isRank, kindOf, type Rank } from './pieces';
+import { ENGINEER, MARSHAL, OPERATIVE, SCOUT, SPOTTER, armyKinds, armySize, isRank, kindOf, strengthOf, zoneRows, type ArmyId, type Rank } from './pieces';
 
 export interface Piece { id: string; owner: PlayerID; rank: Rank; pos: Pos; revealed: boolean }
 /** One piece's run of consecutive moves between the same two squares (two-square rule). */
@@ -18,9 +18,18 @@ export interface Result { winner: PlayerID | null; reason: 'flag' | 'noMoves' | 
 export interface Chase { chaser: PlayerID; target: string; seen: string[] }
 export interface Fallen { owner: PlayerID; rank: Rank }
 export interface MoveArgs { from: Pos; to: Pos }
+/** A Spotter on `from` names the rank of the enemy piece on the orthogonally adjacent square `at`. */
+export interface SpotArgs { from: Pos; at: Pos; guess: Rank }
+/**
+ * The last spot, public to both sides. A miss never records the target's real rank (G does not need it), so
+ * no view can leak it; a hit removes the target, whose rank is then the guess.
+ */
+export interface Spot { player: PlayerID; from: Pos; at: Pos; spotter: string; target: string; guess: Rank; hit: boolean }
 export type Placement = { pos: Pos; rank: Rank }[];
 
 export interface FrontlineState {
+  /** Which army both sides play (set in the briefing; fixed once setup starts). */
+  army: ArmyId;
   /** Every piece on the board, both sides. Views filter this; stored state is always complete. */
   pieces: Piece[];
   ready: Record<PlayerID, boolean>;
@@ -29,6 +38,10 @@ export interface FrontlineState {
   first: PlayerID;
   lastMove: { player: PlayerID; from: Pos; to: Pos } | null;
   lastCombat: Combat | null;
+  /** The last turn's spot (null after a move). */
+  lastSpot: Spot | null;
+  /** Ranks already named wrongly against a piece, by piece id (public: every spot is announced). */
+  ruledOut: Record<string, Rank[]>;
   result: Result | null;
   /** Moves played so far. */
   moves: number;
@@ -46,6 +59,7 @@ export interface FrontlineState {
 export const TWO_SQUARE_LIMIT = 3;
 
 export const emptyState = (): FrontlineState => ({
+  army: 'classic', lastSpot: null, ruledOut: {},
   pieces: [], ready: { 0: false, 1: false }, streak: { 0: null, 1: null }, first: '0',
   lastMove: null, lastCombat: null, result: null, moves: 0,
   chase: null, fallen: [], turnSeconds: null, turnStartedAt: null, startedAt: null,
@@ -57,7 +71,7 @@ export function resolveCombat(a: Rank, d: Rank): CombatWinner {
   if (d === 'B') return a === ENGINEER ? 'attacker' : 'defender';
   if (a === OPERATIVE && d === MARSHAL) return 'attacker';
   if (a === d) return 'both';
-  return (a as number) > (d as number) ? 'attacker' : 'defender';
+  return strengthOf(a) > strengthOf(d) ? 'attacker' : 'defender';
 }
 
 const samePair = (s: Streak, id: string, from: Pos, to: Pos) =>
@@ -65,7 +79,7 @@ const samePair = (s: Streak, id: string, from: Pos, to: Pos) =>
 
 /** The part of a state (full, or one player's view) that move generation reads: own pieces need their rank. */
 type BoardPiece = { id: string; owner: PlayerID; pos: Pos; rank?: Rank };
-export type Board = Pick<FrontlineState, 'streak' | 'lastMove' | 'chase'> & { pieces: readonly BoardPiece[] };
+export type Board = Pick<FrontlineState, 'streak' | 'lastMove' | 'chase'> & Partial<Pick<FrontlineState, 'army' | 'ruledOut'>> & { pieces: readonly BoardPiece[] };
 
 const adjacent = (a: Pos, b: Pos) => Math.abs(rowOf(a) - rowOf(b)) + Math.abs(colOf(a) - colOf(b)) === 1;
 /** The whole position after moving piece `movedId` to `to` (ids are stable, so this identifies a position). */
@@ -117,8 +131,63 @@ function rawMoves(S: Board, player: PlayerID, firstOnly = false, onlyFrom?: Pos)
 }
 
 /**
-/** Whether `player` has any legal move. The two-square rule always yields, so any move at all counts. */
-export const hasLegalMove = (S: Board, player: PlayerID) => rawMoves(S, player, true).length > 0;
+/** Whether `player` has any legal move or spot. The two-square rule always yields, so any move at all counts. */
+export const hasLegalMove = (S: Board, player: PlayerID) => rawMoves(S, player, true).length > 0 || spotTargets(S, player).length > 0;
+
+/** The ranks a Spotter may still name against the piece on `at`: the army's ranks minus those already ruled out. */
+export function spotGuesses(S: Board, at: Pos): Rank[] {
+  const target = S.pieces.find((p) => p.pos === at);
+  const out = target ? S.ruledOut?.[target.id] ?? [] : [];
+  return armyKinds(S.army).map((k) => k.rank).filter((r) => !out.includes(r));
+}
+
+/** Every (Spotter, target) pair `player` may spot now: an own Spotter next to an enemy piece with a guess left. */
+export function spotTargets(S: Board, player: PlayerID, onlyFrom?: Pos): { from: Pos; at: Pos }[] {
+  if ((S.army ?? 'classic') !== 'spotter') return [];
+  const at = new Map<Pos, BoardPiece>(S.pieces.map((p) => [p.pos, p]));
+  const out: { from: Pos; at: Pos }[] = [];
+  for (const p of S.pieces) {
+    if (p.owner !== player || p.rank !== SPOTTER || (onlyFrom !== undefined && p.pos !== onlyFrom)) continue;
+    for (const [dr, dc] of DIRS) {
+      const r = rowOf(p.pos) + dr, c = colOf(p.pos) + dc;
+      if (!onBoard(r, c)) continue;
+      const t = at.get(pos(r, c));
+      if (t && t.owner !== player && spotGuesses(S, t.pos).length > 0) out.push({ from: p.pos, at: t.pos });
+    }
+  }
+  return out;
+}
+
+export const isLegalSpot = (S: Board, player: PlayerID, a: SpotArgs) =>
+  !!a && typeof a.from === 'number' && typeof a.at === 'number' && isRank(a.guess)
+  && spotTargets(S, player, a.from).some((t) => t.at === a.at) && spotGuesses(S, a.at).includes(a.guess);
+
+/**
+ * Play a spot on the full state (mutates it). Throws on an illegal spot. A right guess removes the target
+ * (mines and the command post too) and the Spotter stays where it is; a wrong one leaves the target as it was
+ * and rules that guess out against it. Either way the Spotter is revealed: only a Spotter can spot, so the act
+ * shows what it is. A spot is a whole turn: it breaks the two-square streak and ends any chase.
+ */
+export function applySpot(S: FrontlineState, player: PlayerID, a: SpotArgs): { hit: boolean } {
+  if (!isLegalSpot(S, player, a)) throw new Error('illegal spot');
+  const spotter = S.pieces.find((p) => p.pos === a.from)!;
+  const target = S.pieces.find((p) => p.pos === a.at)!;
+  const hit = target.rank === a.guess;
+  spotter.revealed = true;
+  if (hit) {
+    S.pieces = S.pieces.filter((p) => p !== target);
+    S.fallen.push({ owner: target.owner, rank: target.rank });
+  } else {
+    S.ruledOut = { ...S.ruledOut, [target.id]: [...(S.ruledOut[target.id] ?? []), a.guess] };
+  }
+  S.streak[player] = null;
+  S.chase = null;
+  S.lastMove = null;
+  S.lastCombat = null;
+  S.lastSpot = { player, from: a.from, at: a.at, spotter: spotter.id, target: target.id, guess: a.guess, hit };
+  S.moves++;
+  return { hit };
+}
 
 /**
  * Legal moves for `player`. The two-square rule removes a 4th consecutive move of one piece between the same
@@ -157,6 +226,7 @@ export function applyMove(S: FrontlineState, player: PlayerID, m: MoveArgs): { c
   const st = S.streak[player];
   S.streak[player] = st && samePair(st, mover.id, m.from, m.to) ? { ...st, n: st.n + 1 } : { id: mover.id, a: m.from, b: m.to, n: 1 };
   S.lastMove = { player, from: m.from, to: m.to };
+  S.lastSpot = null;
   S.moves++;
   // a scout running more than one square shows what it is
   const dist = Math.abs(rowOf(m.to) - rowOf(m.from)) + Math.abs(colOf(m.to) - colOf(m.from));
@@ -199,32 +269,35 @@ export function outcome(S: FrontlineState, mover: PlayerID): Result | null {
 }
 
 /** Why a setup is not allowed, or undefined if it is: exactly the army, each piece on its own square in the zone. */
-export function validatePlacement(player: PlayerID, placement: unknown): string | undefined {
+export function validatePlacement(player: PlayerID, placement: unknown, army: ArmyId = 'classic'): string | undefined {
   if (!Array.isArray(placement)) return 'placement must be a list';
-  if (placement.length !== ARMY_SIZE) return `placement must have exactly ${ARMY_SIZE} pieces`;
+  const size = armySize(army);
+  if (placement.length !== size) return `placement must have exactly ${size} pieces`;
   const seen = new Set<Pos>();
   const counts = new Map<Rank, number>();
   for (const x of placement as unknown[]) {
     if (!x || typeof x !== 'object') return 'bad piece';
     const { pos: p, rank } = x as { pos: unknown; rank: unknown };
     if (!isRank(rank)) return 'bad rank';
-    if (typeof p !== 'number' || !inZone(player, p)) return 'piece outside the setup zone';
+    if (typeof p !== 'number' || !inZone(player, p, zoneRows(army))) return 'piece outside the setup zone';
     if (seen.has(p)) return 'two pieces overlap on one square';
     seen.add(p);
     counts.set(rank, (counts.get(rank) ?? 0) + 1);
   }
-  for (const k of ARMY) if ((counts.get(k.rank) ?? 0) !== k.count) return `wrong count of ${k.name}`;
+  const kinds = armyKinds(army);
+  for (const r of counts.keys()) if (!kinds.some((k) => k.rank === r)) return `no ${kindOf(r).name} in this army`;
+  for (const k of kinds) if ((counts.get(k.rank) ?? 0) !== k.count) return `wrong count of ${k.name}`;
   return undefined;
 }
 
 /** A random legal setup for `player`, from a [0, 1) random source. */
-export function randomPlacement(player: PlayerID, rnd: () => number): Placement {
-  const ranks: Rank[] = ARMY.flatMap((k) => Array<Rank>(k.count).fill(k.rank));
+export function randomPlacement(player: PlayerID, rnd: () => number, army: ArmyId = 'classic'): Placement {
+  const ranks: Rank[] = armyKinds(army).flatMap((k) => Array<Rank>(k.count).fill(k.rank));
   for (let i = ranks.length - 1; i > 0; i--) {
     const j = Math.floor(rnd() * (i + 1));
     [ranks[i], ranks[j]] = [ranks[j], ranks[i]];
   }
-  return zoneSquares(player).map((p, i) => ({ pos: p, rank: ranks[i] }));
+  return zoneSquares(player, zoneRows(army)).map((p, i) => ({ pos: p, rank: ranks[i] }));
 }
 
 /** Put a player's validated setup on the board. Piece ids come from the starting square, so they say nothing of rank. */

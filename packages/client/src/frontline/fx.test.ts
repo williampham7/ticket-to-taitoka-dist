@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Combat } from '@boboland/shared/src/frontline';
-import { BOT_PAUSE_MS, botDelay, COMBAT_MS, combatOutcome, fxFor, fxMs } from './fx';
+import { BOT_PAUSE_MS, botDelay, COMBAT_MS, combatOutcome, fxFor, fxMs, REDUCED_SPOT_MS, SPOT_MS, SPOT_T, spotVars } from './fx';
 
 const combat = (a: Combat['attacker']['rank'], d: Combat['defender']['rank'], winner: Combat['winner'], at = 44): Combat => ({
   at, winner, attacker: { id: 'a', owner: '0', rank: a }, defender: { id: 'd', owner: '1', rank: d },
@@ -55,5 +55,26 @@ describe('botDelay', () => {
     const g = { moves: 4, lastMove: { player: '0' as const, from: 54, to: 44 }, lastCombat: combat(6, 4, 'attacker') };
     expect(botDelay(g)).toBe(fxMs(g) + BOT_PAUSE_MS);
     expect(BOT_PAUSE_MS).toBe(1200);
+  });
+});
+
+describe('spot fx', () => {
+  const spot = { player: '1' as const, from: 33, at: 43, spotter: '1-23', target: '0-63', guess: 7 as const, hit: false };
+  const G = { moves: 9, lastMove: null, lastCombat: null, lastSpot: spot };
+
+  it('plays a spot for exactly one new turn, and the computer waits it out', () => {
+    expect(fxFor(8, G)).toEqual({ kind: 'spot', spot, ms: SPOT_MS });
+    expect(fxFor(8, G, true)!.ms).toBe(REDUCED_SPOT_MS);
+    expect(fxFor(7, G)).toBeNull();
+    expect(botDelay(G)).toBe(SPOT_MS + BOT_PAUSE_MS);
+  });
+
+  it('its beats are in order and end before the animation does', () => {
+    expect(SPOT_T.aim).toBeLessThan(SPOT_T.call);
+    expect(SPOT_T.call).toBeLessThan(SPOT_T.result);
+    expect(SPOT_T.result).toBeLessThan(SPOT_T.out);
+    expect(SPOT_T.out + 300).toBeLessThanOrEqual(SPOT_MS);
+    expect(spotVars(false)['--s-result']).toBe(`${SPOT_T.result}ms`);
+    expect(parseInt(spotVars(true)['--s-out'])).toBeLessThan(REDUCED_SPOT_MS);
   });
 });

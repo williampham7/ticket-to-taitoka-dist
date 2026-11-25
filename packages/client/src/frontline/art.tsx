@@ -86,6 +86,30 @@ const ART: Record<string, () => ReactNode> = {
       <path className="c" d="M35 64 L38.2 59.4 L41.8 61.8 L39.6 64 Z" />
     </>
   ),
+  /** Spotter: watch cap and radio headset, a spotting scope on its tripod, a rangefinder reticle. */
+  P: () => (
+    <>
+      <Bust collar={false} />
+      <path className="k" d="M22.4 29 Q21.6 15.4 32 15.2 Q42.4 15.4 41.6 29 Z" />
+      <path className="c-s" strokeWidth="1.1" d="M22.6 25.6 H41.4" />
+      <path className="a-s" strokeWidth="1.7" fill="none" d="M21 31 Q20 13 32 12.6 Q44 13 43 31" />
+      <rect className="a" x="18.4" y="27.6" width="5" height="8" rx="2.2" />
+      <rect className="a" x="40.6" y="27.6" width="5" height="8" rx="2.2" />
+      <path className="a-s" strokeWidth="1.4" strokeLinecap="round" fill="none" d="M21.6 35.4 Q22.6 41.4 29 41.6" />
+      <circle className="a" cx="29.6" cy="41.6" r="1.4" />
+      <g transform="rotate(-16 40 52)">
+        <rect className="k" x="26" y="47.6" width="27" height="6.4" rx="1.6" />
+        <rect className="k" x="51.4" y="46.4" width="5.6" height="8.8" rx="1.2" />
+        <rect className="a" x="55.2" y="47.4" width="1.8" height="6.8" />
+        <rect className="k" x="21.6" y="49" width="5.4" height="3.6" rx="1" />
+        <path className="c-s" strokeWidth="1" d="M33 47.6 V54 M44 47.6 V54" />
+      </g>
+      <path className="k-s" strokeWidth="1.7" strokeLinecap="round" d="M39.5 55.4 L33 64 M39.5 55.4 L46 64 M39.5 55.4 V64" />
+      <circle className="a-s" strokeWidth="1.3" cx="51.5" cy="13" r="6.4" />
+      <path className="a-s" strokeWidth="1.1" d="M51.5 4.6 V9.4 M51.5 16.6 V21.4 M43.1 13 H47.9 M55.1 13 H59.9" />
+      <circle className="a" cx="51.5" cy="13" r="1.1" />
+    </>
+  ),
   /** Scout: boonie hat, binoculars up. */
   2: () => (
     <>

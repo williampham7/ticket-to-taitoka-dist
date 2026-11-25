@@ -69,6 +69,13 @@
 .flt[data-army="tan"][data-hidden] { --cut: #c2a777; background:
   repeating-linear-gradient(45deg, rgba(60,40,10,.10) 0 1.5px, transparent 1.5px 6px),
   linear-gradient(160deg, #d8c194 0%, #c2a777 60%, #ad9165 100%); }
+.flt-rank.letter { font-size: 24cqw; top: 6cqh; }
+/* hidden enemy: ranks a Spotter has already ruled out */
+.flt-ruled {
+  position: absolute; right: 7cqw; bottom: 6cqh; z-index: 1; padding: 1cqw 5cqw; border-radius: 4cqw;
+  font-weight: 700; font-size: 17cqw; line-height: 1.05; letter-spacing: .02em;
+  background: rgba(16,12,6,.72); color: #f2d88e; box-shadow: 0 0 0 1px rgba(242,216,142,.45);
+}
 .flt-crest { position: absolute; inset: 9%; width: 82%; height: 82%; opacity: .62; }
 
 .flt-chip { position: relative; display: inline-block; flex-shrink: 0; vertical-align: middle; }

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { randomPlacement, validatePlacement } from '@boboland/shared/src/frontline';
-import { combatSentence, combatSentenceNamed, displayPos, layoutFromPlacement, placementFromLayout, secondsLeft, swapSquares } from './helpers';
+import { combatSentence, combatSentenceNamed, displayPos, layoutFromPlacement, placementFromLayout, rankLabel, secondsLeft, spotSentence, spotSentenceNamed, swapSquares } from './helpers';
 
 describe('displayPos', () => {
   it('keeps squares for player 0 and rotates 180 degrees for player 1', () => {
@@ -81,5 +81,32 @@ describe('secondsLeft', () => {
   it('is null without a limit', () => {
     expect(secondsLeft({ turnSeconds: null, turnStartedAt: null }, 5)).toBeNull();
     expect(secondsLeft({ turnSeconds: 30, turnStartedAt: null }, 5)).toBeNull();
+  });
+});
+
+describe('Spotter army wording and layouts', () => {
+  const spot = { player: '0' as const, from: 54, at: 44, spotter: '0-74', target: '1-24', guess: 10 as const, hit: true };
+
+  it('labels ranks as each army prints them', () => {
+    expect(rankLabel(1)).toBe('Operative (1)');
+    expect(rankLabel(1, 'spotter')).toBe('Operative (S)');
+    expect(rankLabel('P', 'spotter')).toBe('Spotter (1)');
+    expect(rankLabel('F', 'spotter')).toBe('Command Post (F)');
+  });
+
+  it('describes a spot from either side and for spectators', () => {
+    expect(spotSentence(spot, '0')).toBe('Your Spotter named their piece at E6 a Marshal (10): correct, it is removed');
+    expect(spotSentence({ ...spot, hit: false, guess: 'B' }, '1')).toBe('Their Spotter named your piece at E6 a Mine (B): wrong, it stays hidden');
+    expect(spotSentence({ ...spot, guess: 1 }, '0')).toBe('Your Spotter named their piece at E6 an Operative (S): correct, it is removed');
+    expect(spotSentenceNamed(spot, { 0: 'Ana', 1: 'Bo' })).toBe("Ana's Spotter named Bo's piece at E6 a Marshal (10): correct, it is removed");
+  });
+
+  it('saves and restores a 30-piece layout the same way for both sides', () => {
+    for (const me of ['0', '1'] as const) {
+      const pl = randomPlacement(me, () => 0.3, 'spotter');
+      const layout = layoutFromPlacement(me, pl, 30);
+      expect(layout).toHaveLength(30);
+      expect(validatePlacement(me, placementFromLayout(me, layout), 'spotter')).toBeUndefined();
+    }
   });
 });

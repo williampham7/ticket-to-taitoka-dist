@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { validatePlacement, type Placement, type PlayerID } from '@boboland/shared/src/frontline';
-import { PRESETS, fillRest, moveTo, placeAt, presetPlacement, remaining, removeAt } from './presets';
+import { PRESETS, SPOTTER_PRESETS, fillRest, moveTo, placeAt, presetPlacement, presetsFor, remaining, removeAt } from './presets';
 
 const rnd = (seed: number) => { let s = seed; return () => (s = (s * 16807) % 2147483647) / 2147483647; };
 
@@ -45,5 +45,27 @@ describe('placing pieces by hand', () => {
       expect(pl.slice(0, 13)).toEqual(start);
     }
     expect(validatePlacement('1', fillRest('1', [], rnd(3)))).toBeUndefined();
+  });
+});
+
+describe('Spotter army presets and tray', () => {
+  it('each preset is a legal 30-piece Spotter army for both sides, command post off the front row', () => {
+    expect(SPOTTER_PRESETS.length).toBeGreaterThanOrEqual(2);
+    for (const p of SPOTTER_PRESETS) {
+      expect(p.ranks).toHaveLength(30);
+      expect(p.ranks.indexOf('F')).toBeGreaterThanOrEqual(10);
+      for (const me of ['0', '1'] as PlayerID[]) expect(validatePlacement(me, presetPlacement(me, p), 'spotter'), p.id).toBeUndefined();
+    }
+    expect(presetsFor('spotter')).toBe(SPOTTER_PRESETS);
+    expect(presetsFor('classic')).toBe(PRESETS);
+  });
+
+  it('counts the tray and fills the rest from the Spotter army', () => {
+    expect(remaining([], 'spotter').get('P')).toBe(2);
+    expect(remaining([], 'spotter').get(2)).toBe(4);
+    expect(remaining([], 'classic').has('P')).toBe(false);
+    const pl = fillRest('1', placeAt([], 5, 'P', 'spotter'), rnd(4), 'spotter');
+    expect(validatePlacement('1', pl, 'spotter')).toBeUndefined();
+    expect(placeAt([], 5, 'P')).toEqual([]); // no Spotter in the classic tray
   });
 });

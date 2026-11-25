@@ -1,9 +1,10 @@
 import { useEffect, useRef, type CSSProperties, type PointerEvent as ReactPointerEvent } from 'react';
-import { isLake, type PlayerID, type ViewPiece, type Combat } from '@boboland/shared/src/frontline';
-import { displayPos } from './helpers';
-import { Tile } from './Tile';
+import { isLake, kindOf, type PlayerID, type ViewPiece, type Combat, type Rank, type Spot } from '@boboland/shared/src/frontline';
+import { coordOf, displayPos } from './helpers';
+import { Chip, Tile } from './Tile';
 import type { Fx } from './fx';
 import './board.css';
+import './spot.css';
 
 /** Army colours outside the tiles (chat bubbles, swatches). */
 export const OWNER_STYLE: Record<PlayerID, { bg: string; fg: string }> = {
@@ -27,13 +28,17 @@ interface Props {
   zone?: ReadonlySet<number>;
   /** Setup: the square a dragged piece would land on. */
   dropAt?: number | null;
-  /** The animation playing now (a slide, or the approach of an attack). */
+  /** The animation playing now (a slide, the approach of an attack, or a spot). */
   fx?: Fx | null;
+  /** Spotter army: enemy squares the selected Spotter may spot. */
+  spotTo?: ReadonlySet<number>;
+  /** Spotter army: the last spot (its sight line and mark stay until the next turn). */
+  lastSpot?: Spot | null;
+  /** Ranks already named wrongly against a piece, by piece id. */
+  ruledOut?: Record<string, Rank[]>;
 }
 
-const COLS = 'ABCDEFGHIJ';
-/** Real coordinates, the same for both players: column letter, row number counted from player 0's back row. */
-export const coordOf = (pos: number) => `${COLS[pos % 10]}${10 - Math.floor(pos / 10)}`;
+export { coordOf } from './helpers';
 
 /* ---- terrain: contour lines and scrub, generated once ---- */
 function rng(seed: number) { let s = seed; return () => (s = (s * 16807) % 2147483647) / 2147483647; }
@@ -99,7 +104,7 @@ function Terrain({ flip }: { flip: boolean }) {
 const rc = (me: PlayerID, pos: number) => { const d = displayPos(me, pos); return { r: Math.floor(d / 10), c: d % 10 }; };
 
 /** 10x10 field on a tactical map. Row 0 is the top for player 0; player 1 sees it rotated so their own army is at the bottom. */
-export function Board({ pieces, me, selected, legalTo, movable, lastMove, lastCombat, onCell, onCellPointerDown, zone, dropAt, fx }: Props) {
+export function Board({ pieces, me, selected, legalTo, movable, lastMove, lastCombat, onCell, onCellPointerDown, zone, dropAt, fx, spotTo, lastSpot, ruledOut }: Props) {
   const at = new Map(pieces.map((p) => [p.pos, p]));
 
   // an enemy piece that was hidden and now has a rank flips over (several at once, e.g. at the end: a wave)
@@ -113,6 +118,8 @@ export function Board({ pieces, me, selected, legalTo, movable, lastMove, lastCo
 
   const combatFx = fx?.kind === 'combat' ? fx : null;
   const moveFx = fx?.kind === 'move' ? fx : null;
+  const spotFx = fx?.kind === 'spot' ? fx.spot : null;
+  const spotTarget = spotFx ? pieces.find((p) => p.pos === spotFx.at) : undefined;
 
   const cells = [];
   for (let d = 0; d < 100; d++) {
@@ -144,31 +151,48 @@ export function Board({ pieces, me, selected, legalTo, movable, lastMove, lastCo
         pieceClass += ' flipping';
         pieceStyle = { ...pieceStyle, '--flip-delay': wave ? `${(r + c) * 45}ms` : '0ms' } as CSSProperties;
       }
+      if (spotFx && piece.id === spotFx.spotter) pieceClass += ' spotting';
+      if (spotFx?.hit && piece.id === spotFx.target) pieceClass += ' spot-struck';
       if (isSel) pieceClass += ' selected';
       else if (movable?.has(pos)) pieceClass += ' movable';
     }
     const raised = pieceClass.includes('sliding') || pieceClass.includes('lunging') || isSel;
     const target = combatFx?.combat.at === pos;
-    const scorch = !fx && lastCombat?.at === pos;
+    const scorch = !fx && (lastCombat?.at === pos || (lastSpot?.hit && lastSpot.at === pos));
     const from = !fx && lastMove?.from === pos;
+    const spotable = !!spotTo?.has(pos);
+    const spotHere = spotFx?.at === pos;
+    const missMark = !fx && !!lastSpot && !lastSpot.hit && lastSpot.at === pos;
+    const ruled = piece && piece.rank === undefined ? ruledOut?.[piece.id] ?? [] : [];
 
     cells.push(
       <div key={pos} data-testid={`fl-cell-${pos}`} data-legal={legal ? 'true' : undefined} onClick={() => onCell?.(pos)}
         data-zone={inZone ? 'true' : undefined}
         onPointerDown={onCellPointerDown ? (e) => onCellPointerDown(pos, e) : undefined}
-        style={{ touchAction: onCellPointerDown && piece ? 'none' : undefined, zIndex: raised || target ? 6 : undefined }}
+        title={ruled.length ? `Ruled out: ${ruled.map((r) => kindOf(r).name).join(', ')}` : undefined}
+        data-spot={spotable ? 'true' : undefined}
+        style={{ touchAction: onCellPointerDown && piece ? 'none' : undefined, zIndex: raised || target || spotHere ? 6 : undefined }}
         className={`flb-cell ${lake ? 'lake' : (r + c) % 2 ? 'odd' : ''} ${onCell && !lake ? 'cursor-pointer' : ''} ${inZone && !piece ? 'zone' : ''} ${dropAt === pos ? 'drop' : ''}`}>
-        {scorch && <span className={`flb-scorch ${lastCombat!.defender.rank === 'B' && lastCombat!.winner === 'defender' ? 'crater' : ''}`} />}
+        {scorch && <span className={`flb-scorch ${lastCombat?.at === pos && lastCombat.defender.rank === 'B' && lastCombat.winner === 'defender' ? 'crater' : ''}`} />}
         {from && <span className="flb-from" />}
         {legal && !attack && <span className="flb-dest" />}
         {piece && (
           <div data-testid="fl-piece" data-owner={piece.owner} data-id={piece.id} data-revealed={piece.revealed ? 'true' : undefined}
             className={`flp ${pieceClass}`} style={pieceStyle}>
-            <Tile owner={piece.owner} rank={piece.rank} revealed={piece.owner === me && piece.revealed} />
+            <Tile owner={piece.owner} rank={piece.rank} revealed={piece.owner === me && piece.revealed} ruledOut={ruled.length} />
           </div>
         )}
         {attack && <span className="flb-attack" aria-hidden="true"><i /><i /><i /><i /></span>}
         {isSel && <span className="flb-sel" aria-hidden="true"><i /><i /><i /><i /></span>}
+        {spotable && <span className="flb-spotable" aria-hidden="true" />}
+        {missMark && <span className="flb-missmark" aria-hidden="true" />}
+        {spotHere && spotFx && (
+          <span className={`flb-spot ${spotFx.hit ? 'hit' : 'miss'}`} data-testid="fl-spot-fx" aria-hidden="true">
+            <span className="flb-spot-lock"><i /><i /><i /><i /></span>
+            <span className="flb-spot-call"><Chip owner={spotTarget?.owner ?? (spotFx.player === '0' ? '1' : '0')} rank={spotFx.guess} size={44} /><b>{kindOf(spotFx.guess).name}?</b></span>
+            <b className="flb-spot-verdict">{spotFx.hit ? 'Confirmed' : 'Negative'}</b>
+          </span>
+        )}
         {target && <span className="flb-reticle" aria-hidden="true"><i /><i /><i /><i /><b /></span>}
       </div>,
     );
@@ -178,6 +202,13 @@ export function Board({ pieces, me, selected, legalTo, movable, lastMove, lastCo
   const track = !combatFx && lastMove ? (() => {
     const f = rc(me, lastMove.from), t = rc(me, lastMove.to);
     return { x1: f.c + 0.5, y1: f.r + 0.5, x2: t.c + 0.5, y2: t.r + 0.5, mine: lastMove.player === me };
+  })() : null;
+
+  // a spot: the sight line from the Spotter to its target (drawn while it plays, faint afterwards)
+  const sightOf = spotFx ?? (!fx ? lastSpot : null) ?? null;
+  const sight = sightOf ? (() => {
+    const f = rc(me, sightOf.from), t = rc(me, sightOf.at);
+    return { x1: f.c + 0.5, y1: f.r + 0.5, x2: t.c + 0.5, y2: t.r + 0.5, live: !!spotFx, mine: sightOf.player === me };
   })() : null;
 
   const labels = Array.from({ length: 10 }, (_, i) => i);
@@ -193,6 +224,11 @@ export function Board({ pieces, me, selected, legalTo, movable, lastMove, lastCo
         {track && (
           <svg key={`${lastMove!.from}-${lastMove!.to}`} className={`flb-track ${track.mine ? 'mine' : 'theirs'}`} viewBox="0 0 10 10" preserveAspectRatio="none" aria-hidden="true">
             <line x1={track.x1} y1={track.y1} x2={track.x2} y2={track.y2} pathLength={1} />
+          </svg>
+        )}
+        {sight && (
+          <svg key={`sight-${sightOf!.from}-${sightOf!.at}-${sight.live}`} className={`flb-sight ${sight.live ? 'live' : ''} ${sight.mine ? 'mine' : 'theirs'}`} viewBox="0 0 10 10" preserveAspectRatio="none" aria-hidden="true">
+            <line x1={sight.x1} y1={sight.y1} x2={sight.x2} y2={sight.y2} />
           </svg>
         )}
       </div>

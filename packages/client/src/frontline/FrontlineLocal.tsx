@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Client } from 'boardgame.io/client';
 import { Local } from 'boardgame.io/multiplayer';
-import { FrontlineGame, type PlayerID } from '@boboland/shared/src/frontline';
+import { FrontlineGame, type ArmyId, type PlayerID } from '@boboland/shared/src/frontline';
 import { useClientState, type BgioClient } from '../lib/useClientState';
 import { readChat, type ChatLine, type ChatPayload } from '../lib/chat';
 import { navigate } from '../lib/router';
-import { combatSentenceNamed } from './helpers';
+import { combatSentenceNamed, spotSentenceNamed } from './helpers';
 import { BriefingPanel, btnPrimary, FrontlineScreen, type FrontlineState } from './FrontlineScreen';
 import { useClaimTimeout, useNow } from './timer';
 import { secondsLeft } from './helpers';
@@ -15,23 +15,23 @@ import './screen.css';
 /** Pass-and-play: straight into the game; names and the turn limit are set in its briefing. Every seat change goes through an opaque curtain. */
 export function FrontlineLocal() {
   const [names, setNames] = useState(['Player 1', 'Player 2']);
-  const [round, setRound] = useState({ n: 0, turnSeconds: 0 });
+  const [round, setRound] = useState<{ n: number; turnSeconds: number; army: ArmyId }>({ n: 0, turnSeconds: 0, army: 'classic' });
   return (
-    <LocalMatch key={round.n} names={names} setNames={setNames} turnSeconds={round.turnSeconds}
-      onRematch={(turnSeconds) => setRound((r) => ({ n: r.n + 1, turnSeconds }))} />
+    <LocalMatch key={round.n} names={names} setNames={setNames} turnSeconds={round.turnSeconds} army={round.army}
+      onRematch={(turnSeconds, army) => setRound((r) => ({ n: r.n + 1, turnSeconds, army }))} />
   );
 }
 
-function LocalMatch({ names, setNames, turnSeconds, onRematch }: {
-  names: string[]; setNames: (n: string[]) => void; turnSeconds: number; onRematch: (turnSeconds: number) => void;
+function LocalMatch({ names, setNames, turnSeconds, army, onRematch }: {
+  names: string[]; setNames: (n: string[]) => void; turnSeconds: number; army: ArmyId; onRematch: (turnSeconds: number, army: ArmyId) => void;
 }) {
   // a fresh game object per match: Local() keeps one master per game object
   const clients = useMemo(() => {
     const seed = new URLSearchParams(window.location.search).get('seed');
-    const game = { ...FrontlineGame, setup: (ctx: Parameters<NonNullable<typeof FrontlineGame.setup>>[0]) => FrontlineGame.setup!(ctx, { turnSeconds }), ...(seed ? { seed } : {}) };
+    const game = { ...FrontlineGame, setup: (ctx: Parameters<NonNullable<typeof FrontlineGame.setup>>[0]) => FrontlineGame.setup!(ctx, { turnSeconds, army }), ...(seed ? { seed } : {}) };
     const multiplayer = Local();
     return (['0', '1'] as const).map((id) => Client({ game, numPlayers: 2, multiplayer, playerID: id, debug: false }) as unknown as BgioClient);
-  }, [turnSeconds]);
+  }, [turnSeconds, army]);
   useEffect(() => {
     clients.forEach((c) => c.start());
     return () => clients.forEach((c) => c.stop());
@@ -82,7 +82,13 @@ function LocalMatch({ names, setNames, turnSeconds, onRematch }: {
         {/* the last combat is public (both ranks are revealed), so the mover and the next player can both read it here */}
         {first?.G.lastCombat && first.ctx.phase === 'play' && (
           <p className="max-w-[420px] rounded-md border border-[#5a6355] px-3 py-2 text-[15px]" data-testid="fl-curtain-combat">
-            {combatSentenceNamed(first.G.lastCombat, { 0: shownNames[0], 1: shownNames[1] })}
+            {combatSentenceNamed(first.G.lastCombat, { 0: shownNames[0], 1: shownNames[1] }, first.G.army)}
+          </p>
+        )}
+        {/* so is a spot: the call and whether it was right (a miss never says what the piece really is) */}
+        {first?.G.lastSpot && first.ctx.phase === 'play' && (
+          <p className="max-w-[420px] rounded-md border border-[#3f6a73] px-3 py-2 text-[15px]" data-testid="fl-curtain-spot">
+            {spotSentenceNamed(first.G.lastSpot, { 0: shownNames[0], 1: shownNames[1] }, first.G.army)}
           </p>
         )}
         <div className="fls-kicker">Secure handover</div>
@@ -102,8 +108,9 @@ function LocalMatch({ names, setNames, turnSeconds, onRematch }: {
             { label: 'Tan army', value: names[1], onChange: setName(1), testid: 'fl-name-1' },
           ]}
           turnSeconds={seatState.G.turnSeconds} onTurnSeconds={(s) => clients[0].moves.setTurnLimit(s)}
+          army={seatState.G.army} onArmy={(a) => clients[0].moves.setArmy(a)}
           start={{ onClick: () => clients[0].moves.begin(), hint: 'Who moves first is drawn at random.' }} />
       )}
-      onExit={() => navigate('/frontline')} rematch={{ onClick: () => onRematch(seatState.G.turnSeconds ?? 0) }} />
+      onExit={() => navigate('/frontline')} rematch={{ onClick: () => onRematch(seatState.G.turnSeconds ?? 0, seatState.G.army) }} />
   );
 }

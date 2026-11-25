@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Client } from 'boardgame.io/client';
 import { Local } from 'boardgame.io/multiplayer';
-import { botPlacement, chooseBotMove, FrontlineGame, type PlayerID } from '@boboland/shared/src/frontline';
+import { botPlacement, chooseBotAction, FrontlineGame, type ArmyId, type PlayerID } from '@boboland/shared/src/frontline';
 import { useClientState, type BgioClient } from '../lib/useClientState';
 import { navigate } from '../lib/router';
 import { BriefingPanel, FrontlineScreen, type FrontlineState } from './FrontlineScreen';
@@ -14,19 +14,21 @@ import { botDelay, prefersReducedMotion } from './fx';
 export function FrontlineBot() {
   const party = usePartyState();
   const [name, setName] = useState<string | null>(null);
-  const [round, setRound] = useState({ n: 0, turnSeconds: 0 });
+  const [round, setRound] = useState<{ n: number; turnSeconds: number; army: ArmyId }>({ n: 0, turnSeconds: 0, army: 'classic' });
   const shown = name ?? party.name ?? 'Player';
-  return <BotMatch key={round.n} name={shown} setName={setName} turnSeconds={round.turnSeconds} onRematch={(turnSeconds) => setRound((r) => ({ n: r.n + 1, turnSeconds }))} />;
+  return <BotMatch key={round.n} name={shown} setName={setName} turnSeconds={round.turnSeconds} army={round.army} onRematch={(turnSeconds, army) => setRound((r) => ({ n: r.n + 1, turnSeconds, army }))} />;
 }
 
-function BotMatch({ name, setName, turnSeconds, onRematch }: { name: string; setName: (n: string) => void; turnSeconds: number; onRematch: (turnSeconds: number) => void }) {
+function BotMatch({ name, setName, turnSeconds, army, onRematch }: {
+  name: string; setName: (n: string) => void; turnSeconds: number; army: ArmyId; onRematch: (turnSeconds: number, army: ArmyId) => void;
+}) {
   const { human, botSeat, clients } = useMemo(() => {
     const human: PlayerID = Math.random() < 0.5 ? '0' : '1';
-    const game = { ...FrontlineGame, setup: (ctx: Parameters<NonNullable<typeof FrontlineGame.setup>>[0]) => FrontlineGame.setup!(ctx, { turnSeconds }) };
+    const game = { ...FrontlineGame, setup: (ctx: Parameters<NonNullable<typeof FrontlineGame.setup>>[0]) => FrontlineGame.setup!(ctx, { turnSeconds, army }) };
     const multiplayer = Local();
     const clients = (['0', '1'] as const).map((id) => Client({ game, numPlayers: 2, multiplayer, playerID: id, debug: false }) as unknown as BgioClient);
     return { human, botSeat: (human === '0' ? '1' : '0') as PlayerID, clients };
-  }, [turnSeconds]);
+  }, [turnSeconds, army]);
   useEffect(() => {
     clients.forEach((c) => c.start());
     return () => clients.forEach((c) => c.stop());
@@ -42,15 +44,16 @@ function BotMatch({ name, setName, turnSeconds, onRematch }: { name: string; set
   const moves = botState?.G.moves;
   useEffect(() => {
     if (phase === 'setup' && botReady === false) {
-      const t = setTimeout(() => bot.moves.submitSetup(botPlacement(botSeat, Math.random)), 400);
+      const t = setTimeout(() => bot.moves.submitSetup(botPlacement(botSeat, Math.random, (bot.getState() as FrontlineState).G.army)), 400);
       return () => clearTimeout(t);
     }
     if (botTurn) {
       const t = setTimeout(() => {
         const s = bot.getState() as FrontlineState;
         if (s.ctx.currentPlayer !== botSeat || s.G.result) return;
-        const m = chooseBotMove(s.G, botSeat, Math.random);
-        bot.moves.move(m.from, m.to);
+        const a = chooseBotAction(s.G, botSeat, Math.random);
+        if (a.kind === 'spot') bot.moves.spot(a.from, a.at, a.guess);
+        else bot.moves.move(a.from, a.to);
       }, botDelay(botState!.G, prefersReducedMotion()));
       return () => clearTimeout(t);
     }
@@ -70,8 +73,9 @@ function BotMatch({ name, setName, turnSeconds, onRematch }: { name: string; set
           fields={[{ label: 'Your name', value: name, onChange: setName, testid: 'fl-name-0' }]}
           // settings and Start belong to seat 0, whichever side the human drew
           turnSeconds={humanState.G.turnSeconds} onTurnSeconds={(s) => clients[0].moves.setTurnLimit(s)}
+          army={humanState.G.army} onArmy={(a) => clients[0].moves.setArmy(a)}
           start={{ onClick: () => clients[0].moves.begin(), hint: 'You play olive or tan at random.' }} />
       )}
-      onExit={() => navigate('/frontline')} rematch={{ onClick: () => onRematch(humanState.G.turnSeconds ?? 0) }} />
+      onExit={() => navigate('/frontline')} rematch={{ onClick: () => onRematch(humanState.G.turnSeconds ?? 0, humanState.G.army) }} />
   );
 }

@@ -55,6 +55,7 @@
 .flbr-c i.go { width: 9px; height: 9px; transform: rotate(45deg); border: 2px solid #9be06b; background: rgba(155,224,107,.28); box-shadow: 0 0 8px rgba(155,224,107,.6); }
 .flbr-c i.no::before, .flbr-c i.no::after { content: ""; position: absolute; left: -6px; top: -1px; width: 12px; height: 2px; background: rgba(255,122,92,.7); }
 .flbr-c i.no::before { transform: rotate(45deg); } .flbr-c i.no::after { transform: rotate(-45deg); }
+.flbr-c i.spot { inset: 8%; border: 2px dashed #6fe3ff; border-radius: 50%; box-shadow: 0 0 8px rgba(111,227,255,.6); }
 .flbr-c i.hit { inset: 0; border: 2px solid #ff5a3c; border-radius: 4px; box-shadow: 0 0 8px rgba(255,90,60,.6), inset 0 0 0 2px rgba(255,90,60,.2); }
 
 /* fights */

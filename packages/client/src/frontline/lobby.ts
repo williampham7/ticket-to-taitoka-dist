@@ -1,5 +1,5 @@
 import { LobbyClient } from 'boardgame.io/client';
-import { FRONTLINE_GAME_NAME } from '@boboland/shared/src/frontline';
+import { FRONTLINE_GAME_NAME, type ArmyId } from '@boboland/shared/src/frontline';
 import { load, save } from '../lib/storage';
 
 const client = new LobbyClient({ server: window.location.origin });
@@ -32,8 +32,8 @@ export async function fetchMatch(matchID: string): Promise<FlMatch> {
 }
 
 /** Ask for the next match; returns its id (the same id if the other player already asked). */
-export async function rematchFor(seat: FlSeat, turnSeconds = 0): Promise<string> {
-  const { nextMatchID } = await client.playAgain(FRONTLINE_GAME_NAME, seat.matchID, { playerID: seat.playerID, credentials: seat.credentials, numPlayers: 2, setupData: { turnSeconds } });
+export async function rematchFor(seat: FlSeat, turnSeconds = 0, army: ArmyId = 'classic'): Promise<string> {
+  const { nextMatchID } = await client.playAgain(FRONTLINE_GAME_NAME, seat.matchID, { playerID: seat.playerID, credentials: seat.credentials, numPlayers: 2, setupData: { turnSeconds, army } });
   return nextMatchID;
 }
 

@@ -3,7 +3,7 @@ import { Client } from 'boardgame.io/client';
 import { Local } from 'boardgame.io/multiplayer';
 import type { Game } from 'boardgame.io';
 import {
-  FrontlineGame, legalMoves, randomPlacement, type FrontlineState, type FrontlineView, type PlayerID,
+  FrontlineGame, inZone, legalMoves, randomPlacement, spotGuesses, zoneRows, spotTargets, type FrontlineState, type FrontlineView, type PlayerID,
 } from '../src/frontline';
 import { begin, prng } from './frontlineHelpers';
 
@@ -34,8 +34,12 @@ function assertNoLeak(me: C, enemy: C) {
     const o = x as Record<string, unknown>;
     if (!isOver && 'rank' in o) {
       const byId = typeof o.id === 'string' && hidden.some((h) => h.id === o.id);
-      const byPos = typeof o.pos === 'number' && hidden.some((h) => h.pos === o.pos) && o.owner !== mine;
-      const placement = typeof o.pos === 'number' && !('id' in o) && !('owner' in o) && (mine === '0' ? o.pos < 40 : o.pos >= 60);
+      // a board piece (it has an id or owner) standing where a hidden enemy is; bare {pos, rank} entries are setup placements
+      const isPiece = 'id' in o || 'owner' in o;
+      const byPos = isPiece && typeof o.pos === 'number' && hidden.some((h) => h.pos === o.pos) && o.owner !== mine;
+      // a placement entry inside the enemy's setup zone would be the enemy's setup
+      const rows = zoneRows(enemyView.army);
+      const placement = !isPiece && typeof o.pos === 'number' && inZone(mine === '0' ? '1' : '0', o.pos, rows);
       expect(byId || byPos || placement, `rank leaked to ${mine}: ${JSON.stringify(o)}`).toBe(false);
     }
     Object.values(o).forEach(walk);
@@ -174,5 +178,43 @@ describe('Frontline game: play and hidden information', () => {
     b.moves.submitSetup(randomPlacement('1', prng(6)));
     expect(view(spec).pieces.length).toBe(80);
     expect(view(spec).pieces.some((p) => 'rank' in p)).toBe(false);
+  });
+});
+
+describe('Frontline game: Spotter army hidden information', () => {
+  it('moves and spots through the server never leak a hidden rank, also after a reconnect', () => {
+    let spots = 0, misses = 0;
+    // random games can end early on a captured command post: play matches until both a hit and a miss have gone through
+    for (let g = 0; g < 30 && (spots === misses || misses === 0); g++) {
+      const base = { ...FrontlineGame, seed: `spot-leak-${g}`, setup: (ctx: Parameters<NonNullable<typeof FrontlineGame.setup>>[0]) => FrontlineGame.setup!(ctx, { army: 'spotter' }) };
+      const { seats, make } = table(base);
+      let [a, b] = seats;
+      a.moves.submitSetup(randomPlacement('0', prng(21 + g), 'spotter'));
+      b.moves.submitSetup(randomPlacement('1', prng(122 + g), 'spotter'));
+      check(a, b);
+      const rnd = prng(7 + g);
+      for (let i = 0; i < 600 && !a.getState()!.ctx.gameover; i++) {
+        const cur = a.getState()!.ctx.currentPlayer as PlayerID;
+        const client = cur === '0' ? a : b;
+        const v = view(client) as unknown as FrontlineState;
+        const ts = spotTargets(v, cur);
+        // spot whenever possible (mostly), otherwise a random legal move
+        if (ts.length && rnd() < 0.8) {
+          const t = ts[Math.floor(rnd() * ts.length)];
+          const gs = spotGuesses(v, t.at);
+          client.moves.spot(t.from, t.at, gs[Math.floor(rnd() * gs.length)]);
+          spots++;
+          if (view(a).lastSpot && !view(a).lastSpot!.hit) misses++;
+        } else {
+          const ms = legalMoves(v, cur);
+          const m = ms[Math.floor(rnd() * ms.length)];
+          client.moves.move(m.from, m.to);
+        }
+        check(a, b);
+        if (i === 40) { b.stop(); b = make('1'); check(a, b); }
+      }
+    }
+    expect(misses).toBeGreaterThan(0);
+    expect(spots).toBeGreaterThan(misses);
   });
 });

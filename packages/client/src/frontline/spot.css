@@ -1,0 +1,108 @@
+/*
+ * Spotter army: spotting marks and the spot animation. Optics are cyan, so a spot never reads as an attack (red),
+ * a move (green) or a selection (yellow). Timing comes from SPOT_T in fx.ts as --s-* on the board wrapper.
+ */
+.flb { --optic: #6fe3ff; --optic-glow: rgba(111,227,255,.65); }
+
+/* an enemy the selected Spotter can name: a scope ring that breathes */
+.flb-spotable {
+  position: absolute; inset: 9%; z-index: 4; pointer-events: none; border-radius: 50%;
+  border: 2px dashed var(--optic); box-shadow: 0 0 10px var(--optic-glow), inset 0 0 8px rgba(111,227,255,.35);
+  animation: flb-scope 2.4s linear infinite;
+}
+.flb-spotable::after {
+  content: ""; position: absolute; left: 50%; top: 50%; width: 16%; height: 16%; border-radius: 50%;
+  transform: translate(-50%, -50%); background: var(--optic); box-shadow: 0 0 8px var(--optic);
+}
+@keyframes flb-scope { to { transform: rotate(360deg); } }
+
+/* after a miss: a faint question ring stays on the piece that was named wrongly */
+.flb-missmark {
+  position: absolute; inset: 4%; z-index: 4; pointer-events: none; border-radius: 50%;
+  border: 1.5px dashed rgba(111,227,255,.55); animation: flb-scorch-in .6s ease-out both;
+}
+
+/* the sight line */
+.flb-sight { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 7; pointer-events: none; overflow: visible; }
+.flb-sight line { stroke: rgba(111,227,255,.38); stroke-width: .05; stroke-dasharray: .14 .1; stroke-linecap: round; }
+.flb-sight.live line {
+  stroke: var(--optic); stroke-width: .07; filter: drop-shadow(0 0 .08px var(--optic));
+  animation: flb-sight-march .5s linear infinite, fd-out .3s var(--s-out) ease-in forwards;
+}
+@keyframes flb-sight-march { to { stroke-dashoffset: -.48; } }
+
+/* the Spotter while it spots: raised, its lens catching the light */
+.flp.spotting { z-index: 7; animation: flp-spotting var(--s-out) ease-in-out both; }
+@keyframes flp-spotting {
+  0% { transform: none; filter: none; }
+  15%, 85% { transform: translateY(-6%) scale(1.06); filter: drop-shadow(0 0 8px var(--optic)) brightness(1.1); }
+  100% { transform: none; filter: none; }
+}
+
+/* the target: lock, the call above it, the verdict across it */
+.flb-spot { position: absolute; inset: 0; z-index: 9; pointer-events: none; }
+.flb-spot-lock { position: absolute; inset: -6%; animation: flb-reticle-in .4s cubic-bezier(.2,.9,.3,1.2) both, fd-out .3s var(--s-out) forwards; filter: drop-shadow(0 0 6px var(--optic)); }
+.flb-spot-lock i { position: absolute; width: 30%; height: 30%; border: 0 solid var(--optic); }
+.flb-spot-lock i:nth-child(1) { top: 0; left: 0; border-width: 3px 0 0 3px; }
+.flb-spot-lock i:nth-child(2) { top: 0; right: 0; border-width: 3px 3px 0 0; }
+.flb-spot-lock i:nth-child(3) { bottom: 0; left: 0; border-width: 0 0 3px 3px; }
+.flb-spot-lock i:nth-child(4) { bottom: 0; right: 0; border-width: 0 3px 3px 0; }
+.flb-spot.hit .flb-spot-lock i { animation: flb-lock-hit .3s var(--s-result) forwards; }
+@keyframes flb-lock-hit { to { border-color: #9be06b; } }
+
+.flb-spot-call {
+  position: absolute; left: 50%; bottom: 100%; display: flex; align-items: center; gap: 6px; padding: 4px 9px 4px 4px;
+  border-radius: 6px; white-space: nowrap; transform: translate(-50%, -6px);
+  background: rgba(9,20,24,.92); box-shadow: 0 0 0 1.5px var(--optic), 0 8px 18px rgba(0,0,0,.55);
+  font-family: "Barlow Condensed", "Arial Narrow", sans-serif; font-weight: 700; font-size: 15px; letter-spacing: .06em;
+  text-transform: uppercase; color: #dff8ff;
+  animation: flb-call-in .32s var(--s-call) cubic-bezier(.2,.9,.3,1.25) both, fd-out .3s var(--s-out) forwards;
+}
+.flb-spot-call::after {
+  content: ""; position: absolute; left: 50%; top: 100%; width: 0; height: 0; transform: translateX(-50%);
+  border: 6px solid transparent; border-top-color: var(--optic);
+}
+@keyframes flb-call-in { from { opacity: 0; transform: translate(-50%, 6px) scale(.7); } }
+
+.flb-spot-verdict {
+  position: absolute; left: 50%; top: 50%; padding: 2px 8px; border: 2.5px solid currentColor; border-radius: 4px;
+  font-family: "Barlow Condensed", "Arial Narrow", sans-serif; font-weight: 700; font-size: 16px; letter-spacing: .14em; text-transform: uppercase;
+  white-space: nowrap; transform: translate(-50%, -50%) rotate(-10deg); background: rgba(10,12,9,.82);
+  animation: fd-stamp .34s var(--s-result) cubic-bezier(.2,.9,.3,1.2) both, fd-out .3s var(--s-out) forwards;
+}
+.flb-spot.hit .flb-spot-verdict { color: #9be06b; box-shadow: 0 0 14px rgba(155,224,107,.55); }
+.flb-spot.miss .flb-spot-verdict { color: #ff9a78; box-shadow: 0 0 14px rgba(255,120,90,.45); }
+
+/* a hit: the target is struck off */
+.flp.spot-struck { animation: flp-struck .55s var(--s-result) ease-in forwards; }
+@keyframes flp-struck {
+  0% { transform: none; filter: none; opacity: 1; }
+  25% { transform: translate(-4%, 2%) rotate(-3deg); filter: brightness(1.8) saturate(.4); }
+  100% { transform: scale(.65) rotate(8deg); filter: grayscale(1) brightness(.6); opacity: 0; }
+}
+
+/* the guess picker over the board */
+.fls-spotpick {
+  position: absolute; inset: 0; z-index: 40; display: grid; place-items: center; padding: 12px;
+  background: rgba(4,8,9,.55); backdrop-filter: blur(1.5px);
+}
+.fls-spotpick-box {
+  width: min(430px, 100%); max-height: 100%; overflow: auto; padding: 14px; border-radius: 8px;
+  background: linear-gradient(180deg, #16201f, #0e1514); color: #e8efe9;
+  box-shadow: 0 0 0 1.5px rgba(111,227,255,.6), 0 24px 60px rgba(0,0,0,.6);
+}
+.fls-spotpick-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 6px; margin-top: 10px; }
+.fls-guess {
+  display: flex; align-items: center; gap: 7px; padding: 4px 8px 4px 4px; border-radius: 6px; text-align: left;
+  background: #1c2827; border: 1px solid #304443; color: inherit; cursor: pointer;
+  font-family: "Barlow Condensed", "Arial Narrow", sans-serif; font-weight: 600; font-size: 15px; letter-spacing: .03em;
+  transition: background .12s, border-color .12s, transform .12s;
+}
+.fls-guess:hover:not(:disabled), .fls-guess:focus-visible { background: #213a3d; border-color: #6fe3ff; transform: translateY(-1px); outline: none; }
+.fls-guess:disabled { opacity: .38; cursor: not-allowed; text-decoration: line-through; }
+.fls-guess small { display: block; font-weight: 500; font-size: 12px; opacity: .65; letter-spacing: .02em; text-decoration: none; }
+.fls-guess .pct { margin-left: auto; font-size: 12px; opacity: .7; }
+
+/* the last spot, in the command panel */
+.flc-spot-row { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+.flc-spot-row .scope { width: 22px; height: 22px; color: #6fe3ff; flex-shrink: 0; }

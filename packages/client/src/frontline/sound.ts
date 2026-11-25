@@ -69,6 +69,12 @@ export const sound = {
   }),
   /** an engineer clears a mine */
   defuse: () => play(() => { tone(2000, 0, 0.03, 'square', 0.05); tone(880, 0.1, 0.12, 'triangle', 0.07, 440); tone(440, 0.24, 0.2, 'triangle', 0.06, 330); }),
+  /** a Spotter lifts its scope: radio squelch and a rising ping */
+  scope: () => play(() => { noise(0.12, 0.07, 0, { type: 'bandpass', from: 2400, to: 1200, q: 2 }); tone(880, 0.08, 0.09, 'sine', 0.06, 1320); tone(1760, 0.2, 0.12, 'sine', 0.04); }),
+  /** the call: a two-note radio blip */
+  call: () => play(() => { tone(1046, 0, 0.06, 'square', 0.035); tone(1318, 0.08, 0.08, 'square', 0.035); }),
+  /** a spot misses: a dull double click */
+  negative: () => play(() => { tone(220, 0, 0.09, 'square', 0.05, 180); tone(196, 0.12, 0.14, 'square', 0.05, 150); }),
   /** a short sting after a duel: up for us, down for them */
   good: () => play(() => [392, 523, 659].forEach((f, i) => tone(f, i * 0.08, 0.22, 'triangle', 0.09))),
   bad: () => play(() => [330, 262, 196].forEach((f, i) => tone(f, i * 0.1, 0.26, 'sawtooth', 0.06))),

@@ -1,19 +1,22 @@
 import type { Game, Move } from 'boardgame.io';
 import { ActivePlayers, INVALID_MOVE } from 'boardgame.io/core';
 import { other, type PlayerID } from './board';
-import { applyMove, emptyState, isLegal, outcome, placeArmy, validatePlacement, type FrontlineState, type Placement } from './rules';
+import { isArmyId, type ArmyId } from './pieces';
+import { applyMove, applySpot, emptyState, isLegal, isLegalSpot, outcome, placeArmy, validatePlacement, type FrontlineState, type Placement } from './rules';
 import { viewFor } from './view';
 
 export const FRONTLINE_GAME_NAME = 'frontline';
 
-/** setupData a match may be created with: `turnSeconds` = per-turn limit (0 or absent: no limit). */
-export interface FrontlineSetupData { turnSeconds?: number }
+/** setupData a match may be created with: `turnSeconds` = per-turn limit (0 or absent: no limit); `army` (default classic). */
+export interface FrontlineSetupData { turnSeconds?: number; army?: ArmyId }
 export const MIN_TURN_SECONDS = 10;
 export const MAX_TURN_SECONDS = 3600;
 
 export function validateFrontlineSetupData(d: unknown): string | undefined {
   if (d === undefined || d === null) return undefined;
   if (typeof d !== 'object' || Array.isArray(d)) return 'setupData must be an object';
+  const army = (d as FrontlineSetupData).army;
+  if (army !== undefined && !isArmyId(army)) return 'bad army';
   const t = (d as FrontlineSetupData).turnSeconds;
   if (t === undefined || t === 0) return undefined;
   if (typeof t !== 'number' || !Number.isInteger(t) || t < MIN_TURN_SECONDS || t > MAX_TURN_SECONDS) return 'bad turnSeconds';
@@ -21,6 +24,8 @@ export function validateFrontlineSetupData(d: unknown): string | undefined {
 }
 const turnLimit = (d: unknown): number | null =>
   validateFrontlineSetupData(d) === undefined ? (d as FrontlineSetupData | undefined)?.turnSeconds || null : null;
+const armyFrom = (d: unknown): ArmyId =>
+  (validateFrontlineSetupData(d) === undefined ? (d as FrontlineSetupData | undefined)?.army : undefined) ?? 'classic';
 
 /*
  * Hidden information: G always holds the full board; clients only ever get `viewFor` (playerView).
@@ -32,7 +37,7 @@ const turnLimit = (d: unknown): number | null =>
 const submitSetup: Move<FrontlineState> = {
   move: ({ G, playerID }, placement: Placement) => {
     const p = playerID as PlayerID;
-    if (G.result || G.ready[p] || validatePlacement(p, placement) !== undefined) return INVALID_MOVE;
+    if (G.result || G.ready[p] || validatePlacement(p, placement, G.army) !== undefined) return INVALID_MOVE;
     placeArmy(G, p, placement);
     G.ready[p] = true;
     // both ready: a player who starts with no legal move loses at once (both stuck: draw)
@@ -51,6 +56,20 @@ const move: Move<FrontlineState> = {
     const p = playerID as PlayerID;
     if (G.result || !isLegal(G, p, { from, to })) return INVALID_MOVE;
     applyMove(G, p, { from, to });
+    G.result = outcome(G, p);
+    G.turnStartedAt = Date.now();
+    events.endTurn();
+  },
+  client: false,
+};
+
+/** A Spotter names the adjacent enemy piece on `at` (Spotter army only); a whole turn, like a move. */
+const spot: Move<FrontlineState> = {
+  move: ({ G, playerID, events }, from: number, at: number, guess: unknown) => {
+    const p = playerID as PlayerID;
+    const a = { from, at, guess } as Parameters<typeof applySpot>[2];
+    if (G.result || !isLegalSpot(G, p, a)) return INVALID_MOVE;
+    applySpot(G, p, a);
     G.result = outcome(G, p);
     G.turnStartedAt = Date.now();
     events.endTurn();
@@ -85,6 +104,15 @@ const setTurnLimit: Move<FrontlineState> = {
   client: false,
 };
 
+/** Briefing: the host picks the army both sides will deploy. */
+const setArmy: Move<FrontlineState> = {
+  move: ({ G, playerID }, army: unknown) => {
+    if (playerID !== '0' || !isArmyId(army)) return INVALID_MOVE;
+    G.army = army;
+  },
+  client: false,
+};
+
 const begin: Move<FrontlineState> = {
   move: ({ playerID, events }) => {
     if (playerID !== '0') return INVALID_MOVE;
@@ -97,7 +125,7 @@ export const FrontlineGame: Game<FrontlineState> = {
   name: FRONTLINE_GAME_NAME,
   minPlayers: 2,
   maxPlayers: 2,
-  setup: ({ random }, setupData?: unknown) => ({ ...emptyState(), first: random.Die(2) === 1 ? '0' : '1', turnSeconds: turnLimit(setupData) }),
+  setup: ({ random }, setupData?: unknown) => ({ ...emptyState(), first: random.Die(2) === 1 ? '0' : '1', turnSeconds: turnLimit(setupData), army: armyFrom(setupData) }),
   validateSetupData: (setupData) => validateFrontlineSetupData(setupData),
   playerView: ({ G, ctx, playerID }) => viewFor(G, ctx.phase, playerID) as unknown as FrontlineState,
   phases: {
@@ -105,7 +133,7 @@ export const FrontlineGame: Game<FrontlineState> = {
       start: true,
       next: 'setup',
       turn: { activePlayers: ActivePlayers.ALL },
-      moves: { setTurnLimit, begin },
+      moves: { setTurnLimit, setArmy, begin },
     },
     setup: {
       next: 'play',
@@ -121,7 +149,7 @@ export const FrontlineGame: Game<FrontlineState> = {
         },
         activePlayers: { currentPlayer: 'act', others: 'idle' },
         stages: {
-          act: { moves: { move, resign } },
+          act: { moves: { move, spot, resign } },
           idle: { moves: { resign, claimTimeout } },
         },
       },

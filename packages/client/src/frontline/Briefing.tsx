@@ -1,10 +1,13 @@
 import { useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type ReactNode } from 'react';
-import { ARMY, isLake, kindOf, TWO_SQUARE_LIMIT, type PlayerID, type Rank } from '@boboland/shared/src/frontline';
-import { Chip } from './Tile';
+import { ARMIES, ARMY, isLake, kindOf, TWO_SQUARE_LIMIT, type PlayerID, type Rank } from '@boboland/shared/src/frontline';
+import { ArmyContext, Chip } from './Tile';
 import './briefing.css';
 
-type Tab = 'placement' | 'gameplay';
-const TABS: { id: Tab; label: string }[] = [{ id: 'placement', label: 'Placement' }, { id: 'gameplay', label: 'Gameplay' }];
+type Tab = 'placement' | 'gameplay' | 'spotter';
+const TABS: { id: Tab; label: string }[] = [
+  { id: 'placement', label: 'Placement' }, { id: 'gameplay', label: 'Gameplay' }, { id: 'spotter', label: 'Spotter army' },
+];
+const classicCount = (r: Rank) => ARMY.find((k) => k.rank === r)?.count ?? 0;
 
 /** The instructions, written as a mission briefing: one tab for deploying, one for playing. */
 export function Briefing({ onClose }: { onClose: () => void }) {
@@ -42,13 +45,15 @@ export function Briefing({ onClose }: { onClose: () => void }) {
           </div>
 
           <div id={`flb-panel-${tab}`} role="tabpanel" aria-labelledby={`flb-tab-${tab}`} className="flbr-panel">
-            {tab === 'placement' ? <Placement /> : <Gameplay />}
+            {tab === 'placement' ? <Placement /> : tab === 'gameplay' ? <Gameplay /> : <SpotterArmy />}
           </div>
 
           <div className="mt-6 flex items-center justify-between gap-3">
-            {tab === 'placement'
-              ? <button type="button" className="flbr-next" onClick={() => setTab('gameplay')}>Next: Gameplay</button>
-              : <button type="button" className="flbr-next" onClick={() => setTab('placement')}>Back: Placement</button>}
+            {(() => {
+              const i = TABS.findIndex((t) => t.id === tab);
+              const to = TABS[i + 1] ?? TABS[0];
+              return <button type="button" className="flbr-next" onClick={() => setTab(to.id)}>{i + 1 < TABS.length ? 'Next' : 'Back'}: {to.label}</button>;
+            })()}
             <button type="button" className="flm-close" onClick={onClose} data-testid="fl-rules-close">Understood</button>
           </div>
         </div>
@@ -88,7 +93,7 @@ function Placement() {
           <div key={String(rank)} className="flbr-unit">
             <Chip owner="0" rank={rank} size={58} />
             <div>
-              <b>{kindOf(rank).name}</b> <span className="flbr-count">×{kindOf(rank).count}</span>
+              <b>{kindOf(rank).name}</b> <span className="flbr-count">×{classicCount(rank)}</span>
               <p>{text}</p>
             </div>
           </div>
@@ -120,11 +125,11 @@ function Placement() {
 }
 
 /** The 10x10 field: your rows, no man's land with its lakes, the enemy rows. */
-function MiniBoard() {
+function MiniBoard({ rows = 4 }: { rows?: number }) {
   const cells = [];
   for (let p = 0; p < 100; p++) {
     const r = Math.floor(p / 10);
-    const kind = isLake(p) ? 'lake' : r >= 6 ? 'mine' : r <= 3 ? 'theirs' : 'nml';
+    const kind = isLake(p) ? 'lake' : r >= 10 - rows ? 'mine' : r < rows ? 'theirs' : 'nml';
     cells.push(<i key={p} className={kind} />);
   }
   return (
@@ -141,7 +146,7 @@ function MiniBoard() {
 
 /* ---------------- gameplay ---------------- */
 
-type Mark = 'go' | 'no' | 'hit' | 'lake';
+type Mark = 'go' | 'no' | 'hit' | 'lake' | 'spot';
 /** A small grid with tiles and move marks. */
 function Grid({ size, tiles, marks, label }: { size: number; tiles: Record<number, { owner: PlayerID; rank?: Rank }>; marks: Record<number, Mark>; label: string }) {
   const cells = [];
@@ -154,6 +159,7 @@ function Grid({ size, tiles, marks, label }: { size: number; tiles: Record<numbe
         {m === 'go' && <i className="go" />}
         {m === 'no' && <i className="no" />}
         {m === 'hit' && <i className="hit" />}
+        {m === 'spot' && <i className="spot" />}
       </div>,
     );
   }
@@ -224,5 +230,74 @@ function Gameplay() {
         <p>Capture the enemy Command Post, or leave them with no legal move. If neither side can move, it's a draw.</p>
       </div>
     </>
+  );
+}
+
+/* ---------------- spotter army ---------------- */
+
+/** The 30-piece army: fewer pieces, three rows, and two Spotters that can remove a piece by naming it. */
+function SpotterArmy() {
+  const kinds = ARMIES.spotter.kinds;
+  return (
+    <ArmyContext.Provider value="spotter">
+      <p>The host can switch the game to the <b>Spotter army</b> before it starts. Everything in the other tabs still holds, except for the changes below.</p>
+
+      <h3>A smaller army</h3>
+      <div className="flbr-split">
+        <MiniBoard rows={3} />
+        <ul>
+          <li>Each side deploys <b>30 units</b> on its <b>three back rows</b>, so an empty row opens in front of each army.</li>
+          <li>Fewer of most units: 4 Scouts, 4 Engineers, 3 Mines, and so on.</li>
+          <li>Ranks are printed as this army numbers them: the <b>Spotter is 1</b>, and the <b>Operative is S</b>.</li>
+        </ul>
+      </div>
+      <div className="flbr-officers">
+        {kinds.map((k) => (
+          <div key={k.code}>
+            <Chip owner="0" rank={k.rank} size={58} />
+            <span className="flbr-count">×{k.count}</span>
+          </div>
+        ))}
+      </div>
+
+      <h3>The Spotter</h3>
+      <div className="flbr-special">
+        <div className="flbr-unit">
+          <Chip owner="0" rank="P" size={58} />
+          <div>
+            <b>Spotter</b> <span className="flbr-count">×2</span>
+            <p>Moves one square. In a fight it is weak: it beats only the Operative, and falls to every other unit that attacks it.</p>
+          </div>
+        </div>
+      </div>
+      <div className="flbr-moves">
+        <figure>
+          <Grid size={5} label="A Spotter may name any enemy unit directly next to it, never diagonally"
+            tiles={{ 12: { owner: '0', rank: 'P' }, 7: { owner: '1' }, 13: { owner: '1' }, 18: { owner: '1' } }}
+            marks={{ 7: 'spot', 13: 'spot', 18: 'no' }} />
+          <figcaption>Instead of moving, it names a neighbouring enemy.</figcaption>
+        </figure>
+        <div className="flbr-fights">
+          <div className="flbr-fight">
+            <span className="flbr-ft"><Chip owner="0" rank="P" size={44} /></span>
+            <svg viewBox="0 0 24 12" className="flbr-arrow" aria-hidden="true"><path d="M1 6 H19 M14 1.5 L20 6 L14 10.5" /></svg>
+            <span className="flbr-ft lost"><Chip owner="1" rank={10} size={44} /></span>
+            <span className="flbr-ftext">"Marshal": right, it is removed</span>
+          </div>
+          <div className="flbr-fight">
+            <span className="flbr-ft"><Chip owner="0" rank="P" size={44} /></span>
+            <svg viewBox="0 0 24 12" className="flbr-arrow" aria-hidden="true"><path d="M1 6 H19 M14 1.5 L20 6 L14 10.5" /></svg>
+            <span className="flbr-ft"><Chip owner="1" size={44} /></span>
+            <span className="flbr-ftext">Wrong: the target stays hidden</span>
+          </div>
+        </div>
+      </div>
+      <ul className="mt-3">
+        <li>Select a Spotter: the enemies it can name get a blue scope ring. Tap one, then pick a rank. If you could also attack it, you can choose to attack instead.</li>
+        <li><b>Right:</b> the target is removed, even a Mine or the Command Post (which wins the game). The Spotter stays where it is.</li>
+        <li><b>Wrong:</b> nothing happens to the target, but your Spotter is revealed to the enemy.</li>
+        <li>Spotting is your whole turn. Every call is announced, so a rank named wrongly is struck off that piece for good, and the piece shows how many ranks it has been ruled out of.</li>
+      </ul>
+    </ArmyContext.Provider>
   );
 }
