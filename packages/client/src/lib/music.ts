@@ -539,6 +539,7 @@ function tick() {
 
 function start() {
   if (window.location.pathname.startsWith('/warfront')) return; // Warfront: its own score
+  if (window.location.pathname.startsWith('/kingdom')) return; // Kingdom: its own score
   const a = setup();
   if (!a || timer) return;
   if (a.state === 'suspended') void a.resume();
@@ -591,7 +592,7 @@ function stop() {
 // The edition picker (/) chooses a game first, so music waits until a game's screens open.
 let armed = false;
 // Warfront (/warfront/...) plays its own score (warfront/music.ts), so the soundtrack rests there too.
-const onPicker = () => window.location.pathname === '/' || window.location.pathname.startsWith('/warfront');
+const onPicker = () => window.location.pathname === '/' || window.location.pathname.startsWith('/warfront') || window.location.pathname.startsWith('/kingdom'); // Kingdom: its own score too
 onNavigate(() => {
   if (!armed || !enabled) return;
   if (onPicker()) stop();

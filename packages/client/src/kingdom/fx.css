@@ -1,0 +1,123 @@
+/* Shifting Kingdom animations: every timing comes in through --dur (from fx.ts), so Fast and Off follow it. */
+.kg-boardarea { z-index: 3; }
+.kg-fx { position: absolute; inset: 0; pointer-events: none; }
+.kg-fx-fly, .kg-fx-arc, .kg-fx-puff, .kg-fx-sparkles, .kg-fx-foot, .kg-fx-treasure, .kg-fx-home, .kg-fx-bye { position: absolute; left: 50%; top: 50%; }
+
+/* the spare flies to its banner (0-30%), the pushed-out tile slides off and arcs to the pedestal (70-100%) */
+.kg-fx-fly, .kg-fx-arc { width: var(--T); height: var(--T); margin: calc(var(--T) / -2) 0 0 calc(var(--T) / -2); border-radius: 6px; box-shadow: 0 0 0 1.5px #4a3020, 0 14px 18px -6px rgba(0, 0, 0, .45); overflow: hidden; }
+.kg-fx-fly > svg, .kg-fx-arc > svg, .kg-leaving > svg, .kg-aimghost > svg { display: block; width: 100%; height: 100%; }
+.kg-fx-fly { animation: kg-fly var(--dur) linear both; }
+@keyframes kg-fly {
+  0% { transform: translate(var(--x0), var(--y0)) scale(.85); opacity: 1; }
+  15% { transform: translate(calc((var(--x0) + var(--x1)) / 2), calc((var(--y0) + var(--y1)) / 2 - var(--T) * .8)) scale(1.1) rotate(-6deg); }
+  29% { transform: translate(var(--x1), var(--y1)) scale(var(--s1)); opacity: 1; }
+  30%, 100% { transform: translate(var(--x1), var(--y1)) scale(var(--s1)); opacity: 0; }
+}
+.kg-fx-arc { animation: kg-arc var(--dur) linear both; }
+@keyframes kg-arc {
+  0%, 79% { transform: translate(var(--x0), var(--y0)) scale(var(--s0)); opacity: 0; }
+  80% { transform: translate(var(--x0), var(--y0)) scale(var(--s0)); opacity: 1; }
+  90% { transform: translate(calc((var(--x0) + var(--x1)) / 2), calc((var(--y0) + var(--y1)) / 2 - var(--T) * 1.2)) scale(1.05) rotate(8deg); }
+  99% { transform: translate(var(--x1), var(--y1)) scale(.9); opacity: 1; }
+  100% { transform: translate(var(--x1), var(--y1)) scale(.9); opacity: 0; }
+}
+.kg-incoming { animation: kg-slide var(--slide-dur, 300ms) var(--slide-delay, 0ms) cubic-bezier(.22, .9, .3, 1.04) both, kg-appear 1ms var(--slide-delay, 0ms) both; }
+@keyframes kg-appear { from { opacity: 0; } to { opacity: 1; } }
+.kg-leaving { z-index: 1; pointer-events: none; animation: kg-leave var(--slide-dur, 300ms) var(--slide-delay, 0ms) cubic-bezier(.22, .9, .3, 1.04) both, kg-gone 1ms var(--fade-at, 900ms) both; }
+.kg-leaving > svg { border-radius: inherit; box-shadow: 0 0 0 .5px rgba(74, 48, 32, .55); }
+@keyframes kg-leave { from { transform: none; } to { transform: translate(calc(var(--sx) * -1), calc(var(--sy) * -1)); } }
+@keyframes kg-gone { to { opacity: 0; } }
+.kg-ped-arriving .kg-spare-tile { animation: kg-arrive var(--dur) linear both; }
+@keyframes kg-arrive { 0%, 97% { opacity: 0; transform: scale(.85); } 100% { opacity: 1; transform: none; } }
+.kg-aimghost { position: absolute; opacity: .62; pointer-events: none; border-radius: 6px; box-shadow: 0 0 0 2px #ffd75a, 0 0 22px rgba(255, 214, 90, .8); overflow: hidden; z-index: 4; animation: kg-ghost-in .18s ease-out both; }
+@keyframes kg-ghost-in { from { opacity: 0; transform: scale(.9); } }
+
+/* leaf and dust puffs at both ends */
+.kg-fx-puff i { position: absolute; width: calc(var(--T) * .14); height: calc(var(--T) * .1); border-radius: 50%; opacity: 0; animation: kg-puff calc(var(--dur) * .45) calc(var(--dur) * .3) ease-out both; --dx: calc(cos(var(--j) * 60deg) * var(--T) * .55); --dy: calc(sin(var(--j) * 60deg) * var(--T) * .4 - var(--T) * .1); }
+.kg-fx-dust { background: rgba(225, 205, 160, .9); }
+.kg-fx-leaf { background: #6cb84a; border-radius: 0 80% 0 80% !important; }
+@keyframes kg-puff { 0% { opacity: .95; transform: translate(0, 0) scale(.5) rotate(0); } 100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(1.4) rotate(140deg); } }
+
+/* sparkles (wraps, finds) */
+.kg-fx-sparkles { transform: translate(var(--x), var(--y)); }
+.kg-fx-sparkles i { position: absolute; width: calc(var(--T) * .14); height: calc(var(--T) * .14); margin: calc(var(--T) * -.07); background: #fff6b0; clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%); opacity: 0;
+  animation: kg-spark calc(var(--dur) * .4) calc(var(--dur) * var(--delay)) ease-out both; }
+.kg-fx-big i { width: calc(var(--T) * .22); height: calc(var(--T) * .22); margin: calc(var(--T) * -.11); background: #ffe27a; }
+@keyframes kg-spark { 0% { opacity: 1; transform: rotate(var(--a)) translateY(0) scale(.4); } 100% { opacity: 0; transform: rotate(var(--a)) translateY(calc(var(--T) * -.75)) scale(1.1) rotate(90deg); } }
+
+/* footprints behind a walk */
+.kg-fx-foot { width: calc(var(--T) * .16); height: calc(var(--T) * .11); margin: calc(var(--T) * -.055) 0 0 calc(var(--T) * -.08); border-radius: 50%; background: rgba(110, 70, 30, .5); transform: translate(var(--x), var(--y)); opacity: 0;
+  animation: kg-step-print calc(var(--dur) * .7) calc(var(--dur) * var(--j) / (var(--n) + 1)) ease-out both; }
+@keyframes kg-step-print { 0% { opacity: 0; } 10% { opacity: .9; } 100% { opacity: 0; } }
+
+/* a found treasure rises, bursts, and flies to its finder's banner */
+.kg-fx-treasure { width: calc(var(--T) * .8); height: calc(var(--T) * .8); margin: calc(var(--T) * -.4) 0 0 calc(var(--T) * -.4); z-index: 5; animation: kg-find var(--dur) cubic-bezier(.4, 0, .3, 1) both; filter: drop-shadow(0 4px 6px rgba(80, 50, 0, .45)); }
+.kg-fx-treasure svg { width: 100%; height: 100%; }
+@keyframes kg-find {
+  0% { transform: translate(var(--x0), var(--y0)) scale(.6); opacity: 0; }
+  12% { opacity: 1; }
+  35% { transform: translate(var(--x0), calc(var(--y0) - var(--T) * .9)) scale(1.6) rotate(-8deg); }
+  52% { transform: translate(var(--x0), calc(var(--y0) - var(--T) * 1)) scale(1.65) rotate(6deg); }
+  92% { transform: translate(var(--x1), var(--y1)) scale(.5); opacity: 1; }
+  100% { transform: translate(var(--x1), var(--y1)) scale(.35); opacity: 0; }
+}
+
+/* heading home: the banner unfurls and glows */
+.kg-fx-home { width: calc(var(--T) * .9); height: calc(var(--T) * 1.4); margin: calc(var(--T) * -1.3) 0 0 calc(var(--T) * -.3); transform: translate(var(--x), var(--y)); }
+.kg-fx-home::before { content: ""; position: absolute; left: -40%; right: -40%; bottom: -10%; height: 50%; border-radius: 50%; background: radial-gradient(rgba(255, 230, 140, .95), transparent 70%); animation: kg-breathe .6s ease-in-out 3; }
+.kg-homebanner { width: 100%; height: 100%; overflow: visible; animation: kg-raise var(--dur) cubic-bezier(.3, 1.4, .5, 1) both; transform-origin: 10% 100%; }
+.kg-hb-cloth { transform-box: fill-box; transform-origin: 0 0; animation: kg-unfurl calc(var(--dur) * .5) calc(var(--dur) * .15) ease-out both, kg-flutter 1.2s calc(var(--dur) * .65) ease-in-out infinite; }
+@keyframes kg-raise { 0% { transform: scaleY(0); opacity: 0; } 20% { opacity: 1; } 40%, 85% { transform: none; opacity: 1; } 100% { opacity: 0; } }
+@keyframes kg-unfurl { from { transform: scaleX(0) scaleY(.3); } }
+
+/* a hero bows out with a wave */
+.kg-fx-bye { animation: kg-bye var(--dur) ease-in both; }
+.kg-fx-bye .kg-hero-svg > g { animation: kg-wave-bye .25s ease-in-out infinite alternate; transform-origin: 50% 100%; }
+@keyframes kg-bye { 0%, 55% { opacity: 1; } 100% { opacity: 0; translate: 0 calc(var(--T) * -.5); } }
+@keyframes kg-wave-bye { from { transform: rotate(-9deg); } to { transform: rotate(9deg); } }
+
+/* the winner hops for joy */
+.kg-hero-win .kg-hero-svg > g { animation: kg-joy .45s ease-in-out infinite alternate; }
+@keyframes kg-joy { from { transform: translateY(0) scale(1); } to { transform: translateY(-28%) scale(1.06); } }
+
+/* the turn ribbon */
+.kg-ribbon { position: absolute; left: 50%; top: 2%; z-index: 9; transform: translateX(-50%); pointer-events: none; animation: kg-ribbon var(--dur) ease both; filter: drop-shadow(0 8px 10px rgba(40, 20, 0, .4)); }
+.kg-ribbon-body { position: relative; z-index: 1; display: flex; align-items: center; gap: 10px; padding: 8px 30px 8px 12px; background: linear-gradient(color-mix(in srgb, var(--pc) 85%, #fff), var(--pc)); border: 2.5px solid #4a3020; border-radius: 10px; color: #fffaf0; text-shadow: 0 1px 0 rgba(0, 0, 0, .35); white-space: nowrap; animation: kg-unroll calc(var(--dur) * .3) cubic-bezier(.3, 1.3, .5, 1) both; transform-origin: 50% 50%; }
+.kg-ribbon-body b { display: block; font: 900 24px "Fraunces", serif; }
+.kg-ribbon-body small { font-weight: 700; opacity: .9; }
+.kg-ribbon-face { width: 48px; height: 48px; border-radius: 50%; background: radial-gradient(circle at 50% 35%, #fff, #f4e6c2); border: 2.5px solid #4a3020; overflow: hidden; display: grid; place-items: center; }
+.kg-ribbon-tail { position: absolute; top: 14px; width: 40px; height: 42px; background: color-mix(in srgb, var(--pc) 70%, #000); border: 2.5px solid #4a3020; }
+.kg-ribbon-tail-l { left: -26px; clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 30% 50%); }
+.kg-ribbon-tail-r { right: -26px; clip-path: polygon(0 0, 100% 0, 70% 50%, 100% 100%, 0 100%); }
+.kg-ribbon-me .kg-ribbon-body { box-shadow: 0 0 0 4px #ffd75a, 0 0 30px 8px rgba(255, 214, 90, .7); }
+@keyframes kg-ribbon { 0% { opacity: 0; } 8%, 82% { opacity: 1; } 100% { opacity: 0; transform: translateX(-50%) translateY(-20px); } }
+@keyframes kg-unroll { from { transform: scaleX(0); } }
+
+/* the win: fireworks over the castle and rose petals */
+.kg-celebrate { position: fixed; inset: 0; z-index: 45; pointer-events: none; overflow: hidden; }
+.kg-firework { position: absolute; width: 0; height: 0; }
+.kg-firework i { position: absolute; width: 6px; height: 6px; border-radius: 50%; background: var(--c); box-shadow: 0 0 8px var(--c); opacity: 0; animation: kg-burst calc(var(--dur) * .35) calc(var(--dur) * .12 * var(--i)) ease-out both; }
+@keyframes kg-burst { 0% { opacity: 1; transform: rotate(var(--a)) translateY(0); } 70% { opacity: 1; } 100% { opacity: 0; transform: rotate(var(--a)) translateY(-90px) scale(.5); } }
+.kg-petal { position: absolute; top: -5%; width: 14px; height: 10px; border-radius: 0 80% 0 80%; background: linear-gradient(#ffc1d2, #e85a7d); opacity: 0; animation: kg-petal calc(var(--dur) * .9) calc(var(--j) * 70ms) linear both; }
+.kg-petal:nth-child(3n) { background: linear-gradient(#fff3b0, #f3c24a); }
+@keyframes kg-petal { 0% { opacity: 0; transform: translate(0, 0) rotate(var(--r)); } 8% { opacity: 1; } 100% { opacity: .2; transform: translate(60px, 105vh) rotate(calc(var(--r) + 540deg)); } }
+
+/* the intro book */
+.kg-intro { position: fixed; inset: 0; z-index: 80; display: grid; place-items: center; background: radial-gradient(ellipse, rgba(60, 35, 15, .55), rgba(30, 16, 6, .85)); animation: kg-intro-out var(--dur) ease both; perspective: 1600px; cursor: pointer; }
+.kg-intro-book { position: relative; width: min(340px, 70vw); aspect-ratio: 3 / 4; transform-style: preserve-3d; }
+.kg-intro-cover, .kg-intro-page { position: absolute; inset: 0; transform-origin: 0 50%; border-radius: 4px 14px 14px 4px; backface-visibility: hidden; }
+.kg-intro-page { background: linear-gradient(90deg, #ead6a6, #fffaf0 12%); border: 2px solid #4a3020; }
+.kg-intro-cover { display: grid; place-items: center; align-content: center; gap: 10px; color: #ffe7a8; text-align: center; background: radial-gradient(ellipse at 40% 30%, #3f7d2e, #1f4d22 85%); border: 3px solid #2b1a0c; box-shadow: inset 0 0 0 10px rgba(255, 215, 120, .25); animation: kg-turn calc(var(--dur) * .4) calc(var(--dur) * .15) ease-in both; }
+.kg-intro-cover h2 { font-size: 38px; text-shadow: 0 2px 0 #2b1a0c; }
+.kg-intro-cover small { text-transform: uppercase; letter-spacing: .2em; font-size: 12px; }
+.kg-intro-maze { width: 120px; height: 120px; border: 4px solid #e9b63c; border-radius: 10px; background: repeating-linear-gradient(90deg, transparent 0 18px, rgba(233, 182, 60, .7) 18px 22px), repeating-linear-gradient(0deg, transparent 0 18px, rgba(233, 182, 60, .4) 18px 22px); }
+.kg-intro-p1 { animation: kg-turn calc(var(--dur) * .3) calc(var(--dur) * .4) ease-in both; }
+.kg-intro-p2 { animation: kg-turn calc(var(--dur) * .3) calc(var(--dur) * .52) ease-in both; }
+.kg-intro-p3 { animation: kg-turn calc(var(--dur) * .3) calc(var(--dur) * .64) ease-in both; }
+@keyframes kg-turn { to { transform: rotateY(-178deg); } }
+@keyframes kg-intro-out { 0%, 80% { opacity: 1; } 100% { opacity: 0; visibility: hidden; } }
+.kg-intro-skip { position: absolute; right: 18px; bottom: 18px; }
+
+/* result: the last page turns in */
+.kg-result-page { animation: kg-page-in .8s cubic-bezier(.3, 1, .4, 1) both; transform-origin: 0 50%; }
+@keyframes kg-page-in { from { transform: perspective(1400px) rotateY(-80deg); opacity: 0; } }

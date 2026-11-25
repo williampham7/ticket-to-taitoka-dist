@@ -21,6 +21,8 @@ export interface FollowInput {
   hasEgyptianSeat: (matchID: string) => boolean;
   /** Warfront: I hold a seat in this war room or battle */
   hasWarfrontSeat?: (matchID: string) => boolean;
+  /** Kingdom: I hold a seat in this waiting room or game */
+  hasKingdomSeat?: (matchID: string) => boolean;
   /** I am the first member after the host (Frontline and Fleet seat one opponent; the rest watch) */
   firstMember: boolean;
 }
@@ -29,7 +31,7 @@ export function followTarget(i: FollowInput): { path: string; edition?: string }
   if (i.atAge < SETTLE_MS) return null;
   const path = targetPath(i);
   if (!path) return null;
-  const ttr = path !== '/' && path !== HOLD && !NO_EDITION.some((g) => path.startsWith(`/${g}`)) && !path.startsWith('/warfront');
+  const ttr = path !== '/' && path !== HOLD && !NO_EDITION.some((g) => path.startsWith(`/${g}`)) && !path.startsWith('/warfront') && !path.startsWith('/kingdom'); // Kingdom: no edition
   if (ttr && i.at.edition && i.at.edition !== i.edition) return { path, edition: i.at.edition };
   return path === i.here ? null : { path };
 }
@@ -71,7 +73,17 @@ function warfront(b: string | undefined, c: string | undefined, here: string, se
   return null;
 }
 
-function targetPath({ at, here, hasSeat, hasFrontlineSeat, hasFleetSeat, hasEgyptianSeat, hasWarfrontSeat, firstMember }: FollowInput): string | null {
+// Kingdom (2-4 players): a waiting room like Warfront's; members take free seats, the rest watch.
+function kingdom(b: string | undefined, c: string | undefined, here: string, seated: boolean): string | null {
+  if (!b) return '/kingdom';
+  if (b === 'local' || b === 'bot' || b === 'gallery' || b === 'scenes') return HOLD;
+  if (b === 'wait' && c) return seated ? `/kingdom/wait/${c}` : here.startsWith('/kingdom/play/') ? null : `/kingdom/join/${c}`;
+  if (b === 'play' && c) return seated ? `/kingdom/play/${c}` : here.startsWith('/kingdom/wait/') || here.startsWith('/kingdom/join/') ? null : `/kingdom/watch/${c}`;
+  if (b === 'watch' && c) return `/kingdom/watch/${c}`;
+  return null;
+}
+
+function targetPath({ at, here, hasSeat, hasFrontlineSeat, hasFleetSeat, hasEgyptianSeat, hasWarfrontSeat, hasKingdomSeat, firstMember }: FollowInput): string | null {
   const [, a, b, c] = at.path.split('/');
   const inGame = here.startsWith('/play/');
   const inRoom = here.startsWith('/wait/') || here.startsWith('/join/');
@@ -85,6 +97,7 @@ function targetPath({ at, here, hasSeat, hasFrontlineSeat, hasFleetSeat, hasEgyp
     case 'fleet': return twoSeat('fleet', b, c, !!c && hasFleetSeat(c), firstMember);
     case 'egyptian': return egyptian(b, c, here, !!c && hasEgyptianSeat(c));
     case 'warfront': return warfront(b, c, here, !!c && !!hasWarfrontSeat?.(c)); // Warfront
+    case 'kingdom': return kingdom(b, c, here, !!c && !!hasKingdomSeat?.(c)); // Kingdom
     default: return null;
   }
 }

@@ -15,3 +15,4 @@ export { FrontlineGame, FRONTLINE_GAME_NAME } from './frontline/game';
 export { FleetGame, FLEET_GAME_NAME } from './fleet/game';
 export { EgyptianGame, EGYPTIAN_GAME_NAME } from './egyptian/game';
 export { WarfrontGame, WARFRONT_GAME_NAME } from './warfront/game'; // Warfront
+export { KingdomGame, KINGDOM_GAME_NAME } from './kingdom/game'; // Kingdom

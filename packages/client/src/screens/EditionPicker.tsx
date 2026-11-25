@@ -8,6 +8,7 @@ import { PickerArt as EgyptianArt } from '../egyptian/PickerArt';
 import './EditionPicker.css';
 import './series.css';
 import { WarfrontCard } from '../warfront/PickerCard'; // Warfront
+import { KingdomCard } from '../kingdom/PickerCard'; // Kingdom
 
 /**
  * The first screen. The route-building games sit behind one flagship card, the Ticket to Taitoka series; opening it
@@ -76,6 +77,7 @@ export function EditionPicker() {
           </span>
         </button>
         <WarfrontCard follower={follower} /> {/* Warfront */}
+        <KingdomCard follower={follower} /> {/* Kingdom */}
       </div>
     </main>
     {maps !== 'closed' && <MapChooser closing={maps === 'closing'} onClose={closeMaps} onPick={pick} />}

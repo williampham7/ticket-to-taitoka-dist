@@ -90,3 +90,21 @@ describe('followTarget: Warfront', () => {
     expect(wf({ at: { path: '/warfront/bot' } })).toEqual({ path: HOLD });
   });
 });
+
+// Kingdom
+describe('followTarget: Kingdom', () => {
+  const kg = (o: Partial<FollowInput>) => go({ hasKingdomSeat: () => false, ...o });
+  it('members take free seats, follow into the game, otherwise watch; local modes hold', () => {
+    expect(kg({ at: { path: '/kingdom' } })).toEqual({ path: '/kingdom' });
+    expect(kg({ at: { path: '/kingdom/wait/r1' } })).toEqual({ path: '/kingdom/join/r1' });
+    expect(kg({ at: { path: '/kingdom/wait/r1' }, hasKingdomSeat: (id) => id === 'r1' })).toEqual({ path: '/kingdom/wait/r1' });
+    expect(kg({ at: { path: '/kingdom/play/g1' }, hasKingdomSeat: (id) => id === 'g1' })).toEqual({ path: '/kingdom/play/g1' });
+    expect(kg({ at: { path: '/kingdom/play/g1' } })).toEqual({ path: '/kingdom/watch/g1' });
+    expect(kg({ at: { path: '/kingdom/play/g1' }, here: '/kingdom/wait/r1' })).toBeNull();
+    expect(kg({ at: { path: '/kingdom/bot' } })).toEqual({ path: HOLD });
+    expect(kg({ at: { path: '/kingdom/local' } })).toEqual({ path: HOLD });
+  });
+  it('never asks for an edition reload', () => {
+    expect(kg({ at: { path: '/kingdom/wait/r1', edition: 'china' }, edition: 'usa' })).toEqual({ path: '/kingdom/join/r1' });
+  });
+});

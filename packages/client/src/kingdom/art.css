@@ -1,0 +1,92 @@
+/* Shifting Kingdom art: background scene, cards, hero walk cycle, gallery. */
+
+/* ---------- the painted scene ---------- */
+.kg-scene { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; --px: 0; --py: 0; background: #cfe9f6; }
+.kg-scene-svg { display: block; width: 100%; height: 100%; }
+.kg-sky { opacity: 0; transition: opacity 3s ease; }
+.kg-scene-morning .kg-sky-morning, .kg-scene-afternoon .kg-sky-afternoon, .kg-scene-sunset .kg-sky-sunset, .kg-scene-night .kg-sky-night { opacity: 1; }
+.kg-sky-morning { opacity: 1; }
+.kg-stars, .kg-moon, .kg-fireflies, .kg-lit { opacity: 0; transition: opacity 3s ease; }
+.kg-scene-night .kg-stars, .kg-scene-night .kg-moon, .kg-scene-night .kg-fireflies, .kg-scene-night .kg-lit { opacity: 1; }
+.kg-scene-sunset .kg-lit { opacity: .55; }
+.kg-sun { transform: translate(250px, 190px); transition: transform 4s ease, opacity 3s; }
+.kg-scene-afternoon .kg-sun { transform: translate(800px, 110px); }
+.kg-scene-sunset .kg-sun { transform: translate(1080px, 400px); }
+.kg-scene-night .kg-sun { transform: translate(1100px, 1000px); opacity: 0; }
+.kg-moon { transform: translate(420px, 150px); }
+.kg-twinkle { animation: kg-twinkle 3s calc(var(--i) * -.45s) ease-in-out infinite; }
+@keyframes kg-twinkle { 50% { opacity: .3; } }
+.kg-cloud { animation: kg-drift calc(170s + var(--i) * 30s) calc(var(--i) * -41s) linear infinite; }
+@keyframes kg-drift { from { transform: translateX(-1300px); } to { transform: translateX(1500px); } }
+.kg-flag { transform-box: fill-box; transform-origin: 0 50%; animation: kg-wave 1.6s calc(var(--i) * -.5s) ease-in-out infinite; }
+@keyframes kg-wave { 50% { transform: skewY(8deg) scaleX(.86); } }
+.kg-smoke circle { fill: #fffdf6; opacity: 0; transform-box: fill-box; transform-origin: center; animation: kg-smoke 4.5s ease-out infinite; }
+.kg-smoke circle:nth-child(2) { animation-delay: 1.5s; } .kg-smoke circle:nth-child(3) { animation-delay: 3s; }
+.kg-smoke { animation-delay: calc(var(--i) * -.8s); }
+@keyframes kg-smoke { 0% { opacity: 0; transform: translateY(8px) scale(.6); } 20% { opacity: .75; } 100% { opacity: 0; transform: translate(10px, -26px) scale(1.5); } }
+.kg-shimmer path { animation: kg-shimmer 2.2s linear infinite; }
+@keyframes kg-shimmer { to { stroke-dashoffset: -36; } }
+.kg-tint { fill: #ffcf6a; opacity: 0; transition: fill 3s, opacity 3s; pointer-events: none; }
+.kg-scene-afternoon .kg-tint { fill: #ffc04a; opacity: .12; }
+.kg-scene-sunset .kg-tint { fill: #e8604a; opacity: .22; }
+.kg-scene-night .kg-tint { fill: #0e1446; opacity: .58; }
+.kg-birds { transform: translate(-300px, 200px); animation: kg-birds 34s linear infinite; }
+@keyframes kg-birds { 0% { transform: translate(-300px, 220px); } 45% { transform: translate(1900px, 120px); } 100% { transform: translate(1900px, 120px); } }
+.kg-firefly { animation: kg-firefly 5s calc(var(--i) * -.7s) ease-in-out infinite; }
+@keyframes kg-firefly { 0%, 100% { opacity: .1; transform: translate(0, 0); } 40% { opacity: 1; transform: translate(14px, -18px); } 70% { opacity: .4; transform: translate(-8px, -6px); } }
+.kg-par-1 { transform: translate(calc(var(--px) * -14px), calc(var(--py) * -6px)); transition: transform .6s ease-out; }
+.kg-par-2 { transform: translate(calc(var(--px) * -26px), calc(var(--py) * -10px)); transition: transform .6s ease-out; }
+.kg-par-3 { transform: translate(calc(var(--px) * -40px), calc(var(--py) * -14px)); transition: transform .6s ease-out; }
+.kg-butterfly { position: absolute; width: 30px; height: 26px; animation: kg-flutter-path 22s ease-in-out infinite; }
+.kg-butterfly-0 { left: 4vw; bottom: 22vh; }
+.kg-butterfly-1 { right: 5vw; top: 30vh; animation-delay: -9s; animation-duration: 26s; }
+.kg-wings { transform-origin: 0 0; animation: kg-flap .22s ease-in-out infinite alternate; }
+@keyframes kg-flap { to { transform: scaleX(.25); } }
+@keyframes kg-flutter-path { 0%, 100% { transform: translate(0, 0) rotate(-6deg); } 25% { transform: translate(60px, -40px) rotate(8deg); } 50% { transform: translate(120px, 10px) rotate(-4deg); } 75% { transform: translate(40px, 30px) rotate(10deg); } }
+.kg-grain { position: absolute; inset: 0; opacity: .16; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .35  0 0 0 0 .22  0 0 0 0 .1  0 0 0 .9 0'/></filter><rect width='220' height='220' filter='url(%23n)'/></svg>"); }
+.kg-scene[data-paused] *, .kg-scene[data-paused] { animation-play-state: paused !important; }
+@media (prefers-reduced-motion: reduce) {
+  .kg-birds, .kg-butterfly, .kg-wings, .kg-firefly, .kg-flag, .kg-smoke circle { animation: none; }
+  .kg-cloud { animation-duration: 600s; }
+  .kg-par-1, .kg-par-2, .kg-par-3 { transform: none; }
+}
+
+/* ---------- storybook cards ---------- */
+.kg-target { perspective: 900px; }
+.kg-flipper { position: relative; transform-style: preserve-3d; }
+.kg-flipping { animation: kg-flip var(--flip-ms, 600ms) cubic-bezier(.3, 1.2, .4, 1) both; }
+@keyframes kg-flip { from { transform: rotateY(180deg); } to { transform: rotateY(0); } }
+.kg-face { backface-visibility: hidden; -webkit-backface-visibility: hidden; filter: drop-shadow(0 6px 8px rgba(60, 30, 10, .35)); }
+.kg-face-back { position: absolute; inset: 0; transform: rotateY(180deg); display: grid; place-items: center; }
+.kg-card { width: 132px; aspect-ratio: 5 / 7; box-sizing: border-box; padding: 7px; background: radial-gradient(ellipse at 50% 35%, #fffdf4, #f4e6c2 75%, #e6cf98); position: relative; }
+.kg-card-frame { height: 100%; box-sizing: border-box; display: grid; grid-template-rows: 1fr auto; justify-items: center; align-items: center; padding: 6px 4px 7px; border: 3px solid #d2a23a; border-radius: 6px; box-shadow: inset 0 0 0 2px #fff4cf, inset 0 0 0 3.5px #8a6418; }
+.kg-card-art { width: 92%; }
+.kg-card b { font: 800 15px/1.05 "Fraunces", serif; text-align: center; }
+.kg-card-sm { width: 82px; padding: 5px; }
+.kg-card-sm b { font-size: 11px; }
+.kg-card-sm .kg-card-frame { border-width: 2px; padding: 3px 2px 4px; }
+.kg-card-back { background: radial-gradient(ellipse at 50% 40%, #fbf0d2, #e8d09a 80%); }
+.kg-card-seal { width: 100%; height: 100%; }
+.kg-card-home b { color: color-mix(in srgb, var(--pc) 70%, #4a3020); }
+.kg-cards-young { max-width: 270px; }
+
+/* ---------- heroes walking ---------- */
+.kg-leg-l, .kg-leg-r, .kg-arm-l, .kg-arm-r { transform-box: fill-box; transform-origin: 50% 0; }
+.kg-walk .kg-leg-l, .kg-walk .kg-arm-r { animation: kg-swing .16s ease-in-out infinite alternate; }
+.kg-walk .kg-leg-r, .kg-walk .kg-arm-l { animation: kg-swing .16s ease-in-out infinite alternate-reverse; }
+@keyframes kg-swing { from { transform: rotate(-16deg); } to { transform: rotate(16deg); } }
+.kg-staff-star { transform-box: fill-box; transform-origin: center; animation: kg-glint 2.4s ease-in-out infinite; }
+@keyframes kg-glint { 50% { transform: scale(1.18) rotate(18deg); } }
+
+/* ---------- QA gallery ---------- */
+.kg-gallery { display: block; padding: 24px; position: relative; z-index: 1; }
+
+.kg-gal-sec { position: relative; z-index: 1; background: rgba(255, 250, 235, .93); border: 2px solid var(--kg-ink); border-radius: 16px; padding: 14px 18px; margin: 0 auto 18px; max-width: 1400px; }
+.kg-gal-sec h2 { font-size: 22px; margin-bottom: 10px; }
+.kg-gal-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; }
+.kg-gal-tile { width: 96px; height: 96px; box-shadow: 0 0 0 1px var(--kg-ink); }
+.kg-gal-cap { font-size: 11px; text-align: center; }
+.kg-gal-patch { display: grid; grid-template-columns: repeat(3, 120px); }
+.kg-gal-patch .kg-tile-svg { width: 120px; height: 120px; }
+.kg-gal-t { display: grid; justify-items: center; gap: 2px; width: 132px; font-size: 12px; }
+.kg-gal-hero { width: 110px; height: 150px; }
