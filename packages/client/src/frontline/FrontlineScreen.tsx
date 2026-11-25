@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent, type ReactNode } from 'react';
+import { useContext, useEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent, type ReactNode } from 'react';
 import {
-  ARMIES, ARMY_IDS, armyKinds, armySize, badgeOf, inZone, kindOf, legalMoves, randomPlacement, spotGuesses, spotTargets, validatePlacement, zoneRows,
+  ARMIES, ARMY_IDS, armyKinds, armySize, badgeOf, boardRows, inZone, kindOf, legalMoves, randomPlacement, spotGuesses, spotTargets, validatePlacement, zoneRows,
   type ArmyId, type Combat, type FrontlineView, type PieceKind, type Placement, type PlayerID, type Rank, type Spot, type ViewPiece,
 } from '@boboland/shared/src/frontline';
 import { ChatPanel, type ChatProps } from '../game/ChatPanel';
@@ -80,6 +80,7 @@ export function FrontlineScreen({ state, playerID: me, moves, names, chat, onExi
   const army: ArmyId = G.army ?? 'classic';
   const size = armySize(army);
   const rows = zoneRows(army);
+  const br = boardRows(army);
 
   // setup: my placement (starts empty), editable until I confirm
   const [placement, setPlacement] = useState<Placement>([]);
@@ -101,7 +102,7 @@ export function FrontlineScreen({ state, playerID: me, moves, names, chat, onExi
   const pieces: ViewPiece[] = deploying
     ? placement.map((p) => ({ id: `setup-${p.pos}`, owner: me, pos: p.pos, revealed: false, rank: p.rank }))
     : G.pieces;
-  const zone = useMemo(() => (deploying ? new Set(Array.from({ length: 100 }, (_, i) => i).filter((p) => inZone(me, p, rows))) : undefined), [deploying, me, rows]);
+  const zone = useMemo(() => (deploying ? new Set(Array.from({ length: br * 10 }, (_, i) => i).filter((p) => inZone(me, p, rows, br))) : undefined), [deploying, me, rows, br]);
 
   // every edit of the placement goes through here, so the armed piece is always one still in the tray
   const edit = (next: Placement, keepPreset = false) => {
@@ -121,11 +122,11 @@ export function FrontlineScreen({ state, playerID: me, moves, names, chat, onExi
   const complete = placement.length === size && !validatePlacement(me, placement, army);
   const saveLayout = () => {
     const nm = layoutName.trim() || `Layout ${saved.length + 1}`;
-    const next = [...saved.filter((s) => s.name !== nm), { name: nm, ranks: layoutFromPlacement(me, placement, size) }].slice(-3);
+    const next = [...saved.filter((s) => s.name !== nm), { name: nm, ranks: layoutFromPlacement(me, placement, size, br) }].slice(-3);
     setSaved(next); save(savedKey(army), next); setLayoutName(''); setLayoutNote(`Saved "${nm}"`);
   };
   const loadLayout = (s: SavedLayout) => {
-    const p = placementFromLayout(me, s.ranks);
+    const p = placementFromLayout(me, s.ranks, br);
     if (validatePlacement(me, p, army)) { setLayoutNote('That layout is not valid'); return; }
     edit(p); setLayoutNote(`Loaded "${s.name}"`);
   };
@@ -203,7 +204,7 @@ export function FrontlineScreen({ state, playerID: me, moves, names, chat, onExi
   // ---- setup: taps ----
   const suppressClick = useRef(false);
   const onSetupCell = (pos: number) => {
-    if (!inZone(me, pos, rows)) return;
+    if (!inZone(me, pos, rows, br)) return;
     const here = placement.find((p) => p.pos === pos);
     // a tap on a placed piece sends it back to the tray (and picks that rank, so the next tap puts it elsewhere)
     if (here) { edit(removeAt(placement, pos)); setArmed(here.rank); sound.select(); return; }
@@ -227,7 +228,7 @@ export function FrontlineScreen({ state, playerID: me, moves, names, chat, onExi
     if (el?.closest('[data-fl-tray]')) return 'tray';
     const cell = el?.closest('[data-testid^="fl-cell-"]');
     const pos = cell ? Number(cell.getAttribute('data-testid')!.slice('fl-cell-'.length)) : NaN;
-    return Number.isInteger(pos) && inZone(me, pos, rows) ? pos : null;
+    return Number.isInteger(pos) && inZone(me, pos, rows, br) ? pos : null;
   };
   const dragging = !!drag;
   useEffect(() => {
@@ -334,7 +335,7 @@ export function FrontlineScreen({ state, playerID: me, moves, names, chat, onExi
       <Deploy me={me} army={army} placement={placement} armed={armed} presetId={presetId} complete={complete}
         trayDrop={drag?.moved && drag.src.kind === 'cell' && drag.over === 'tray'}
         onArm={onTrayKind} onTrayPointerDown={(rank, e) => { if ((remaining(placement, army).get(rank) ?? 0) > 0) startDrag({ kind: 'tray', rank }, rank, e); }}
-        onPreset={(id) => { const p = presetsFor(army).find((x) => x.id === id)!; edit(presetPlacement(me, p)); setPresetId(id); }}
+        onPreset={(id) => { const p = presetsFor(army).find((x) => x.id === id)!; edit(presetPlacement(me, p, army)); setPresetId(id); }}
         onRandom={() => { edit(randomPlacement(me, Math.random, army)); }}
         onFill={() => { edit(fillRest(me, placement, Math.random, army), true); }}
         onClear={() => { edit([]); }}
@@ -355,7 +356,7 @@ export function FrontlineScreen({ state, playerID: me, moves, names, chat, onExi
 
   return (
     <ArmyContext.Provider value={army}>
-    <main className="fls" data-testid="fl-screen" data-army={army}>
+    <main className="fls" data-testid="fl-screen" data-army={army} style={{ '--rows': br } as CSSProperties}>
       <div className="fls-left">{leftPanel}</div>
 
       <div className={`fls-board ${combatAnim ? 'fx-combat' : ''} ${combatAnim?.outcome === 'blast' ? 'fx-blast' : ''}`}
@@ -364,7 +365,7 @@ export function FrontlineScreen({ state, playerID: me, moves, names, chat, onExi
           lastMove={ctx.phase === 'play' ? G.lastMove : null} lastCombat={ctx.phase === 'play' ? G.lastCombat : null}
           onCell={spectator ? undefined : onCell} onCellPointerDown={deploying ? onCellPointerDown : undefined}
           zone={zone} dropAt={drag?.moved && typeof drag.over === 'number' ? drag.over : null} fx={anim?.fx ?? null}
-          spotTo={picking ? undefined : spotTo} lastSpot={ctx.phase === 'play' ? G.lastSpot ?? null : null} ruledOut={G.ruledOut} />
+          spotTo={picking ? undefined : spotTo} lastSpot={ctx.phase === 'play' ? G.lastSpot ?? null : null} ruledOut={G.ruledOut} rows={br} />
         {picking && (
           <SpotPicker army={army} G={G} me={me} target={picking.at}
             attack={legal.some((m) => m.from === picking.from && m.to === picking.at)}
@@ -381,7 +382,7 @@ export function FrontlineScreen({ state, playerID: me, moves, names, chat, onExi
               attacker: anim!.prev.find((p) => p.id === combatAnim.combat.attacker.id)?.rank !== undefined,
               defender: anim!.prev.find((p) => p.id === combatAnim.combat.defender.id)?.rank !== undefined,
             }}
-            viewer={spectator ? null : me} name={(id) => name(id)} coord={coordOf(combatAnim.combat.at)} />
+            viewer={spectator ? null : me} name={(id) => name(id)} coord={coordOf(combatAnim.combat.at, br)} />
         )}
         {endStamp && over && (
           <div className={`fl-end ${spectator || G.result!.winner === null ? 'neutral' : G.result!.winner === me ? 'good' : 'bad'}`} role="status">
@@ -690,6 +691,7 @@ function Forces({ army, fallen, me, spectator, name }: { army: ArmyId; fallen: F
 
 /** The latest fight in small: both tiles, the losers struck through. */
 function LastEngagement({ combat, me, sentence }: { combat: Combat; me: PlayerID; sentence: string }) {
+  const rows = boardRows(useContext(ArmyContext));
   const o = combatOutcome(combat);
   const lost = (role: 'attacker' | 'defender') =>
     o === 'trade' || (role === 'attacker' ? o === 'repel' || o === 'blast' : o === 'win' || o === 'defuse' || o === 'capture');
@@ -699,7 +701,7 @@ function LastEngagement({ combat, me, sentence }: { combat: Combat; me: PlayerID
   const won = o === 'trade' ? null : lost('attacker') ? combat.defender.owner : combat.attacker.owner;
   return (
     <div className="flc-eng" data-testid="fl-last-combat">
-      <div className="fls-sub">Last engagement <span className="normal-case tracking-normal opacity-70">at {coordOf(combat.at)}</span></div>
+      <div className="fls-sub">Last engagement <span className="normal-case tracking-normal opacity-70">at {coordOf(combat.at, rows)}</span></div>
       <div className="flc-eng-row">
         {tile('attacker')}
         <svg viewBox="0 0 20 20" className="flc-eng-x" aria-hidden="true"><path d="M3 3 L17 17 M17 3 L3 17" /></svg>
@@ -713,11 +715,12 @@ function LastEngagement({ combat, me, sentence }: { combat: Combat; me: PlayerID
 
 /** The latest spot in small: the Spotter, the rank it called, and whether it was right. */
 function LastSpot({ spot, me, sentence }: { spot: Spot; me: PlayerID; sentence: string }) {
+  const rows = boardRows(useContext(ArmyContext));
   const foe: PlayerID = spot.player === '0' ? '1' : '0';
   const good = spot.hit === (spot.player === me);
   return (
     <div className="flc-eng" data-testid="fl-last-spot">
-      <div className="fls-sub">Last spot <span className="normal-case tracking-normal opacity-70">at {coordOf(spot.at)}</span></div>
+      <div className="fls-sub">Last spot <span className="normal-case tracking-normal opacity-70">at {coordOf(spot.at, rows)}</span></div>
       <div className="flc-spot-row">
         <Chip owner={spot.player} rank="P" size={36} />
         <svg viewBox="0 0 24 24" className="scope" aria-hidden="true"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" strokeWidth="1.8" /><path d="M12 1.5v6M12 16.5v6M1.5 12h6M16.5 12h6" stroke="currentColor" strokeWidth="1.8" /></svg>
@@ -745,6 +748,7 @@ function SpotPicker({ army, G, me, target, attack, onGuess, onAttack, onCancel }
     - G.fallen.filter((f) => f.owner === foe && f.rank === r).length
     - G.pieces.filter((p) => p.owner === foe && p.rank === r).length;
   const box = useRef<HTMLDivElement>(null);
+  const at = coordOf(target, boardRows(army));
   useEffect(() => {
     box.current?.querySelector<HTMLButtonElement>('button:not(:disabled)')?.focus({ preventScroll: true });
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onCancel();
@@ -753,8 +757,8 @@ function SpotPicker({ army, G, me, target, attack, onGuess, onAttack, onCancel }
   }, [onCancel]);
   return (
     <div className="fls-spotpick" onClick={onCancel}>
-      <div ref={box} className="fls-spotpick-box" role="dialog" aria-modal="true" aria-label={`Spot the piece at ${coordOf(target)}`} data-testid="fl-spot-picker" onClick={(e) => e.stopPropagation()}>
-        <div className="fls-kicker"><span>Spotter</span><span>Target {coordOf(target)}</span></div>
+      <div ref={box} className="fls-spotpick-box" role="dialog" aria-modal="true" aria-label={`Spot the piece at ${at}`} data-testid="fl-spot-picker" onClick={(e) => e.stopPropagation()}>
+        <div className="fls-kicker"><span>Spotter</span><span>Target {at}</span></div>
         <h2 className="fls-h mt-1.5">Name the target</h2>
         <p className="mt-1 text-[13px] leading-snug opacity-80">Right, and it is removed while your Spotter stays put. Wrong, and your Spotter is revealed; the target stays hidden.</p>
         <div className="fls-spotpick-grid">

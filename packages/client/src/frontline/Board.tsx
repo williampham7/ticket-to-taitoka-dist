@@ -36,14 +36,19 @@ interface Props {
   lastSpot?: Spot | null;
   /** Ranks already named wrongly against a piece, by piece id. */
   ruledOut?: Record<string, Rank[]>;
+  /** Board rows: 10 (classic) or 8 (Spotter army). Always 10 columns. */
+  rows?: number;
 }
 
 export { coordOf } from './helpers';
 
-/* ---- terrain: contour lines and scrub, generated once ---- */
+/* ---- terrain: contour lines and scrub, generated once per board height (in 100 units a square) ---- */
 function rng(seed: number) { let s = seed; return () => (s = (s * 16807) % 2147483647) / 2147483647; }
-const TERRAIN = (() => {
+const TERRAINS = new Map<number, ReturnType<typeof makeTerrain>>();
+const terrainFor = (rows: number) => { if (!TERRAINS.has(rows)) TERRAINS.set(rows, makeTerrain(rows)); return TERRAINS.get(rows)!; };
+function makeTerrain(rows: number) {
   const r = rng(20261122);
+  const H = rows * 100, mid = H / 2, ky = H / 1000;
   const hills = [
     { x: 150, y: 150, r: 210, n: 6 }, { x: 830, y: 210, r: 230, n: 7 }, { x: 520, y: 70, r: 120, n: 3 },
     { x: 170, y: 850, r: 230, n: 7 }, { x: 860, y: 830, r: 200, n: 6 }, { x: 480, y: 930, r: 120, n: 3 },
@@ -58,13 +63,13 @@ const TERRAIN = (() => {
       for (let j = 0; j < 72; j++) {
         const t = (j / 72) * Math.PI * 2;
         const f = 1 + harm.reduce((s, q) => s + q.a * Math.sin(q.k * t + q.p + i * 0.18), 0);
-        pts.push(`${(h.x + Math.cos(t) * rad * f).toFixed(1)} ${(h.y + Math.sin(t) * rad * f * 0.86).toFixed(1)}`);
+        pts.push(`${(h.x + Math.cos(t) * rad * f).toFixed(1)} ${(h.y * ky + Math.sin(t) * rad * f * 0.86 * ky).toFixed(1)}`);
       }
       contours.push({ d: `M${pts.join(' L')} Z`, major: i % 3 === 0 });
     }
   }
-  const scrub = Array.from({ length: 70 }, () => ({ x: r() * 1000, y: r() * 1000, s: 2 + r() * 5 }))
-    .filter((p) => !(p.y > 395 && p.y < 605 && ((p.x > 195 && p.x < 405) || (p.x > 595 && p.x < 805))));
+  const scrub = Array.from({ length: 70 }, () => ({ x: r() * 1000, y: r() * H, s: 2 + r() * 5 }))
+    .filter((p) => !(p.y > mid - 105 && p.y < mid + 105 && ((p.x > 195 && p.x < 405) || (p.x > 595 && p.x < 805))));
   const lake = (cx: number) => {
     const pts: string[] = [];
     for (let j = 0; j < 64; j++) {
@@ -72,18 +77,20 @@ const TERRAIN = (() => {
       const c = Math.cos(t), s = Math.sin(t);
       const se = (v: number) => Math.sign(v) * Math.pow(Math.abs(v), 0.5);
       const w = 1 + 0.035 * Math.sin(5 * t + cx) + 0.025 * Math.sin(9 * t);
-      pts.push(`${(cx + se(c) * 92 * w).toFixed(1)} ${(500 + se(s) * 92 * w).toFixed(1)}`);
+      pts.push(`${(cx + se(c) * 92 * w).toFixed(1)} ${(mid + se(s) * 92 * w).toFixed(1)}`);
     }
     return `M${pts.join(' L')} Z`;
   };
-  return { contours, scrub, lakes: [lake(300), lake(700)] };
-})();
+  return { contours, scrub, lakes: [lake(300), lake(700)], H, mid };
+}
 
-function Terrain({ flip }: { flip: boolean }) {
+function Terrain({ flip, rows }: { flip: boolean; rows: number }) {
+  const TERRAIN = terrainFor(rows);
+  const { H, mid } = TERRAIN;
   return (
-    <svg className="flb-terrain" viewBox="0 0 1000 1000" preserveAspectRatio="none" aria-hidden="true">
-      <rect x="0" y="400" width="1000" height="200" className="flb-nml" />
-      <g transform={flip ? 'rotate(180 500 500)' : undefined}>
+    <svg className="flb-terrain" viewBox={`0 0 1000 ${H}`} preserveAspectRatio="none" aria-hidden="true">
+      <rect x="0" y={mid - 100} width="1000" height="200" className="flb-nml" />
+      <g transform={flip ? `rotate(180 500 ${mid})` : undefined}>
         {TERRAIN.contours.map((c, i) => <path key={i} d={c.d} className={c.major ? 'flb-contour major' : 'flb-contour'} />)}
         {TERRAIN.scrub.map((p, i) => <circle key={i} cx={p.x} cy={p.y} r={p.s} className="flb-scrub" />)}
       </g>
@@ -91,7 +98,7 @@ function Terrain({ flip }: { flip: boolean }) {
         <g key={i}>
           <path d={d} className="flb-shore" />
           <path d={d} className="flb-water" />
-          <g className="flb-ripples" transform={`translate(${i ? 700 : 300} 500)`}>
+          <g className="flb-ripples" transform={`translate(${i ? 700 : 300} ${mid})`}>
             <path d="M-60 -30 Q-30 -40 0 -30 T60 -30" /><path d="M-70 5 Q-35 -5 0 5 T70 5" /><path d="M-55 40 Q-27 30 0 40 T55 40" />
           </g>
         </g>
@@ -100,11 +107,10 @@ function Terrain({ flip }: { flip: boolean }) {
   );
 }
 
-/** Display row and column of a real square. */
-const rc = (me: PlayerID, pos: number) => { const d = displayPos(me, pos); return { r: Math.floor(d / 10), c: d % 10 }; };
-
-/** 10x10 field on a tactical map. Row 0 is the top for player 0; player 1 sees it rotated so their own army is at the bottom. */
-export function Board({ pieces, me, selected, legalTo, movable, lastMove, lastCombat, onCell, onCellPointerDown, zone, dropAt, fx, spotTo, lastSpot, ruledOut }: Props) {
+/** 10-column field (10 or 8 rows) on a tactical map. Row 0 is the top for player 0; player 1 sees it rotated so their own army is at the bottom. */
+export function Board({ pieces, me, selected, legalTo, movable, lastMove, lastCombat, onCell, onCellPointerDown, zone, dropAt, fx, spotTo, lastSpot, ruledOut, rows = 10 }: Props) {
+  /** Display row and column of a real square. */
+  const rc = (who: PlayerID, pos: number) => { const d = displayPos(who, pos, rows); return { r: Math.floor(d / 10), c: d % 10 }; };
   const at = new Map(pieces.map((p) => [p.pos, p]));
 
   // an enemy piece that was hidden and now has a rank flips over (several at once, e.g. at the end: a wave)
@@ -122,10 +128,10 @@ export function Board({ pieces, me, selected, legalTo, movable, lastMove, lastCo
   const spotTarget = spotFx ? pieces.find((p) => p.pos === spotFx.at) : undefined;
 
   const cells = [];
-  for (let d = 0; d < 100; d++) {
-    const pos = displayPos(me, d);
+  for (let d = 0; d < rows * 10; d++) {
+    const pos = displayPos(me, d, rows);
     const piece = at.get(pos);
-    const lake = isLake(pos);
+    const lake = isLake(pos, rows);
     const legal = !!legalTo?.has(pos);
     const attack = legal && !!piece;
     const isSel = selected === pos;
@@ -211,23 +217,25 @@ export function Board({ pieces, me, selected, legalTo, movable, lastMove, lastCo
     return { x1: f.c + 0.5, y1: f.r + 0.5, x2: t.c + 0.5, y2: t.r + 0.5, live: !!spotFx, mine: sightOf.player === me };
   })() : null;
 
-  const labels = Array.from({ length: 10 }, (_, i) => i);
+  const cols = Array.from({ length: 10 }, (_, i) => i);
+  const rowLabels = Array.from({ length: rows }, (_, i) => i);
+  const square = (d: number) => coordOf(displayPos(me, d, rows), rows);
   return (
-    <div className={`flb ${combatFx ? 'engaged' : ''}`}>
-      <div className="flb-rim-cols bottom" aria-hidden="true">{labels.map((c) => <span key={c}>{coordOf(displayPos(me, 90 + c))[0]}</span>)}</div>
-      <div className="flb-rim-cols top" aria-hidden="true">{labels.map((c) => <span key={c}>{coordOf(displayPos(me, c))[0]}</span>)}</div>
-      <div className="flb-rim-rows left" aria-hidden="true">{labels.map((r) => <span key={r}>{coordOf(displayPos(me, r * 10)).slice(1)}</span>)}</div>
-      <div className="flb-rim-rows right" aria-hidden="true">{labels.map((r) => <span key={r}>{coordOf(displayPos(me, r * 10)).slice(1)}</span>)}</div>
+    <div className={`flb ${combatFx ? 'engaged' : ''}`} style={{ '--rows': rows } as CSSProperties} data-rows={rows}>
+      <div className="flb-rim-cols bottom" aria-hidden="true">{cols.map((c) => <span key={c}>{square((rows - 1) * 10 + c)[0]}</span>)}</div>
+      <div className="flb-rim-cols top" aria-hidden="true">{cols.map((c) => <span key={c}>{square(c)[0]}</span>)}</div>
+      <div className="flb-rim-rows left" aria-hidden="true">{rowLabels.map((r) => <span key={r}>{square(r * 10).slice(1)}</span>)}</div>
+      <div className="flb-rim-rows right" aria-hidden="true">{rowLabels.map((r) => <span key={r}>{square(r * 10).slice(1)}</span>)}</div>
       <div data-testid="fl-board" className="flb-field" style={{ gridTemplateColumns: 'repeat(10, var(--cell))', gridAutoRows: 'var(--cell)' }}>
-        <Terrain flip={me === '1'} />
+        <Terrain flip={me === '1'} rows={rows} />
         {cells}
         {track && (
-          <svg key={`${lastMove!.from}-${lastMove!.to}`} className={`flb-track ${track.mine ? 'mine' : 'theirs'}`} viewBox="0 0 10 10" preserveAspectRatio="none" aria-hidden="true">
+          <svg key={`${lastMove!.from}-${lastMove!.to}`} className={`flb-track ${track.mine ? 'mine' : 'theirs'}`} viewBox={`0 0 10 ${rows}`} preserveAspectRatio="none" aria-hidden="true">
             <line x1={track.x1} y1={track.y1} x2={track.x2} y2={track.y2} pathLength={1} />
           </svg>
         )}
         {sight && (
-          <svg key={`sight-${sightOf!.from}-${sightOf!.at}-${sight.live}`} className={`flb-sight ${sight.live ? 'live' : ''} ${sight.mine ? 'mine' : 'theirs'}`} viewBox="0 0 10 10" preserveAspectRatio="none" aria-hidden="true">
+          <svg key={`sight-${sightOf!.from}-${sightOf!.at}-${sight.live}`} className={`flb-sight ${sight.live ? 'live' : ''} ${sight.mine ? 'mine' : 'theirs'}`} viewBox={`0 0 10 ${rows}`} preserveAspectRatio="none" aria-hidden="true">
             <line x1={sight.x1} y1={sight.y1} x2={sight.x2} y2={sight.y2} />
           </svg>
         )}

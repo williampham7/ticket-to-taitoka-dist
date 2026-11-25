@@ -1,11 +1,11 @@
-import { badgeOf, kindOf, type ArmyId, type Combat, type Placement, type PlayerID, type Rank, type Spot } from '@boboland/shared/src/frontline';
+import { badgeOf, boardRows, kindOf, type ArmyId, type Combat, type Placement, type PlayerID, type Rank, type Spot } from '@boboland/shared/src/frontline';
 
 const COLS = 'ABCDEFGHIJ';
 /** Real coordinates, the same for both players: column letter, row number counted from player 0's back row. */
-export const coordOf = (pos: number) => `${COLS[pos % 10]}${10 - Math.floor(pos / 10)}`;
+export const coordOf = (pos: number, rows = 10) => `${COLS[pos % 10]}${rows - Math.floor(pos / 10)}`;
 
 /** Where square `pos` is drawn: player 1 sees the board rotated 180 degrees so their army is at the bottom. */
-export const displayPos = (me: PlayerID, pos: number): number => (me === '1' ? 99 - pos : pos);
+export const displayPos = (me: PlayerID, pos: number, rows = 10): number => (me === '1' ? rows * 10 - 1 - pos : pos);
 
 /** A placement with the ranks on squares `a` and `b` exchanged (unchanged if either square is not in it). */
 export function swapSquares(placement: Placement, a: number, b: number): Placement {
@@ -36,24 +36,24 @@ const spotResult = (s: Spot) => (s.hit ? 'correct, it is removed' : 'wrong, it s
 /** "Your Spotter named their piece at E6 a Marshal (10): correct, it is removed" */
 export function spotSentence(s: Spot, me: PlayerID, army: ArmyId = 'spotter'): string {
   const whose = s.player === me ? ['Your', 'their'] : ['Their', 'your'];
-  return `${whose[0]} Spotter named ${whose[1]} piece at ${coordOf(s.at)} ${a(s.guess)} ${rankLabel(s.guess, army)}: ${spotResult(s)}`;
+  return `${whose[0]} Spotter named ${whose[1]} piece at ${coordOf(s.at, boardRows(army))} ${a(s.guess)} ${rankLabel(s.guess, army)}: ${spotResult(s)}`;
 }
 
 /** "Ana's Spotter named Bo's piece at E6 a Marshal (10): correct, it is removed" (neutral wording). */
 export function spotSentenceNamed(s: Spot, names: Record<PlayerID, string>, army: ArmyId = 'spotter'): string {
   const foe: PlayerID = s.player === '0' ? '1' : '0';
-  return `${names[s.player]}'s Spotter named ${names[foe]}'s piece at ${coordOf(s.at)} ${a(s.guess)} ${rankLabel(s.guess, army)}: ${spotResult(s)}`;
+  return `${names[s.player]}'s Spotter named ${names[foe]}'s piece at ${coordOf(s.at, boardRows(army))} ${a(s.guess)} ${rankLabel(s.guess, army)}: ${spotResult(s)}`;
 }
 
 /** A saved army as `size` ranks in display order (the owner's zone, top-left to bottom-right), the same for both sides. */
-export function layoutFromPlacement(me: PlayerID, placement: Placement, size = 40): Rank[] {
+export function layoutFromPlacement(me: PlayerID, placement: Placement, size = 40, rows = 10): Rank[] {
   const out: Rank[] = new Array(size);
-  for (const p of placement) out[displayPos(me, p.pos) - (100 - size)] = p.rank;
+  for (const p of placement) out[displayPos(me, p.pos, rows) - (rows * 10 - size)] = p.rank;
   return out;
 }
 
-export function placementFromLayout(me: PlayerID, layout: readonly Rank[]): Placement {
-  return layout.map((rank, d) => ({ pos: displayPos(me, 100 - layout.length + d), rank }));
+export function placementFromLayout(me: PlayerID, layout: readonly Rank[], rows = 10): Placement {
+  return layout.map((rank, d) => ({ pos: displayPos(me, rows * 10 - layout.length + d, rows), rank }));
 }
 
 /** Whole seconds left in the current turn, or null when there is no limit. */

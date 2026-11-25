@@ -3,7 +3,7 @@ import { Client } from 'boardgame.io/client';
 import { Local } from 'boardgame.io/multiplayer';
 import type { Game } from 'boardgame.io';
 import {
-  FrontlineGame, inZone, legalMoves, randomPlacement, spotGuesses, zoneRows, spotTargets, type FrontlineState, type FrontlineView, type PlayerID,
+  FrontlineGame, boardRows, inZone, legalMoves, randomPlacement, spotGuesses, zoneRows, spotTargets, type FrontlineState, type FrontlineView, type PlayerID,
 } from '../src/frontline';
 import { begin, prng } from './frontlineHelpers';
 
@@ -39,7 +39,7 @@ function assertNoLeak(me: C, enemy: C) {
       const byPos = isPiece && typeof o.pos === 'number' && hidden.some((h) => h.pos === o.pos) && o.owner !== mine;
       // a placement entry inside the enemy's setup zone would be the enemy's setup
       const rows = zoneRows(enemyView.army);
-      const placement = !isPiece && typeof o.pos === 'number' && inZone(mine === '0' ? '1' : '0', o.pos, rows);
+      const placement = !isPiece && typeof o.pos === 'number' && inZone(mine === '0' ? '1' : '0', o.pos, rows, boardRows(enemyView.army));
       expect(byId || byPos || placement, `rank leaked to ${mine}: ${JSON.stringify(o)}`).toBe(false);
     }
     Object.values(o).forEach(walk);

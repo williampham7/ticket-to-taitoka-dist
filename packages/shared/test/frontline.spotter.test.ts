@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { Client } from 'boardgame.io/client';
 import { Local } from 'boardgame.io/multiplayer';
 import {
-  ARMIES, FrontlineGame, SPOTTER, applyMove, applySpot, placeArmy, armySize, botPlacement, chooseBotAction, emptyState, hasLegalMove, inZone,
+  ARMIES, FrontlineGame, SPOTTER, applyMove, applySpot, placeArmy, boardRows, isLake, onBoard, zoneSquares, armySize, botPlacement, chooseBotAction, emptyState, hasLegalMove, inZone,
   isLegalSpot, legalMoves, outcome, pos, randomPlacement, resolveCombat, spotGuesses, spotTargets, validatePlacement,
   viewFor, type FrontlineState, type FrontlineView, type PlayerID,
 } from '../src/frontline';
@@ -20,12 +20,32 @@ describe('Spotter army: roster and setup', () => {
     expect(ARMIES.classic.kinds.some((k) => k.rank === SPOTTER)).toBe(false);
   });
 
-  it('deploys on three rows per side', () => {
+  it('plays on an 8-row board: three setup rows each, right up to the lakes in the middle two rows', () => {
     expect(ARMIES.spotter.rows).toBe(3);
-    expect(inZone('0', pos(7, 0), 3)).toBe(true);
-    expect(inZone('0', pos(6, 0), 3)).toBe(false);
-    expect(inZone('1', pos(2, 9), 3)).toBe(true);
-    expect(inZone('1', pos(3, 9), 3)).toBe(false);
+    expect(boardRows('spotter')).toBe(8);
+    expect(boardRows('classic')).toBe(10);
+    expect(inZone('0', pos(5, 0), 3, 8)).toBe(true);
+    expect(inZone('0', pos(7, 9), 3, 8)).toBe(true);
+    expect(inZone('0', pos(4, 0), 3, 8)).toBe(false);
+    expect(inZone('0', pos(8, 0), 3, 8)).toBe(false); // off the board
+    expect(inZone('1', pos(2, 9), 3, 8)).toBe(true);
+    expect(inZone('1', pos(3, 9), 3, 8)).toBe(false);
+    // lakes: rows 3-4, columns 2-3 and 6-7 (the classic board keeps rows 4-5)
+    expect([pos(3, 2), pos(3, 3), pos(4, 6), pos(4, 7)].every((p) => isLake(p, 8))).toBe(true);
+    expect([pos(3, 0), pos(4, 4), pos(5, 2), pos(2, 3)].some((p) => isLake(p, 8))).toBe(false);
+    expect(isLake(pos(4, 2))).toBe(true);
+    expect(isLake(pos(3, 2))).toBe(false);
+    expect(onBoard(7, 9, 8)).toBe(true);
+    expect(onBoard(8, 0, 8)).toBe(false);
+    expect(zoneSquares('0', 3, 8)).toEqual(Array.from({ length: 30 }, (_, i) => 50 + i));
+    expect(zoneSquares('1', 3, 8)).toEqual(Array.from({ length: 30 }, (_, i) => i));
+  });
+
+  it('scouts stop at the edge of the 8-row board and at its lakes', () => {
+    const S = spotterBoard([['0', 2, 7, 0], ['0', 2, 5, 3], ['1', 'F', 0, 9], ['0', 'F', 7, 9]]);
+    const runs = (from: number) => legalMoves(S, '0').filter((m) => m.from === from).map((m) => m.to).sort((a, b) => a - b);
+    expect(runs(pos(7, 0))).toEqual([pos(0, 0), pos(1, 0), pos(2, 0), pos(3, 0), pos(4, 0), pos(5, 0), pos(6, 0), pos(7, 1), pos(7, 2), pos(7, 3), pos(7, 4), pos(7, 5), pos(7, 6), pos(7, 7), pos(7, 8)]);
+    expect(runs(pos(5, 3))).not.toContain(pos(4, 3)); // lake straight ahead
   });
 
   it('random and bot placements are valid for the army they are made for, and only for it', () => {
@@ -58,15 +78,15 @@ describe('Spotter in combat', () => {
   });
 
   it('moves one square', () => {
-    const S = spotterBoard([['0', SPOTTER, 8, 0], ['1', 'F', 0, 9], ['0', 'F', 9, 9]]);
-    expect(legalMoves(S, '0').filter((m) => m.from === pos(8, 0)).map((m) => m.to).sort()).toEqual([pos(7, 0), pos(8, 1), pos(9, 0)].sort());
+    const S = spotterBoard([['0', SPOTTER, 6, 0], ['1', 'F', 0, 9], ['0', 'F', 7, 9]]);
+    expect(legalMoves(S, '0').filter((m) => m.from === pos(6, 0)).map((m) => m.to).sort()).toEqual([pos(5, 0), pos(6, 1), pos(7, 0)].sort());
   });
 });
 
 describe('Spotting', () => {
   const setup = () => spotterBoard([
     ['0', SPOTTER, 6, 0], ['1', 10, 5, 0], ['1', 'B', 6, 1], ['1', 4, 7, 1],
-    ['0', 'F', 9, 9], ['1', 'F', 0, 9], ['0', 3, 9, 0],
+    ['0', 'F', 7, 9], ['1', 'F', 0, 9], ['0', 3, 7, 0],
   ]);
 
   it('targets only orthogonally adjacent enemy pieces, from a Spotter', () => {
@@ -75,7 +95,7 @@ describe('Spotting', () => {
     expect(spotTargets(S, '0').every((t) => t.from === pos(6, 0))).toBe(true);
     expect(spotTargets(S, '1')).toEqual([]);
     expect(isLegalSpot(S, '0', { from: pos(6, 0), at: pos(7, 1), guess: 4 })).toBe(false); // diagonal
-    expect(isLegalSpot(S, '0', { from: pos(9, 0), at: pos(5, 0), guess: 10 })).toBe(false); // not a spotter
+    expect(isLegalSpot(S, '0', { from: pos(7, 0), at: pos(5, 0), guess: 10 })).toBe(false); // not a spotter
     expect(isLegalSpot(S, '0', { from: pos(6, 0), at: pos(5, 0), guess: 'X' as never })).toBe(false);
   });
 
@@ -117,7 +137,7 @@ describe('Spotting', () => {
   });
 
   it('spotting the command post wins', () => {
-    const S = spotterBoard([['0', SPOTTER, 1, 9], ['1', 'F', 0, 9], ['1', 3, 0, 0], ['0', 'F', 9, 9], ['0', 4, 9, 0]]);
+    const S = spotterBoard([['0', SPOTTER, 1, 9], ['1', 'F', 0, 9], ['1', 3, 0, 0], ['0', 'F', 7, 9], ['0', 4, 7, 0]]);
     applySpot(S, '0', { from: pos(1, 9), at: pos(0, 9), guess: 'F' });
     expect(outcome(S, '0')).toEqual({ winner: '0', reason: 'flag' });
   });
@@ -147,13 +167,13 @@ describe('Spotting', () => {
 
   it('a Spotter that can only spot still has a move', () => {
     // the spotter is boxed in by the board corner and enemy mines: no step is legal, but it can spot
-    const S = spotterBoard([['0', SPOTTER, 9, 0], ['1', 'B', 8, 0], ['1', 'B', 9, 1], ['0', 'F', 9, 9], ['1', 'F', 0, 9], ['0', 'B', 8, 9], ['0', 'B', 9, 8]]);
-    expect(legalMoves(S, '0').filter((m) => m.from === pos(9, 0))).toHaveLength(2); // attacks are moves
-    const T = spotterBoard([['0', SPOTTER, 9, 0], ['0', 'B', 8, 0], ['1', 'B', 9, 1], ['0', 'F', 9, 9], ['1', 'F', 0, 9], ['0', 'B', 8, 9], ['0', 'B', 9, 8]]);
+    const S = spotterBoard([['0', SPOTTER, 7, 0], ['1', 'B', 6, 0], ['1', 'B', 7, 1], ['0', 'F', 7, 9], ['1', 'F', 0, 9], ['0', 'B', 6, 9], ['0', 'B', 7, 8]]);
+    expect(legalMoves(S, '0').filter((m) => m.from === pos(7, 0))).toHaveLength(2); // attacks are moves
+    const T = spotterBoard([['0', SPOTTER, 7, 0], ['0', 'B', 6, 0], ['1', 'B', 7, 1], ['0', 'F', 7, 9], ['1', 'F', 0, 9], ['0', 'B', 6, 9], ['0', 'B', 7, 8]]);
     T.ruledOut = {};
     expect(hasLegalMove(T, '0')).toBe(true);
     // every guess used up on the only target: nothing left
-    T.ruledOut[T.pieces.find((p) => p.pos === pos(9, 1))!.id] = ARMIES.spotter.kinds.map((k) => k.rank);
+    T.ruledOut[T.pieces.find((p) => p.pos === pos(7, 1))!.id] = ARMIES.spotter.kinds.map((k) => k.rank);
     expect(spotTargets(T, '0')).toEqual([]);
   });
 
@@ -244,7 +264,7 @@ describe('Spotter army through boardgame.io', () => {
 
 describe('Spotter bot', () => {
   it('takes a sure kill: names a revealed piece next to its Spotter', () => {
-    const S = spotterBoard([['0', SPOTTER, 6, 0], ['1', 10, 5, 0], ['0', 'F', 9, 9], ['1', 'F', 0, 9], ['0', 2, 9, 0]]);
+    const S = spotterBoard([['0', SPOTTER, 6, 0], ['1', 10, 5, 0], ['0', 'F', 7, 9], ['1', 'F', 0, 9], ['0', 2, 7, 0]]);
     S.pieces.find((p) => p.pos === pos(5, 0))!.revealed = true;
     const a = chooseBotAction(viewFor(S, 'play', '0'), '0', prng(1));
     expect(a).toEqual({ kind: 'spot', from: pos(6, 0), at: pos(5, 0), guess: 10 });

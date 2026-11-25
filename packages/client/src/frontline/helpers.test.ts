@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { randomPlacement, validatePlacement } from '@boboland/shared/src/frontline';
-import { combatSentence, combatSentenceNamed, displayPos, layoutFromPlacement, placementFromLayout, rankLabel, secondsLeft, spotSentence, spotSentenceNamed, swapSquares } from './helpers';
+import { combatSentence, combatSentenceNamed, coordOf, displayPos, layoutFromPlacement, placementFromLayout, rankLabel, secondsLeft, spotSentence, spotSentenceNamed, swapSquares } from './helpers';
 
 describe('displayPos', () => {
   it('keeps squares for player 0 and rotates 180 degrees for player 1', () => {
@@ -94,19 +94,29 @@ describe('Spotter army wording and layouts', () => {
     expect(rankLabel('F', 'spotter')).toBe('Command Post (F)');
   });
 
+  it('names squares on the 8-row board from player 0\'s back row, and flips it for player 1', () => {
+    expect(coordOf(70, 8)).toBe('A1');
+    expect(coordOf(9, 8)).toBe('J8');
+    expect(displayPos('1', 0, 8)).toBe(79);
+    expect(displayPos('1', 52, 8)).toBe(27);
+  });
+
   it('describes a spot from either side and for spectators', () => {
-    expect(spotSentence(spot, '0')).toBe('Your Spotter named their piece at E6 a Marshal (10): correct, it is removed');
-    expect(spotSentence({ ...spot, hit: false, guess: 'B' }, '1')).toBe('Their Spotter named your piece at E6 a Mine (B): wrong, it stays hidden');
-    expect(spotSentence({ ...spot, guess: 1 }, '0')).toBe('Your Spotter named their piece at E6 an Operative (S): correct, it is removed');
-    expect(spotSentenceNamed(spot, { 0: 'Ana', 1: 'Bo' })).toBe("Ana's Spotter named Bo's piece at E6 a Marshal (10): correct, it is removed");
+    expect(spotSentence(spot, '0')).toBe('Your Spotter named their piece at E4 a Marshal (10): correct, it is removed');
+    expect(spotSentence({ ...spot, hit: false, guess: 'B' }, '1')).toBe('Their Spotter named your piece at E4 a Mine (B): wrong, it stays hidden');
+    expect(spotSentence({ ...spot, guess: 1 }, '0')).toBe('Your Spotter named their piece at E4 an Operative (S): correct, it is removed');
+    expect(spotSentenceNamed(spot, { 0: 'Ana', 1: 'Bo' })).toBe("Ana's Spotter named Bo's piece at E4 a Marshal (10): correct, it is removed");
   });
 
   it('saves and restores a 30-piece layout the same way for both sides', () => {
     for (const me of ['0', '1'] as const) {
       const pl = randomPlacement(me, () => 0.3, 'spotter');
-      const layout = layoutFromPlacement(me, pl, 30);
+      const layout = layoutFromPlacement(me, pl, 30, 8);
       expect(layout).toHaveLength(30);
-      expect(validatePlacement(me, placementFromLayout(me, layout), 'spotter')).toBeUndefined();
+      expect(layout.every((r) => r !== undefined)).toBe(true);
+      expect(validatePlacement(me, placementFromLayout(me, layout, 8), 'spotter')).toBeUndefined();
+      // seen from either seat, the front row of the layout is the row on the lakes
+      expect(placementFromLayout(me, layout, 8).slice(0, 10).every((p) => Math.floor(p.pos / 10) === (me === '0' ? 5 : 2))).toBe(true);
     }
   });
 });

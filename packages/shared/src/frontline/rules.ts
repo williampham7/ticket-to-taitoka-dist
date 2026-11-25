@@ -2,7 +2,7 @@
  * Frontline rules, pure functions on the full (server-side) state. No boardgame.io, no maps.
  */
 import { DIRS, SIZE, colOf, inZone, isLake, onBoard, other, pos, rowOf, zoneSquares, type PlayerID, type Pos } from './board';
-import { ENGINEER, MARSHAL, OPERATIVE, SCOUT, SPOTTER, armyKinds, armySize, isRank, kindOf, strengthOf, zoneRows, type ArmyId, type Rank } from './pieces';
+import { ENGINEER, MARSHAL, OPERATIVE, SCOUT, SPOTTER, armyKinds, armySize, boardRows, isRank, kindOf, strengthOf, zoneRows, type ArmyId, type Rank } from './pieces';
 
 export interface Piece { id: string; owner: PlayerID; rank: Rank; pos: Pos; revealed: boolean }
 /** One piece's run of consecutive moves between the same two squares (two-square rule). */
@@ -108,6 +108,7 @@ function rawMoves(S: Board, player: PlayerID, firstOnly = false, onlyFrom?: Pos)
   const occ = new Map<Pos, BoardPiece>();
   for (const p of S.pieces) occ.set(p.pos, p);
   const out: MoveArgs[] = [];
+  const rows = boardRows(S.army);
   for (const p of S.pieces) {
     if (onlyFrom !== undefined && p.pos !== onlyFrom) continue;
     if (p.owner !== player || p.rank === undefined || !kindOf(p.rank).movable) continue;
@@ -116,9 +117,9 @@ function rawMoves(S: Board, player: PlayerID, firstOnly = false, onlyFrom?: Pos)
       let r = rowOf(p.pos), c = colOf(p.pos);
       for (let step = 0; step < reach; step++) {
         r += dr; c += dc;
-        if (!onBoard(r, c)) break;
+        if (!onBoard(r, c, rows)) break;
         const to = pos(r, c);
-        if (isLake(to)) break;
+        if (isLake(to, rows)) break;
         const there = occ.get(to);
         if (there?.owner === player) break;
         out.push({ from: p.pos, to });
@@ -150,7 +151,7 @@ export function spotTargets(S: Board, player: PlayerID, onlyFrom?: Pos): { from:
     if (p.owner !== player || p.rank !== SPOTTER || (onlyFrom !== undefined && p.pos !== onlyFrom)) continue;
     for (const [dr, dc] of DIRS) {
       const r = rowOf(p.pos) + dr, c = colOf(p.pos) + dc;
-      if (!onBoard(r, c)) continue;
+      if (!onBoard(r, c, boardRows(S.army))) continue;
       const t = at.get(pos(r, c));
       if (t && t.owner !== player && spotGuesses(S, t.pos).length > 0) out.push({ from: p.pos, at: t.pos });
     }
@@ -279,7 +280,7 @@ export function validatePlacement(player: PlayerID, placement: unknown, army: Ar
     if (!x || typeof x !== 'object') return 'bad piece';
     const { pos: p, rank } = x as { pos: unknown; rank: unknown };
     if (!isRank(rank)) return 'bad rank';
-    if (typeof p !== 'number' || !inZone(player, p, zoneRows(army))) return 'piece outside the setup zone';
+    if (typeof p !== 'number' || !inZone(player, p, zoneRows(army), boardRows(army))) return 'piece outside the setup zone';
     if (seen.has(p)) return 'two pieces overlap on one square';
     seen.add(p);
     counts.set(rank, (counts.get(rank) ?? 0) + 1);
@@ -297,7 +298,7 @@ export function randomPlacement(player: PlayerID, rnd: () => number, army: ArmyI
     const j = Math.floor(rnd() * (i + 1));
     [ranks[i], ranks[j]] = [ranks[j], ranks[i]];
   }
-  return zoneSquares(player, zoneRows(army)).map((p, i) => ({ pos: p, rank: ranks[i] }));
+  return zoneSquares(player, zoneRows(army), boardRows(army)).map((p, i) => ({ pos: p, rank: ranks[i] }));
 }
 
 /** Put a player's validated setup on the board. Piece ids come from the starting square, so they say nothing of rank. */

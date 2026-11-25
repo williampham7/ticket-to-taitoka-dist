@@ -16,8 +16,8 @@
   --fls-pad: 12px; --fls-gap: 12px;
   --fls-left: clamp(196px, 17vw, 280px);
   --fls-right: clamp(232px, 20vw, 340px);
-  /* landscape: the board takes all the height, and the width the two side columns leave */
-  --cell: max(28px, min(calc((100dvh - 2 * var(--fls-pad) - 36px) / 10), calc((100vw - var(--fls-left) - var(--fls-right) - 2 * var(--fls-pad) - 2 * var(--fls-gap) - 44px) / 10)));
+  /* landscape: the board takes all the height, and the width the two side columns leave (--rows: 10, or 8 for the Spotter army) */
+  --cell: max(28px, min(calc((100dvh - 2 * var(--fls-pad) - 36px) / var(--rows, 10)), calc((100vw - var(--fls-left) - var(--fls-right) - 2 * var(--fls-pad) - 2 * var(--fls-gap) - 44px) / 10)));
 
   min-height: 100dvh; padding: var(--fls-pad); color: var(--fls-ink); font-family: "Inter", system-ui, sans-serif;
   background: radial-gradient(ellipse at 50% 45%, #232c21 0%, #171c16 60%, #0d100c 100%);
@@ -37,7 +37,7 @@
 /* portrait tablets: board across the top, the two panels side by side underneath */
 @media (orientation: portrait) and (min-width: 600px) {
   .fls {
-    --cell: max(28px, min(calc((100vw - 2 * var(--fls-pad) - 36px) / 10), calc((100dvh - 366px) / 10)));
+    --cell: max(28px, min(calc((100vw - 2 * var(--fls-pad) - 36px) / 10), calc((100dvh - 366px) / var(--rows, 10))));
     grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-areas: "board board" "left right";
   }
   .fls-left, .fls-right { position: static; max-height: none; }

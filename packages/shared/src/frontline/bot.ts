@@ -3,14 +3,14 @@
  * so it plays fair. Greedy one-move scoring with a little randomness.
  */
 import { DIRS, colOf, inZone, isLake, onBoard, pos, rowOf, type PlayerID, type Pos } from './board';
-import { armyKinds, zoneRows, type ArmyId, type Rank } from './pieces';
+import { armyKinds, boardRows, zoneRows, type ArmyId, type Rank } from './pieces';
 import { legalMoves, randomPlacement, resolveCombat, spotGuesses, spotTargets, type MoveArgs, type Placement, type SpotArgs } from './rules';
 import type { FrontlineView, ViewPiece } from './view';
 
 const VALUE = (r: Rank): number => (r === 'F' ? 1000 : r === 'B' ? 5 : r === 1 ? 6 : r === 'P' ? 5 : r === 2 ? 2 : r === 3 ? 4 : r);
 
-const neighbours = (p: Pos): Pos[] =>
-  DIRS.map(([dr, dc]) => [rowOf(p) + dr, colOf(p) + dc]).filter(([r, c]) => onBoard(r, c)).map(([r, c]) => pos(r, c)).filter((q) => !isLake(q));
+const neighbours = (p: Pos, rows = 10): Pos[] =>
+  DIRS.map(([dr, dc]) => [rowOf(p) + dr, colOf(p) + dc]).filter(([r, c]) => onBoard(r, c, rows)).map(([r, c]) => pos(r, c)).filter((q) => !isLake(q, rows));
 
 /** A random army with the command post on the back row and mines on the squares around it. */
 export function botPlacement(me: PlayerID, rnd: () => number, army: ArmyId = 'classic'): Placement {
@@ -19,10 +19,11 @@ export function botPlacement(me: PlayerID, rnd: () => number, army: ArmyId = 'cl
     const x = pl.find((p) => p.pos === a)!, y = pl.find((p) => p.pos === b)!;
     [x.rank, y.rank] = [y.rank, x.rank];
   };
-  const backRow = me === '0' ? 9 : 0;
+  const rows = boardRows(army);
+  const backRow = me === '0' ? rows - 1 : 0;
   const flagTo = pos(backRow, Math.floor(rnd() * 10));
   swap(pl.find((p) => p.rank === 'F')!.pos, flagTo);
-  const guard = neighbours(flagTo).filter((q) => inZone(me, q, zoneRows(army)));
+  const guard = neighbours(flagTo, rows).filter((q) => inZone(me, q, zoneRows(army), rows));
   for (const q of guard) {
     if (pl.find((p) => p.pos === q)!.rank === 'B') continue;
     const spare = pl.find((p) => p.rank === 'B' && !guard.includes(p.pos));
@@ -90,7 +91,7 @@ function scoreMoves(view: FrontlineView, me: PlayerID, moves: MoveArgs[], rnd: (
   const at = new Map<Pos, ViewPiece>(view.pieces.map((p) => [p.pos, p]));
   const forward = (from: Pos, to: Pos) => (me === '0' ? rowOf(from) - rowOf(to) : rowOf(to) - rowOf(from));
   // a known enemy next to `sq` that would beat `rank` by attacking it
-  const threatened = (sq: Pos, rank: Rank) => neighbours(sq).some((q) => {
+  const threatened = (sq: Pos, rank: Rank) => neighbours(sq, boardRows(view.army)).some((q) => {
     const e = at.get(q);
     return !!e && e.owner !== me && e.rank !== undefined && e.rank !== 'B' && e.rank !== 'F' && resolveCombat(e.rank, rank) === 'attacker';
   });

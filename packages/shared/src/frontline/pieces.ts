@@ -19,6 +19,8 @@ export interface Army {
   blurb: string;
   /** Setup rows per side (each row is 10 squares, so rows * 10 = pieces). */
   rows: number;
+  /** Board rows: the setup rows of both sides plus the two lake rows (and any no man's land between). */
+  boardRows: number;
   kinds: readonly PieceKind[];
 }
 
@@ -42,11 +44,11 @@ const roster = (counts: [keyof typeof KIND, number][]): PieceKind[] => counts.ma
 
 export const ARMIES: Record<ArmyId, Army> = {
   classic: {
-    id: 'classic', name: 'Classic', blurb: '40 pieces on four rows: the full army.', rows: 4,
+    id: 'classic', name: 'Classic', blurb: '40 pieces on four rows of a 10x10 board: the full army.', rows: 4, boardRows: 10,
     kinds: roster([['F', 1], ['B', 6], [1, 1], [2, 8], [3, 5], [4, 4], [5, 4], [6, 4], [7, 3], [8, 2], [9, 1], [10, 1]]),
   },
   spotter: {
-    id: 'spotter', name: 'Spotter', blurb: '30 pieces on three rows, with two Spotters that remove a piece by naming it.', rows: 3,
+    id: 'spotter', name: 'Spotter', blurb: '30 pieces on a 10x8 board, deployed right up to the lakes, with two Spotters that remove a piece by naming it.', rows: 3, boardRows: 8,
     kinds: roster([['F', 1], ['B', 3], [1, 1], ['P', 2], [2, 4], [3, 4], [4, 3], [5, 3], [6, 3], [7, 2], [8, 2], [9, 1], [10, 1]]),
   },
 };
@@ -58,6 +60,7 @@ export const ARMY_SIZE = 40;
 export const armyKinds = (id: ArmyId = 'classic'): readonly PieceKind[] => ARMIES[id].kinds;
 export const armySize = (id: ArmyId = 'classic'): number => ARMIES[id].kinds.reduce((n, k) => n + k.count, 0);
 export const zoneRows = (id: ArmyId = 'classic'): number => ARMIES[id].rows;
+export const boardRows = (id: ArmyId = 'classic'): number => ARMIES[id].boardRows;
 export const countOf = (id: ArmyId, r: Rank): number => ARMIES[id].kinds.find((k) => k.rank === r)?.count ?? 0;
 
 export const SCOUT: Rank = 2;

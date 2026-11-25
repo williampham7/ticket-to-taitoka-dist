@@ -15,7 +15,7 @@
 }
 .flb-rim-cols { left: var(--rim); width: calc(var(--cell) * 10); height: var(--rim); grid-template-columns: repeat(10, 1fr); }
 .flb-rim-cols.top { top: 0; } .flb-rim-cols.bottom { bottom: 0; }
-.flb-rim-rows { top: var(--rim); height: calc(var(--cell) * 10); width: var(--rim); grid-template-rows: repeat(10, 1fr); }
+.flb-rim-rows { top: var(--rim); height: calc(var(--cell) * var(--rows, 10)); width: var(--rim); grid-template-rows: repeat(var(--rows, 10), 1fr); }
 .flb-rim-rows.left { left: 0; } .flb-rim-rows.right { right: 0; }
 @media (max-width: 599px) { .flb-rim-cols, .flb-rim-rows { font-size: 9px; } }
 

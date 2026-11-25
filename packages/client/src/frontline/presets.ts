@@ -1,4 +1,4 @@
-import { armyKinds, randomPlacement, type ArmyId, type Placement, type PlayerID, type Rank } from '@boboland/shared/src/frontline';
+import { armyKinds, boardRows, randomPlacement, type ArmyId, type Placement, type PlayerID, type Rank } from '@boboland/shared/src/frontline';
 import { placementFromLayout } from './helpers';
 
 /**
@@ -50,7 +50,7 @@ export const PRESETS: readonly Preset[] = [
   },
 ];
 
-/** Spotter army: 3 rows of 10. The empty row in front of them gives the Spotters room to step up. */
+/** Spotter army: 3 rows of 10 on the 8-row board, the front row right on the lakes. */
 export const SPOTTER_PRESETS: readonly Preset[] = [
   {
     id: 'watch', name: 'Watchtower', blurb: 'Spotters lead the outer lanes; the command post sits in a corner beside a mine.',
@@ -80,7 +80,7 @@ export const SPOTTER_PRESETS: readonly Preset[] = [
 
 export const presetsFor = (army: ArmyId = 'classic'): readonly Preset[] => (army === 'spotter' ? SPOTTER_PRESETS : PRESETS);
 
-export const presetPlacement = (me: PlayerID, p: Preset): Placement => placementFromLayout(me, p.ranks);
+export const presetPlacement = (me: PlayerID, p: Preset, army: ArmyId = 'classic'): Placement => placementFromLayout(me, p.ranks, boardRows(army));
 
 /** How many of each rank are still to be placed. */
 export function remaining(placement: Placement, army: ArmyId = 'classic'): Map<Rank, number> {

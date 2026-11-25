@@ -54,7 +54,7 @@ describe('Spotter army presets and tray', () => {
     for (const p of SPOTTER_PRESETS) {
       expect(p.ranks).toHaveLength(30);
       expect(p.ranks.indexOf('F')).toBeGreaterThanOrEqual(10);
-      for (const me of ['0', '1'] as PlayerID[]) expect(validatePlacement(me, presetPlacement(me, p), 'spotter'), p.id).toBeUndefined();
+      for (const me of ['0', '1'] as PlayerID[]) expect(validatePlacement(me, presetPlacement(me, p, 'spotter'), 'spotter'), p.id).toBeUndefined();
     }
     expect(presetsFor('spotter')).toBe(SPOTTER_PRESETS);
     expect(presetsFor('classic')).toBe(PRESETS);

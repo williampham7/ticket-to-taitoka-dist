@@ -125,11 +125,11 @@ function Placement() {
 }
 
 /** The 10x10 field: your rows, no man's land with its lakes, the enemy rows. */
-function MiniBoard({ rows = 4 }: { rows?: number }) {
+function MiniBoard({ zone = 4, rows = 10 }: { zone?: number; rows?: number }) {
   const cells = [];
-  for (let p = 0; p < 100; p++) {
+  for (let p = 0; p < rows * 10; p++) {
     const r = Math.floor(p / 10);
-    const kind = isLake(p) ? 'lake' : r >= 10 - rows ? 'mine' : r < rows ? 'theirs' : 'nml';
+    const kind = isLake(p, rows) ? 'lake' : r >= rows - zone ? 'mine' : r < zone ? 'theirs' : 'nml';
     cells.push(<i key={p} className={kind} />);
   }
   return (
@@ -244,9 +244,9 @@ function SpotterArmy() {
 
       <h3>A smaller army</h3>
       <div className="flbr-split">
-        <MiniBoard rows={3} />
+        <MiniBoard zone={3} rows={8} />
         <ul>
-          <li>Each side deploys <b>30 units</b> on its <b>three back rows</b>, so an empty row opens in front of each army.</li>
+          <li>A smaller board: <b>10 columns by 8 rows</b>. Each side deploys <b>30 units</b> on its <b>three rows</b>, right up to the lakes, so the armies face each other across the water from the first move.</li>
           <li>Fewer of most units: 4 Scouts, 4 Engineers, 3 Mines, and so on.</li>
           <li>Ranks are printed as this army numbers them: the <b>Spotter is 1</b>, and the <b>Operative is S</b>.</li>
         </ul>

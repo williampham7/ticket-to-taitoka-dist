@@ -1,13 +1,13 @@
 import { expect, test, type Page } from '@playwright/test';
 
 /*
- * The Spotter army, pass and play. Both sides deploy the Watchtower preset, so each has a Spotter on the
- * front row of an outer lane: seat 0 at (7,1) facing column 1, seat 1 at (2,8) facing column 8.
- * Each Spotter walks up its lane until it stands next to the enemy front row (an enemy Spotter, by the
+ * The Spotter army (10 columns x 8 rows), pass and play. Both sides deploy the Watchtower preset, so each has
+ * a Spotter on the front row (right on the lakes) of an outer lane: seat 0 at (5,1), seat 1 at (2,8).
+ * Each Spotter steps through its lane until it stands next to the enemy front row (an enemy Spotter, by the
  * preset), then spots it: the first spot calls the wrong rank on purpose, the second the right one.
  */
-const PATH: Record<string, number[]> = { 0: [71, 61, 51, 41, 31], 1: [28, 38, 48, 58, 68] };
-const TARGET: Record<string, number> = { 0: 21, 1: 78 };
+const PATH: Record<string, number[]> = { 0: [51, 41, 31], 1: [28, 38, 48] };
+const TARGET: Record<string, number> = { 0: 21, 1: 58 };
 
 const cell = (page: Page, pos: number) => page.getByTestId(`fl-cell-${pos}`);
 
@@ -31,11 +31,15 @@ test('Spotter army: the host switches armies, both deploy 30, Spotters spot (a m
   await expect(page.getByTestId('fl-army-spotter')).toHaveAttribute('aria-checked', 'true');
   await expect(page.getByTestId('fl-army-blurb')).toContainText('30 pieces');
   await expect(page.getByTestId('fl-briefing')).toContainText('30 pieces on their own three rows');
+  await expect(page.getByTestId('fl-army-blurb')).toContainText('10x8');
   await page.getByTestId('fl-start').click();
 
   for (const seat of ['0', '1']) {
     await page.getByTestId('fl-reveal').click();
     await expect(page.getByTestId('fl-placed')).toHaveText('0/30');
+    // a 10x8 board: 80 squares, the rim numbered 1-8
+    await expect(page.locator('[data-testid^="fl-cell-"]')).toHaveCount(80);
+    await expect(page.locator('.flb-rim-rows.left span')).toHaveCount(8);
     await expect(page.getByTestId('fl-tray-P')).toContainText('Spotter');
     await expect(page.getByTestId('fl-tray-P')).toContainText('×2');
     await page.getByTestId('fl-preset-watch').click();
@@ -43,7 +47,8 @@ test('Spotter army: the host switches armies, both deploy 30, Spotters spot (a m
     await expect(page.getByTestId('fl-placed')).toHaveText('30/30');
     if (seat === '0') {
       // the Spotter army's own numbering: the Spotter is 1, the Operative S
-      await expect(cell(page, 71).locator('.flt-rank')).toHaveText('1');
+      await expect(cell(page, 51).locator('.flt-rank')).toHaveText('1');
+      await page.screenshot({ path: 'test-results/spotter-deploy.png' });
       await expect(page.getByTestId('fl-board').locator('.flt-rank', { hasText: /^S$/ })).toHaveCount(1);
     }
     await page.getByTestId('fl-ready').click();
@@ -51,7 +56,7 @@ test('Spotter army: the host switches armies, both deploy 30, Spotters spot (a m
 
   const at: Record<string, number> = { 0: 0, 1: 0 };
   let spots = 0;
-  for (let turn = 0; turn < 14 && spots < 2; turn++) {
+  for (let turn = 0; turn < 10 && spots < 2; turn++) {
     await reveal(page);
     const me = await seatOnScreen(page);
     const step = at[me];
