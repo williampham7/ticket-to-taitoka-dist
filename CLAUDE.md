@@ -113,7 +113,7 @@
 - Party: `partyRules.ts` `warfront()` (members without a seat watch; local battles put them on hold).
 - Tests: `npx vitest run packages/shared/test/warfront* packages/shared/test/fuzz.warfront.test.ts` (rules, bots incl. fair view and Hard > Medium > Easy, Local() no-leak incl. reconnect, 500-game fuzz). Also `npx playwright test e2e/warfront.spec.ts` after `npm run build`; e2e sets fx off and a fast bot pace, and clicks territories through their unit tokens (`[data-unit="ID"] use`).
 
-## Shifting Kingdom (separate 2-4 player shifting-maze game, not an edition)
+## Runeshift (separate 2-4 player shifting-maze game, not an edition)
 - Plays like the classic shifting-maze board game in an original storybook kingdom: shift the maze with the spare tile, then walk your hero to your secret treasures and home. Never write that game's trademarked name. Brief: `docs/kingdom/PROMPT.md`; spec with every decision: `docs/kingdom/SPEC.md`; checklist: `docs/kingdom/PLAN.md`. Not in `EDITIONS`; the `/` picker shows `KingdomCard` (`kingdom/PickerCard.tsx`, `kingdom-card`), which opens `/kingdom`.
 - Rules (pure TS): `packages/shared/src/kingdom/`.
   - `tiles.ts`: opening masks (N1 E2 S4 W8), the 16 fixed tiles (corner homes; centre pinwheel), 34 movable tiles, 24 treasures, 12 insertion points (`INSERTS`, `opposite`, `lineCells`), the 4 heroes.

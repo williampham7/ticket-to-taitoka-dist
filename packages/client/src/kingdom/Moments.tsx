@@ -5,6 +5,7 @@ import { HeroPortrait } from './art/portraits';
 import { HERO_COLOR, heroName, heroOf } from './text';
 import { load } from '../lib/storage';
 import { getFx, ms } from './fx';
+import { RUNES } from './art/runes';
 
 /** The turn ribbon: unrolls with the hero's portrait and name, holds, and rolls away. */
 export function TurnRibbon({ d, anim, names, me }: { d: KView; anim: Anim | null; names: Record<string, string>; me: string | null }) {
@@ -16,6 +17,7 @@ export function TurnRibbon({ d, anim, names, me }: { d: KView; anim: Anim | null
     <div key={anim.key} className={`kg-ribbon${mine ? ' kg-ribbon-me' : ''}`} style={{ ['--dur' as string]: `${anim.dur}ms`, ['--pc' as string]: HERO_COLOR[h] } as CSSProperties} role="status" data-testid="kg-ribbon">
       <span className="kg-ribbon-tail kg-ribbon-tail-l" /><span className="kg-ribbon-tail kg-ribbon-tail-r" />
       <span className="kg-ribbon-body">
+        <span className="kg-ribbon-glint" aria-hidden />
         <span className="kg-ribbon-face"><HeroPortrait hero={h} /></span>
         <span><b>{mine ? 'Your turn!' : `${names[p] ?? heroName(d, p)}'s turn`}</b><small>the {heroName(d, p)}</small></span>
       </span>
@@ -28,11 +30,13 @@ export function Celebration({ anim }: { d: KView; anim: Anim | null; T: number }
   if (!anim || anim.e.k !== 'win') return null;
   return (
     <div key={anim.key} className="kg-celebrate" style={{ ['--dur' as string]: `${anim.dur}ms` } as CSSProperties} aria-hidden data-testid="kg-celebrate">
-      {[[78, 14, 0, '#ffd34d'], [88, 26, 1, '#f49ac0'], [70, 30, 2, '#9fd3f2'], [84, 8, 3, '#ff8a6a'], [62, 16, 4, '#c6f08a']].map(([x, y, i, c]) => (
+      {[[78, 14, 0, '#ffd34d'], [88, 26, 1, '#f49ac0'], [70, 30, 2, '#9fd3f2'], [84, 8, 3, '#ff8a6a'], [62, 16, 4, '#c6f08a'], [30, 18, 5, '#7ef0d0'], [48, 10, 6, '#ffd34d'], [18, 30, 7, '#f49ac0']].map(([x, y, i, c]) => (
         <span key={i} className="kg-firework" style={{ left: `${x}%`, top: `${y}%`, ['--i' as string]: i, ['--c' as string]: c } as CSSProperties}>
           {Array.from({ length: 12 }, (_, j) => <i key={j} style={{ ['--a' as string]: `${j * 30}deg` } as CSSProperties} />)}
         </span>
       ))}
+      {[14, 38, 62, 86].map((x, i) => <span key={x} className="kg-win-pillar" style={{ left: `${x}%`, ['--i' as string]: i } as CSSProperties} />)}
+      <span className="kg-win-title">{['R', 'U', 'N', 'E', 'S', 'H', 'I', 'F', 'T'].map((c, i) => <i key={i} style={{ ['--i' as string]: i } as CSSProperties}>{c}</i>)}</span>
       {Array.from({ length: 36 }, (_, j) => <i key={j} className="kg-petal" style={{ left: `${(j * 37) % 100}%`, ['--j' as string]: j, ['--r' as string]: `${(j * 53) % 360}deg` } as CSSProperties} />)}
     </div>
   );
@@ -49,7 +53,8 @@ export function Intro({ title }: { title: string }) {
         <div className="kg-intro-page kg-intro-p3" />
         <div className="kg-intro-page kg-intro-p2" />
         <div className="kg-intro-page kg-intro-p1" />
-        <div className="kg-intro-cover"><small>A storybook adventure</small><h2>{title}</h2><span className="kg-intro-maze" /></div>
+        <div className="kg-intro-cover"><small>A storybook adventure</small><h2>{title}</h2><span className="kg-intro-runes" aria-hidden>{[0, 1, 2, 3, 4].map((k) => <svg key={k} viewBox="-5 -8 10 16" style={{ ['--k' as string]: k } as CSSProperties}><path d={RUNES[k]} /></svg>)}</span>
+          <span className="kg-intro-maze" /></div>
       </div>
       <button type="button" className="kg-btn kg-btn-sm kg-intro-skip" onClick={() => setOn(false)}>Skip ›</button>
     </div>

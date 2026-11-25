@@ -1,4 +1,4 @@
-/* Shifting Kingdom: the title-page menu, How to play, and the result page. */
+/* Runeshift: the title-page menu, How to play, and the result page. */
 .kg-menu { padding: 20px; }
 .kg-title-book {
   position: relative; z-index: 2; width: min(1060px, 96vw); display: grid; grid-template-columns: 1fr 1fr; perspective: 2000px;

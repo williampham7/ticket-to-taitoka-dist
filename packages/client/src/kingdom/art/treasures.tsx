@@ -277,8 +277,42 @@ const ART: Record<TreasureId, () => ReactElement> = {
   ),
 };
 
+/**
+ * Fine detail on top of each silhouette: hairline engraving, gems, facets, a soft rim light. It is drawn thin and
+ * translucent so the 32px version still reads from the bold shapes underneath; at gallery size it is the craft.
+ */
+const f = { fill: 'none', stroke: INK, strokeWidth: 1.2, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const, opacity: 0.55 };
+const gem = (x: number, y: number, c: string, r = 2.6) => <g><circle cx={x} cy={y} r={r} fill={c} stroke={INK} strokeWidth="1" /><circle cx={x - r * 0.3} cy={y - r * 0.3} r={r * 0.35} fill="#fff" opacity=".85" /></g>;
+const dot = (x: number, y: number, r = 1.2, c = '#fff', o = 0.7) => <circle cx={x} cy={y} r={r} fill={c} opacity={o} />;
+const DETAIL: Record<TreasureId, () => ReactElement> = {
+  harp: () => <g><path d="M30,24 Q36,18 44,22 M30,30 Q38,24 48,30" {...f} />{gem(31, 44, '#4fd1b4', 2)}{gem(31, 62, '#e04b5a', 2)}<path d="M28,84 H42" {...f} />{dot(46, 30)}</g>,
+  slipper: () => <g><path d="M70,34 L80,56 M66,44 L78,62" {...f} />{gem(64, 62, '#fff', 2.4)}<path d="M12,76 Q30,80 46,76" {...f} />{dot(84, 28, 1.4)}{dot(30, 62, 1)}</g>,
+  crystal: () => <g><path d="M30,32 L50,14 L70,32 L50,74 Z M30,32 H70 M50,14 V74" {...f} opacity=".3" /><path d="M36,86 H64" {...f} />{dot(36, 30, 2, '#fff', 0.8)}{dot(62, 52, 1.2)}</g>,
+  musicbox: () => <g><path d="M18,52 L46,60 M82,52 L54,60" {...f} />{gem(50, 76, '#e9b63c', 2.4)}<path d="M14,48 L50,38 L86,48" {...f} stroke="#fff" opacity=".6" />{dot(22, 28, 1)}<path d="M20,70 V76 M30,74 V80" {...f} /></g>,
+  sceptre: () => <g><path d="M34,80 L40,70 M42,68 L48,58 M50,56 L55,48" {...f} strokeWidth="2" opacity=".6" />{gem(56, 38, '#fff', 1.8)}<path d="M60,14 L68,28 L76,14" {...f} stroke="#fff" opacity=".6" />{dot(42, 68, 1.4, '#3d8ee0', 0.9)}</g>,
+  watch: () => <g>{[30, 60, 120, 150, 210, 240, 300, 330].map((a) => <path key={a} d="M50,34 V36.5" {...f} transform={`rotate(${a} 50 57)`} />)}<circle cx="50" cy="57" r="29" {...f} /><path d="M50,57 L40,66" stroke="#d9374f" strokeWidth="1.4" strokeLinecap="round" /><path d="M24,40 Q30,30 40,26" stroke="#fff" strokeWidth="2.4" fill="none" strokeLinecap="round" opacity=".6" /></g>,
+  lantern: () => <g><path d="M50,26 V76 M32,50 H68" {...f} /><path d="M44,6 Q50,0 56,6" {...f} /><path d="M36,22 H64" {...f} stroke="#fff" opacity=".5" />{dot(44, 84, 1.4, '#e04b5a', 0.8)}{dot(58, 84, 1.4, '#e04b5a', 0.8)}</g>,
+  teapot: () => <g><path d="M40,62 Q50,52 60,62 Q50,72 40,62 Z M50,53 V71" {...f} /><path d="M30,50 Q50,44 70,50" {...f} stroke="#fff" opacity=".7" /><circle cx="34" cy="78" r="1.2" fill={INK} opacity=".5" /><circle cx="66" cy="78" r="1.2" fill={INK} opacity=".5" /><path d="M86,24 Q82,16 88,10 M78,24 Q74,16 80,8" {...f} stroke="#9aa6b4" /></g>,
+  apple: () => <g>{dot(36, 64, 1, '#b07d16', 0.8)}{dot(60, 70, 1, '#b07d16', 0.8)}{dot(68, 48, 1, '#b07d16', 0.8)}{dot(46, 76, 1, '#b07d16', 0.8)}<path d="M58,18 Q68,14 74,18" {...f} /><path d="M50,30 Q44,40 46,50" {...f} opacity=".35" /></g>,
+  wheel: () => <g><circle cx="44" cy="44" r="25" {...f} /><circle cx="44" cy="44" r="3" fill="#f4e2b8" stroke={INK} strokeWidth="1" />{[0, 60, 120, 180, 240, 300].map((a) => <circle key={a} cx="44" cy="22" r="1.5" fill="#d9a93e" transform={`rotate(${a} 44 44)`} />)}<path d="M72,58 L88,34" stroke="#fff" strokeWidth="1.4" opacity=".6" /></g>,
+  coin: () => <g>{Array.from({ length: 16 }, (_, i) => <circle key={i} cx="50" cy="20" r="1.3" fill="#b07d16" transform={`rotate(${i * 22.5} 50 54)`} />)}<path d="M36,76 Q50,82 64,76" {...f} /><path d="M26,42 Q32,30 44,26" stroke="#fff" strokeWidth="2.4" fill="none" strokeLinecap="round" opacity=".7" /></g>,
+  beans: () => <g><path d="M60,22 Q56,16 62,14 M66,32 Q74,26 70,20" {...f} stroke="#3f7d2e" />{dot(24, 68, 1.2)}{dot(50, 74, 1.2)}{dot(70, 64, 1.2)}<path d="M64,34 L68,38" {...f} opacity=".4" /></g>,
+  unicorn: () => <g><path d="M60,14 L66,10 M61,22 L68,18" {...f} stroke="#b07d16" />{[[34, 40], [30, 54], [38, 62]].map(([x, y], i) => <path key={i} d={`M${x},${y} q-4,4 -2,8`} {...f} stroke="#d9608f" />)}<path d="M62,70 L66,86 M72,66 L74,84" {...f} /><path d="M60,70 q6,2 6,10" {...f} opacity=".3" />{gem(70, 70, '#b48cf2', 2)}</g>,
+  goose: () => <g><path d="M24,70 q4,-4 8,0 q4,-4 8,0 q4,-4 8,0 M30,76 q4,-4 8,0 q4,-4 8,0" {...f} />{dot(72, 76, 1.2, '#fff', 0.9)}<path d="M76,86 L80,92 M70,90 L68,94" {...f} stroke="#f29a2e" /><path d="M64,20 q4,-2 6,2" {...f} /></g>,
+  frog: () => <g>{dot(36, 64, 2, '#4f9a3c', 0.8)}{dot(62, 60, 2.4, '#4f9a3c', 0.8)}{dot(50, 80, 2, '#4f9a3c', 0.8)}{gem(50, 24, '#e04b5a', 2)}<path d="M20,54 Q22,46 30,44 M80,54 Q78,46 70,44" {...f} stroke="#fff" opacity=".7" /><path d="M30,84 L26,90 M70,84 L74,90" {...f} /></g>,
+  fox: () => <g><path d="M24,60 L10,62 M26,66 L12,72 M76,60 L90,62 M74,66 L88,72" {...f} /><path d="M44,32 L40,26 M56,32 L60,26" {...f} /><path d="M40,80 Q50,86 60,80" {...f} />{gem(50, 40, '#8cc7ea', 1.8)}</g>,
+  griffin: () => <g><path d="M12,40 L18,48 M10,46 L16,54 M88,40 L82,48 M90,46 L84,54" {...f} /><path d="M36,64 q6,6 12,0 q6,6 12,0 M40,72 q5,5 10,0 q5,5 10,0" {...f} /><path d="M54,56 L50,60 L46,56" {...f} stroke="#fff" opacity=".7" />{dot(41, 36, 1, '#fff', 0.9)}{dot(59, 36, 1, '#fff', 0.9)}</g>,
+  fairy: () => <g><path d="M46,54 Q32,40 20,40 M54,54 Q68,40 80,40 M46,56 Q36,52 24,50 M54,56 Q64,52 76,50" {...f} stroke="#5b86c4" />{[[18, 70], [26, 84], [78, 76], [86, 62], [62, 88]].map(([x, y], i) => <g key={i}>{dot(x, y, 1.6, '#fff6c2', 0.9)}</g>)}<path d="M44,72 H56 M42,80 H58" {...f} stroke="#fff" opacity=".7" /></g>,
+  gnome: () => <g><path d="M38,38 L62,38 M44,22 L56,22" {...f} stroke="#fff" opacity=".6" />{gem(50, 44, '#e9b63c', 2)}<path d="M34,76 Q42,86 50,80 Q58,86 66,76" {...f} /><path d="M40,82 Q44,88 48,84 M52,84 Q56,88 60,82" {...f} /></g>,
+  tortoise: () => <g><path d="M24,56 L36,48 M70,56 L58,48 M30,70 L40,64 M62,70 L52,64" {...f} />{dot(46, 36, 1.6, '#fff', 0.5)}<path d="M8,86 q4,-6 8,0 q4,-8 8,0 M60,88 q4,-6 8,0 q4,-8 8,0" {...f} stroke="#3f7d2e" opacity=".8" /></g>,
+  bear: () => <g><path d="M38,40 q12,-6 24,0" {...f} />{dot(44, 48, 1.3, '#fff', 0.8)}{dot(60, 48, 1.3, '#fff', 0.8)}<path d="M26,34 q-4,2 -4,6 M74,34 q4,2 4,6" {...f} /><rect x="58" y="70" width="12" height="10" rx="2" fill="#e9b63c" opacity=".85" stroke={INK} strokeWidth="1" /><path d="M60,75 h8 M64,71 v8" stroke={INK} strokeWidth=".9" /></g>,
+  rose: () => <g><path d="M36,32 Q48,20 62,30 M44,48 Q54,40 62,46" {...f} />{dot(76, 70, 1.8, '#9fd6f0', 0.9)}<path d="M50,84 l-3,-3 M50,70 l3,-3" {...f} stroke="#3f7d2e" /></g>,
+  phoenix: () => <g><path d="M34,76 L46,60 M44,66 L56,52 M52,56 L62,44 M60,44 L68,34" {...f} stroke="#d9374f" />{dot(80, 26, 1.8, '#ffd34d', 0.95)}{dot(88, 50, 1.4, '#ffd34d', 0.95)}{dot(18, 70, 1.4, '#ffd34d', 0.95)}{dot(72, 14, 1.2, '#ff8a2a', 0.95)}</g>,
+  comb: () => <g>{gem(50, 22, '#4fd1b4', 2.6)}{[20, 30, 40, 60, 70, 80].map((x) => <path key={x} d={`M${x + 2},56 V82`} stroke="#fff" strokeWidth="1.4" opacity=".6" />)}{dot(30, 48, 1.4)}{dot(50, 48, 1.4)}{dot(70, 48, 1.4)}</g>,
+};
+
 export function TreasureGlyph({ t }: { t: TreasureId }) {
-  return ART[t]();
+  return <g><ellipse cx="50" cy="94" rx="30" ry="4.5" fill="#1d2a10" opacity=".16" />{ART[t]()}{DETAIL[t]()}</g>;
 }
 
 /** A standalone treasure image (cards, banners, gallery). */

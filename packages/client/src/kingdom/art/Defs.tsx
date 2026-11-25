@@ -37,6 +37,11 @@ export function KingdomArtDefs() {
         <linearGradient id="kg-rose" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#f6a1b3" /><stop offset="1" stopColor="#c9435f" /></linearGradient>
         <linearGradient id="kg-sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#bfe3f7" /><stop offset="1" stopColor="#7ab8e0" /></linearGradient>
         <linearGradient id="kg-skin" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#ffe1c4" /><stop offset="1" stopColor="#f0b98e" /></linearGradient>
+        <linearGradient id="kg-rune-stone" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#9aa5aa" /><stop offset=".55" stopColor="#6f7b82" /><stop offset="1" stopColor="#4f5b62" /></linearGradient>
+        <linearGradient id="kg-rune-face" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#56646b" /><stop offset="1" stopColor="#3b474e" /></linearGradient>
+        <radialGradient id="kg-rune-glow" cx=".5" cy=".5" r=".5"><stop offset="0" stopColor="#9ff5dc" stopOpacity=".85" /><stop offset=".55" stopColor="#4fd1b4" stopOpacity=".28" /><stop offset="1" stopColor="#4fd1b4" stopOpacity="0" /></radialGradient>
+        <linearGradient id="kg-pennant-live" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#ffe48a" /><stop offset="1" stopColor="#e0a126" /></linearGradient>
+        <linearGradient id="kg-pennant-idle" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#e6dcc3" /><stop offset="1" stopColor="#b9ad92" /></linearGradient>
         {HERO_COLOR.map((c, i) => (
           <linearGradient key={i} id={`kg-hero-${i}`} x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor={HERO_LIGHT[i]} /><stop offset=".25" stopColor={c} /><stop offset="1" stopColor={HERO_DEEP[i]} /></linearGradient>
         ))}

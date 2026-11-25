@@ -9,7 +9,7 @@ import { TreasureGlyph } from './art/treasures';
 import { HeroPortrait } from './art/portraits';
 import { TargetCard } from './art/cards';
 import { Scene, timeOfDay } from './art/scene';
-import { STAGE } from './project';
+import { trayExtent } from './project';
 import { HERO_COLOR, heroName, heroOf, narrate } from './text';
 import { useKingdomFx } from './useKingdomFx';
 import { setFlat, setFx, useFlat, useFx, ms } from './fx';
@@ -23,7 +23,7 @@ import { SoundRows } from './SoundRows';
 
 /** Arrow keys move a focus ring around the live banners and the squares you can walk to. */
 function moveFocus(key: string): boolean {
-  const all = [...document.querySelectorAll<HTMLElement>('.kg-banner:not(:disabled), .kg-cell[tabindex]')];
+  const all = [...document.querySelectorAll<HTMLElement>('.kg-banner:not(:disabled), .kg-banner[aria-disabled="true"], .kg-cell[tabindex]')];
   if (!all.length) return false;
   const cur = document.activeElement as HTMLElement | null;
   if (!cur || !all.includes(cur)) { all[0].focus(); return true; }
@@ -118,7 +118,13 @@ export function KgScreen(props: KgScreenProps) {
   useLayoutEffect(() => {
     const el = area.current;
     if (!el) return;
-    const fit = () => { const r = el.getBoundingClientRect(); setT(Math.max(26, Math.floor(Math.min(r.width, r.height / (flat ? 1 : 0.93)) / STAGE))); };
+    // the whole diorama (flags, plinth, shadow) fits, with a small gap above and below; Board shifts it to centre that box
+    const fit = () => {
+      const r = el.getBoundingClientRect();
+      const e = trayExtent(100, !flat);
+      const gap = Math.max(8, Math.round(r.height * 0.012));
+      setT(Math.max(26, Math.floor(Math.min((r.width - 8) / (2 * e.across / 100), (r.height - 2 * gap) / ((e.up + e.down) / 100)))));
+    };
     fit();
     const ro = new ResizeObserver(fit);
     ro.observe(el);
@@ -143,6 +149,8 @@ export function KgScreen(props: KgScreenProps) {
   const showResult = !!d.result && !busy;
   const lastLines = useMemo(() => d.log.slice(-6).map((e) => ({ n: e.n, text: narrate(e, d, names), k: e.k })).filter((x) => x.text).reverse(), [d.log, d.heroes, names]); // eslint-disable-line react-hooks/exhaustive-deps
   const curHero = hero(d.current);
+  const lastPush = [...d.log].reverse().find((e) => e.k === 'shift');
+  const lockWho = lastPush ? (lastPush.p === me ? 'you' : names[lastPush.p] ?? heroName(d, lastPush.p)) : null;
   const spareMask = rotMask(d.spare.m, rot);
   const coach = playing && kind !== 'watch' && myTurn && load<string | null>('kg.coach', null) !== 'done';
 
@@ -189,7 +197,7 @@ export function KgScreen(props: KgScreenProps) {
 
       <main className="kg-boardarea" ref={area}>
         <Board d={d} T={T} tilt={!flat} me={me} mode={mode} rot={rot} aim={aim} onAim={setAim} onShift={shift}
-          reach={reach} hover={hover} onHover={setHover} onMove={move} pulse={typeof pulse === 'number' ? pulse : null} anim={anim} />
+          reach={reach} lockWho={lockWho} hover={hover} onHover={setHover} onMove={move} pulse={typeof pulse === 'number' ? pulse : null} anim={anim} />
         <TurnRibbon d={d} anim={anim} names={names} me={me} />
       </main>
 
@@ -220,7 +228,7 @@ export function KgScreen(props: KgScreenProps) {
       {coach && <Coach step={d.step} />}
       {props.chat && <ChatPanel lines={props.chat.lines} send={props.chat.send} names={names} heroOf={(p) => hero(p)} readOnly={kind === 'watch'} />}
       <Celebration d={d} anim={anim} T={T} />
-      {view.logTotal < 2 && <Intro title="Shifting Kingdom" />}
+      {view.logTotal < 2 && <Intro title="Runeshift" />}
 
       {menu && (
         <div className="kg-pop" role="dialog" aria-label="Settings">

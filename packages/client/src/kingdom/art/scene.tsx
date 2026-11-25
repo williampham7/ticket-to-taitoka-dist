@@ -69,16 +69,26 @@ export function Scene({ phase }: { phase: TimeOfDay }) {
           <linearGradient id="kg-sc-sunset" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#6b5aa8" /><stop offset=".45" stopColor="#ef8a78" /><stop offset="1" stopColor="#ffc47a" /></linearGradient>
           <linearGradient id="kg-sc-night" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#141a42" /><stop offset=".7" stopColor="#2d3470" /><stop offset="1" stopColor="#4a4a7e" /></linearGradient>
           <linearGradient id="kg-sc-river" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#9fd6f0" /><stop offset="1" stopColor="#5fa8d6" /></linearGradient>
+          <linearGradient id="kg-sc-ray" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stopColor="#fff6c8" stopOpacity=".5" /><stop offset=".5" stopColor="#fff6c8" stopOpacity=".08" /><stop offset="1" stopColor="#fff6c8" stopOpacity="0" /></linearGradient>
+          <linearGradient id="kg-sc-beam" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stopColor="#9ff5dc" stopOpacity=".7" /><stop offset="1" stopColor="#9ff5dc" stopOpacity="0" /></linearGradient>
+          <linearGradient id="kg-sc-mount" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#c4d3ea" /><stop offset="1" stopColor="#a3b8d6" /></linearGradient>
           <radialGradient id="kg-sc-sun" cx=".5" cy=".5" r=".5"><stop offset="0" stopColor="#fff6c8" /><stop offset=".45" stopColor="#ffe17a" stopOpacity=".9" /><stop offset="1" stopColor="#ffe17a" stopOpacity="0" /></radialGradient>
         </defs>
         {(['morning', 'afternoon', 'sunset', 'night'] as const).map((p) => <rect key={p} className={`kg-sky kg-sky-${p}`} width="1600" height="900" fill={`url(#kg-sc-${p})`} />)}
         <g className="kg-stars">{Array.from({ length: 46 }, (_, i) => <circle key={i} className="kg-twinkle" cx={(i * 337) % 1600} cy={(i * 131) % 420} r={1 + (i % 3) * 0.7} fill="#fffbe0" style={{ ['--i' as string]: i % 7 } as CSSProperties} />)}</g>
-        <g className="kg-sun"><circle cx="0" cy="0" r="120" fill="url(#kg-sc-sun)" /><circle cx="0" cy="0" r="44" fill="#fff0a8" {...ink} /></g>
+        <g className="kg-sun">
+          <g className="kg-rays">{Array.from({ length: 9 }, (_, i) => <path key={i} d="M-26,0 L0,-1500 L26,0 Z" fill="url(#kg-sc-ray)" transform={`rotate(${i * 40 + 12})`} />)}</g>
+          <circle cx="0" cy="0" r="120" fill="url(#kg-sc-sun)" /><circle cx="0" cy="0" r="44" fill="#fff0a8" {...ink} /></g>
         <g className="kg-moon"><circle cx="0" cy="0" r="38" fill="#fdf6d8" {...ink} /><circle cx="14" cy="-8" r="34" fill="#2d3470" /></g>
         <g className="kg-par-1">
           {[[120, 110, 1.6, 0], [620, 70, 1.1, 1], [1040, 150, 1.4, 2], [1380, 60, 1, 3], [300, 230, 0.9, 4]].map(([x, y, s, i]) => (
             <g key={i} transform={`translate(${x},${y}) scale(${s})`}><path className="kg-cloud" d={CLOUD} fill="#fffdf6" {...ink} strokeWidth={2.4} style={{ ['--i' as string]: i } as CSSProperties} /></g>
           ))}
+        </g>
+        <g className="kg-par-1 kg-mount">
+          <path d="M0,470 L110,380 L190,430 L330,300 L450,410 L560,350 L700,440 L840,330 L960,420 L1090,350 L1230,440 L1380,330 L1500,410 L1600,360 V560 H0 Z" fill="url(#kg-sc-mount)" stroke={INK} strokeWidth="2" strokeLinejoin="round" />
+          <path d="M330,300 L300,336 L322,330 L334,346 L350,328 L370,338 Z M840,330 L812,366 L832,360 L846,376 L862,358 L880,368 Z M1380,330 L1352,364 L1372,358 L1386,374 L1402,356 L1420,366 Z" fill="#fff" stroke={INK} strokeWidth="1.6" strokeLinejoin="round" />
+          <path d="M120,430 Q260,400 420,440 M900,430 Q1020,410 1180,450" stroke="#fff" strokeWidth="14" strokeLinecap="round" opacity=".35" fill="none" />
         </g>
         <g className="kg-land kg-par-2">
           <path d="M0,520 Q200,420 420,470 Q640,520 860,440 Q1080,370 1300,430 Q1460,470 1600,420 V900 H0 Z" fill="#a8cf8e" {...ink} strokeWidth={2.4} />
@@ -103,6 +113,33 @@ export function Scene({ phase }: { phase: TimeOfDay }) {
           <g className="kg-shimmer" stroke="#fff" strokeWidth="3" strokeLinecap="round" opacity=".8">
             <path d="M1262,560 h22 M1255,668 h26 M1250,782 h24 M1262,868 h18" strokeDasharray="8 10" />
           </g>
+          {/* a little sailboat */}
+          <g className="kg-boat" transform="translate(1262,742)">
+            <path d="M-26,0 H26 L18,12 H-18 Z" fill="#a86b3c" {...ink} strokeWidth="2.4" />
+            <path d="M0,-2 V-52" stroke={INK} strokeWidth="2.6" />
+            <path d="M3,-50 Q26,-26 22,-6 H3 Z" fill="#fffaf0" {...ink} strokeWidth="2.2" />
+            <path d="M-3,-40 Q-18,-22 -20,-6 H-3 Z" fill="#f4d68a" {...ink} strokeWidth="2.2" />
+          </g>
+          {/* a windmill on the near hill */}
+          <g transform="translate(610,496)">
+            <path d="M-18,0 L-11,-58 H11 L18,0 Z" fill="#f2e6c8" {...ink} />
+            <path d="M-13,-58 L0,-78 L13,-58 Z" fill="#d9546f" {...ink} />
+            <path d="M-5,0 V-14 Q0,-20 5,-14 V0 Z" fill="#8a5329" {...ink} strokeWidth="2" />
+            <g className="kg-blades" transform="translate(0,-60)">
+              {[0, 90, 180, 270].map((a) => <g key={a} transform={`rotate(${a})`}><path d="M0,0 V-50" stroke={INK} strokeWidth="3" /><path d="M2,-8 H15 V-46 H2 Z" fill="#fffaf0" {...ink} strokeWidth="2" /></g>)}
+              <circle r="4.5" fill="#e9b63c" {...ink} strokeWidth="2" />
+            </g>
+          </g>
+          {/* the old standing stones: carved runes that wake as the day ends */}
+          <g className="kg-menhirs" transform="translate(960,424)">
+            <rect className="kg-menhir-beam" x="-70" y="-460" width="140" height="460" fill="url(#kg-sc-beam)" />
+            {[[-52, 4, 0.8, 0], [-26, 0, 1, 1], [0, -2, 1.18, 2], [26, 0, 1, 3], [52, 4, 0.8, 4]].map(([x, y, sc, k]) => (
+              <g key={k} transform={`translate(${x},${y}) scale(${sc})`}>
+                <path d="M-9,0 V-28 Q-9,-40 0,-40 Q9,-40 9,-28 V0 Z" fill="url(#kg-rune-stone)" {...ink} strokeWidth="2.2" />
+                <path className="kg-menhir-rune" d={['M-3,-10 V-30 M-3,-30 L3,-24 M-3,-22 L3,-16', 'M-3,-10 V-30 L3,-24 V-10', 'M-3,-10 V-30 M-3,-26 L3,-21 L-3,-16', 'M-2,-30 L3,-20 L-2,-10', 'M-3,-30 L3,-10 M3,-30 L-3,-10'][Number(k)]} fill="none" stroke="#7ef0d0" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ ['--i' as string]: k } as CSSProperties} />
+              </g>
+            ))}
+          </g>
         </g>
         <g className="kg-land kg-par-3">
           {/* the forest edge and the village on the left */}
@@ -112,8 +149,10 @@ export function Scene({ phase }: { phase: TimeOfDay }) {
           <path d="M1600,600 Q1480,640 1440,720 Q1420,800 1500,900 H1600 Z" fill="#7fb35e" {...ink} />
           {[[1520, 640, 1.4], [1570, 700, 1.2], [1490, 760, 1.5]].map(([x, y, s], k) => tree(x, y, s, k + 10))}
           <path d="M0,760 Q400,700 800,760 Q1200,820 1600,760 V900 H0 Z" fill="#9fcd6c" {...ink} />
-          {Array.from({ length: 22 }, (_, i) => <circle key={i} cx={40 + i * 72} cy={820 + (i % 3) * 18} r="5" fill={['#f7a8c0', '#fff3a8', '#ffffff'][i % 3]} stroke={INK} strokeWidth="1.4" />)}
+          {Array.from({ length: 22 }, (_, i) => <circle key={i} className="kg-sway" style={{ ['--i' as string]: i } as CSSProperties} cx={40 + i * 72} cy={820 + (i % 3) * 18} r="5" fill={['#f7a8c0', '#fff3a8', '#ffffff'][i % 3]} stroke={INK} strokeWidth="1.4" />)}
         </g>
+        <g className="kg-mist" fill="#fff"><ellipse cx="300" cy="560" rx="420" ry="34" /><ellipse cx="1000" cy="610" rx="520" ry="40" /><ellipse cx="1500" cy="520" rx="360" ry="26" /></g>
+        <g className="kg-motes">{Array.from({ length: 18 }, (_, i) => <circle key={i} className="kg-mote" cx={80 + ((i * 211) % 1460)} cy={560 + ((i * 97) % 300)} r={1.6 + (i % 3) * 0.8} fill="#fffbe0" style={{ ['--i' as string]: i } as CSSProperties} />)}</g>
         <rect className="kg-tint" width="1600" height="900" />
         <g className="kg-lit">
           {[[233, 548], [333, 588], [173, 628], [403, 668]].map(([x, y], k) => <rect key={k} x={x} y={y} width="8" height="8" fill="#ffd66b" />)}

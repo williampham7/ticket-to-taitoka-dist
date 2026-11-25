@@ -5,7 +5,7 @@ import { KingdomGame, KINGDOM_GAME_NAME } from '@boboland/shared';
 import { KINGDOM_BOT_LEVELS, chooseKingdomAction, eventMs, HEROES, type KBotLevel, type KView } from '@boboland/shared/src/kingdom';
 
 /**
- * Shifting Kingdom's server-played bots for online rooms (Warfront's pattern): the room host seats a bot in the
+ * Runeshift's server-played bots for online rooms (Warfront's pattern): the room host seats a bot in the
  * waiting room; it follows the group into the game and back into the next room. Each bot plays through its own
  * socket client, so it only ever sees its own player view. A bot waits for the animations of everything since it
  * last acted (shared `timing.ts`), plus a turn lead; TTB_BOT_DELAY replaces that with a fixed pace (tests).

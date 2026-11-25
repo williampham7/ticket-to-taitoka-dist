@@ -17,7 +17,7 @@ function place(G: KState, t: TreasureId, i: number) {
 const first = (G: KState) => G.current;
 const other = (G: KState) => G.players.find((p) => p !== G.current)!;
 
-describe('Shifting Kingdom layout', () => {
+describe('Runeshift layout', () => {
   it('has 16 fixed tiles: L homes in the corners, edge T tiles closed toward the edge', () => {
     expect(Object.keys(FIXED)).toHaveLength(16);
     for (const h of HOMES) expect(shapeOf(FIXED[h].m)).toBe('L');

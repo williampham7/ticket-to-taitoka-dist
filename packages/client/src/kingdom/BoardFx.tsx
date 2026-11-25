@@ -1,3 +1,4 @@
+import { RUNES } from './art/runes';
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { INSERTS, lineCells, rc, type KView } from '@boboland/shared/src/kingdom';
 import { projectXY } from './project';
@@ -102,6 +103,11 @@ export function BoardFx({ d, T, tilt, anim }: { d: KView; T: number; tilt: boole
       for (const [p, n] of [[inn, 0], [outEdge, 1]] as const) {
         fx.push(<div key={`puff${k}${n}`} className="kg-fx-puff" style={{ ...base, ...vars({ x: px(p.x), y: px(p.y) }) }}>{[0, 1, 2, 3, 4, 5].map((j) => <i key={j} style={vars({ j })} className={j % 2 ? 'kg-fx-leaf' : 'kg-fx-dust'} />)}</div>);
       }
+      line.forEach((cell, j) => {
+        const p = at(cell);
+        fx.push(<span key={`rw${k}${j}`} className="kg-fx-rune" style={{ ...base, ...vars({ x: px(p.x), y: px(p.y), j }) }}><svg viewBox="-5 -8 10 16"><path d={RUNES[(e.at + j) % 7]} /></svg></span>);
+      });
+      fx.push(<span key={`rg${k}`} className="kg-fx-ring" style={{ ...base, ...vars({ x: px(inn.x), y: px(inn.y), squash: tilt ? 0.55 : 1, rd: 0.22 }) }} />);
       if (e.wraps.length) for (const p of [outEdge, at(line[0])]) fx.push(<Sparkles key={`w${k}${p.x}`} x={p.x} y={p.y} T={T} dur={dur} delay={0.55} />);
     }
     if (e.k === 'move' && e.path.length > 1) {
@@ -109,18 +115,22 @@ export function BoardFx({ d, T, tilt, anim }: { d: KView; T: number; tilt: boole
         const p = at(c);
         fx.push(<span key={`fp${k}${j}`} className="kg-fx-foot" style={{ ...base, ...vars({ x: px(p.x), y: px(p.y), j, n: e.path.length - 1 }) }} />);
       });
+      const end = at(e.path[e.path.length - 1]);
+      fx.push(<span key={`land${k}`} className="kg-fx-ring kg-fx-ring-soft" style={{ ...base, ...vars({ x: px(end.x), y: px(end.y), squash: tilt ? 0.55 : 1, rd: 0.7 }) }} />);
     }
     if (e.k === 'collect') {
       const c = anim.before.pos[e.p] ?? d.pos[e.p];
       const p = at(c);
       const ban = domPoint(stage, `[data-testid="kg-player-${e.p}"] .kg-pl-face`) ?? { x: 0, y: -stage.height / 2 };
       fx.push(
+        <span key={`cr${k}`} className="kg-fx-ring kg-fx-ring-gold" style={{ ...base, ...vars({ x: px(p.x), y: px(p.y + T * 0.1), squash: tilt ? 0.55 : 1, rd: 0.05 }) }} />,
         <Sparkles key={`cs${k}`} x={p.x} y={p.y - T * 0.4} T={T} dur={dur} delay={0.18} big />,
         <div key={`ct${k}`} className="kg-fx-treasure" style={{ ...base, ...vars({ x0: px(p.x), y0: px(p.y - T * 0.25), x1: px(ban.x), y1: px(ban.y) }) }}><TreasureIcon t={e.t} /></div>,
       );
     }
     if (e.k === 'home') {
       const p = at(d.home[e.p]);
+      fx.push(<span key={`pl${k}`} className="kg-fx-pillar" style={{ ...base, ...vars({ x: px(p.x), y: px(p.y) }) }} />);
       fx.push(<div key={`hb${k}`} className="kg-fx-home" style={{ ...base, ...vars({ x: px(p.x), y: px(p.y), hc: HERO_COLOR[heroOf(d, e.p)] }) }}><HomeBanner /></div>);
     }
     if (e.k === 'resign') {

@@ -20,3 +20,15 @@ export function projectXY(x: number, y: number, T: number, tilt: boolean): { x: 
 }
 /** The centre of cell (row, col) on screen, relative to the stage centre. */
 export const project = (r: number, c: number, T: number, tilt: boolean) => projectXY(c - 3, r - 3, T, tilt);
+
+/**
+ * What the whole diorama covers on screen, in px from the stage centre: the top flags reach up to `up`, the plinth and
+ * its drop shadow down to `down`, and the plinth's near corners out to `across`. All three scale with T, so `fit` asks
+ * for them at T = 100. The stage is shifted by `trayShift` so this box (not the stage) is centred in the board area.
+ */
+export function trayExtent(T: number, tilt: boolean): { up: number; down: number; across: number } {
+  const top = projectXY(0, -(STAGE / 2 - 0.58 + 0.9), T, tilt).y; // north flag tops
+  const bottom = projectXY(0, STAGE / 2 - 0.18 + 0.16, T, tilt); // plinth bottom + its shadow
+  return { up: -top, down: bottom.y, across: projectXY(STAGE / 2 - 0.18 + 0.04, STAGE / 2 - 0.18, T, tilt).x };
+}
+export const trayShift = (T: number, tilt: boolean) => { const e = trayExtent(T, tilt); return (e.up - e.down) / 2; };

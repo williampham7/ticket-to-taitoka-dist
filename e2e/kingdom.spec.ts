@@ -29,15 +29,16 @@ async function act(page: Page): Promise<'done' | 'acted' | 'idle'> {
   if ((await game.getAttribute('data-busy')) === '1') return 'idle';
   const suggest = page.getByTestId('kg-suggest');
   if (await suggest.isVisible() && await suggest.isEnabled()) {
-    await suggest.click();
+    // the turn can pass between the check and the click (bots, other windows): treat that as idle
+    if (!(await suggest.click({ timeout: 2000 }).then(() => true, () => false))) return 'idle';
     const aimed = page.locator('.kg-banner.kg-aimed');
-    if (await aimed.count()) { await aimed.click(); return 'acted'; }
+    if (await aimed.count()) { if (!(await aimed.click({ timeout: 2000 }).then(() => true, () => false))) return 'idle'; return 'acted'; }
   }
   const stay = page.getByTestId('kg-stay');
   if (await stay.isVisible() && await stay.isEnabled()) {
     const goal = page.locator('.kg-cell.kg-reach[data-goal]');
-    if (await goal.count()) await goal.first().click(); else await stay.click();
-    return 'acted';
+    const ok = await (await goal.count() ? goal.first() : stay).click({ timeout: 2000 }).then(() => true, () => false);
+    return ok ? 'acted' : 'idle';
   }
   return 'idle';
 }
@@ -52,7 +53,7 @@ async function playToEnd(pages: Page[], max = 1500) {
 }
 async function targetOf(page: Page) { return page.locator('[data-testid=kg-target] .kg-face-front .kg-card').first().getAttribute('data-t'); }
 
-test.describe('Shifting Kingdom', () => {
+test.describe('Runeshift', () => {
   test.setTimeout(180_000);
   test.beforeEach(async ({ page }) => { await fast(page); await asName(page, 'Ana'); });
 

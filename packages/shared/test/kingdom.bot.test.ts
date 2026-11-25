@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { act, chooseKingdomAction, newGame, suggestShift, viewFor, applyShift, pathTo, cellOf, type KBotLevel } from '../src/kingdom';
 import { seeded, simulate } from './kingdomSim';
 
-describe('Shifting Kingdom bots', () => {
+describe('Runeshift bots', () => {
   it('decide only from their own view (same choice whatever the others hold)', () => {
     for (const level of ['easy', 'medium', 'hard'] as KBotLevel[]) {
       const G = newGame(3, seeded(3), {});

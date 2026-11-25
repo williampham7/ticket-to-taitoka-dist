@@ -5,7 +5,7 @@ import {
 import { LOG_KEEP, MAX_PLAYERS, MIN_PLAYERS, treasuresEach, type Length } from './tuning';
 
 /**
- * Shifting Kingdom rules: pure functions over a plain state. `act` validates one action and applies it,
+ * Runeshift rules: pure functions over a plain state. `act` validates one action and applies it,
  * returning an error string (nothing changed) or undefined. Everything random comes in as `rng`.
  */
 export type PlayerID = string;

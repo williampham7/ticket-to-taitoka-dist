@@ -11,12 +11,13 @@ import './kingdom.css';
 import './art.css';
 import './fx.css';
 import './menu.css';
+import './runes.css';
 
 export function KingdomApp() {
   const path = usePath();
   const [, , sub, id] = path.split('/');
   useKingdomMusic();
-  useEffect(() => { document.title = 'Shifting Kingdom'; });
+  useEffect(() => { document.title = 'Runeshift'; });
   return (
     <>
       <KingdomArtDefs />

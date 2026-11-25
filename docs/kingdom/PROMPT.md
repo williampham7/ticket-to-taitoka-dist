@@ -1,6 +1,6 @@
-# Build brief: Shifting Kingdom
+# Build brief: Runeshift
 
-Owner's confirmed brief (2026-11-25). Build **Shifting Kingdom**, a standalone game in this repo. It plays like the classic shifting-maze board game: push a spare tile into the maze, then walk your hero to your secret treasures. The setting is our own: a hand-painted **storybook kingdom**. It sits alongside Frontline, Fleet, Egyptian War and Warfront in the same format: a card on the `/` picker, its own menu, online rooms, party support, bots and pass-and-play.
+Owner's confirmed brief (2026-11-25). Build **Runeshift**, a standalone game in this repo. It plays like the classic shifting-maze board game: push a spare tile into the maze, then walk your hero to your secret treasures. The setting is our own: a hand-painted **storybook kingdom**. It sits alongside Frontline, Fleet, Egyptian War and Warfront in the same format: a card on the `/` picker, its own menu, online rooms, party support, bots and pass-and-play.
 
 **Who it's for:** the owner playing **online** with their younger brothers and their girlfriend. The draw is adventure and nostalgia. Quality bar: stunning visuals, painted background art, lots of small details, an animation for every action, easy to pick up for mixed ages, and immersive. The owner usually needs 4-5 follow-up prompts to reach a solid product. This brief is written so that one pass gets there. Follow the quality gates in section 9; they are the difference.
 

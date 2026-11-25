@@ -1,5 +1,5 @@
 /**
- * "The Hedge-Maze Waltz": an original, lilting folk-medieval loop for Shifting Kingdom, in D major, 3/4 at 112 BPM.
+ * "The Hedge-Maze Waltz": an original, lilting folk-medieval loop for Runeshift, in D major, 3/4 at 112 BPM.
  * A harp ripples chord tones, a plucked lute and a soft bass walk the roots, a recorder sings the tune and a tabor
  * keeps a gentle dance step. Intro (harp), A (recorder), B (lute, recorder answering), bridge (harp and tabor),
  * A' (recorder and lute together): 32 bars, about 51 s before it loops.

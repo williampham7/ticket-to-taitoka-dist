@@ -1,4 +1,4 @@
-# Shifting Kingdom: spec
+# Runeshift: spec
 
 The brief (`PROMPT.md`) made precise. A storybook-kingdom game that plays like the classic shifting-maze board game: shift the maze with the spare tile, then walk your hero to your secret treasures and home. Game name `kingdom`, 2-4 players, online first, with server bots, pass and play, vs computer, party and spectators.
 

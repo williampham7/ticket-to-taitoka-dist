@@ -223,7 +223,7 @@ export function KgPlay({ matchID }: { matchID: string }) {
     rejoinRoom(seat, meta.nextMatchID, { hero: view.heroes[Number(seat.playerID)], young: view.young[Number(seat.playerID)], host: seat.playerID === actingHost })
       .then((s) => navigate(`/kingdom/wait/${s.matchID}`)).catch(() => {});
   }, [over, meta.nextMatchID]); // eslint-disable-line react-hooks/exhaustive-deps
-  if (!seat || !view || !client) return <Shell title="Shifting Kingdom" text="Opening the storybook" />;
+  if (!seat || !view || !client) return <Shell title="Runeshift" text="Opening the storybook" />;
   return (
     <KgScreen view={view} me={me} names={meta.names} kind="online" connected={connected}
       send={(a: Action) => client.moves.act(a)} resign={() => client.moves.resign()} dismiss={(p) => client.moves.dismiss(p)}
@@ -235,6 +235,6 @@ export function KgPlay({ matchID }: { matchID: string }) {
 
 export function KgWatch({ matchID }: { matchID: string }) {
   const { view, meta, connected, chat } = useMatch(matchID, null);
-  if (!view) return <Shell title="Shifting Kingdom" text="Finding a good seat" />;
+  if (!view) return <Shell title="Runeshift" text="Finding a good seat" />;
   return <KgScreen view={view} me={null} names={meta.names} kind="watch" connected={connected} chat={{ lines: chat, send: () => {} }} onExit={() => navigate('/kingdom')} />;
 }

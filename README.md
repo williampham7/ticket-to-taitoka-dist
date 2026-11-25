@@ -116,7 +116,7 @@ The first page also has five other games, each with its own card. All of them ca
 | Fleet | 2 | hide your ships and hunt theirs, with Classic, Salvo and Super Weapons modes; also against the computer or on one screen |
 | Egyptian War | 2 to 5 | real-time card slapping: flip, challenge and slap to win all 52 cards; two players can share one keyboard |
 | Warfront | 2 to 6 | territory conquest on a world map; also against computer generals or on one screen |
-| Shifting Kingdom | 2 to 4 | shift the hedge maze and race your hero to secret treasures, then home; also against the computer or on one screen |
+| Runeshift | 2 to 4 | shift the hedge maze and race your hero to secret treasures, then home; also against the computer or on one screen |
 
 ### Desktop icon
 

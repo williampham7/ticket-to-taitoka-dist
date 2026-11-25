@@ -1,4 +1,4 @@
-/** Every game and bot number for Shifting Kingdom in one place. */
+/** Every game and bot number for Runeshift in one place. */
 export type Length = 'full' | 'medium' | 'short';
 export const LENGTHS: Length[] = ['full', 'medium', 'short'];
 /** Treasures dealt to each player: Full shares all 24 out evenly. */

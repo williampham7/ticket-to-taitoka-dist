@@ -3,7 +3,7 @@ import { KINGDOM_BOT_LEVELS, LENGTHS, type KBotLevel } from '../src/kingdom';
 import { conserved, simulate } from './kingdomSim';
 
 /** 500 whole games in total across 2-4 players, lengths, Young Adventurer seats and difficulty mixes: no illegal choice, no stall. */
-describe('Shifting Kingdom fuzz', () => {
+describe('Runeshift fuzz', () => {
   it('500 bot games always finish with one winner and every treasure conserved', () => {
     const t0 = Date.now();
     for (let s = 0; s < 500; s++) {

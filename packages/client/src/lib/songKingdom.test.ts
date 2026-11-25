@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { BEATS_PER_BAR_KINGDOM, BPM_KINGDOM, buildSongKingdom, createKingdomVoices, SECTIONS_KINGDOM, VOLUME_KINGDOM } from './songKingdom';
 import { OfflineCtx } from './offlineAudio.testutil';
 
-describe('Shifting Kingdom music', () => {
+describe('Runeshift music', () => {
   const song = buildSongKingdom();
 
   it('is deterministic, sorted and fills every bar', () => {

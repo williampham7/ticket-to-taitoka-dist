@@ -1,5 +1,5 @@
 /**
- * Shifting Kingdom: tiles, the fixed layout, treasures and heroes (data only).
+ * Runeshift: tiles, the fixed layout, treasures and heroes (data only).
  * An opening mask has N=1, E=2, S=4, W=8. Cells are `r * 7 + c`, row 0 at the top.
  */
 export const N = 1, E = 2, S = 4, W = 8;

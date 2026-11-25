@@ -1,4 +1,4 @@
-# Shifting Kingdom Implementation Plan
+# Runeshift Implementation Plan
 
 > **For agentic workers:** the owner's brief (`PROMPT.md` §1) forbids subagents: execute inline, milestone by milestone. Steps use checkbox (`- [ ]`) syntax. After every milestone: tick it here, commit, push to `feat/kingdom`.
 

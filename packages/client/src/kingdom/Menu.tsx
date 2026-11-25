@@ -9,6 +9,7 @@ import { HowTo } from './HowTo';
 import { SoundRows } from './SoundRows';
 import { setFlat, setFx, useFlat, useFx } from './fx';
 import { kgSound } from './sound';
+import { RUNES as RUNES_ROW, RuneMotes, RuneRing, RuneStone } from './art/runes';
 
 /** A small diorama for the title page: nine tiles, the castle behind, the four heroes in front. */
 const MINI = [E | S, E | W | S, S | W, N | S, N | E | S, N | W, N | E, E | W, N | W];
@@ -52,26 +53,34 @@ export function KgMenu() {
   return (
     <div className="kingdom kg-page kg-menu" data-testid="kg-menu-page">
       <Scene phase="morning" />
+      <div className="kg-menu-decor" aria-hidden>
+        <RuneRing />
+        <RuneStone i={0} className="kg-ms kg-ms-l1" /><RuneStone i={3} className="kg-ms kg-ms-l2" />
+        <RuneStone i={5} className="kg-ms kg-ms-r1" /><RuneStone i={6} className="kg-ms kg-ms-r2" />
+        <RuneMotes />
+      </div>
       <div className="kg-title-book">
         <div className="kg-title-cover" aria-hidden />
+        <span className="kg-ribbon-mark" aria-hidden />
         <section className="kg-title-left">
           <MiniDiorama />
           <p className="kg-title-quote">“The hedges move, the paths change, and somewhere in the maze your treasure is waiting.”</p>
         </section>
         <section className="kg-title-right">
           <small className="kg-title-kicker">A storybook adventure for 2 to 4 heroes</small>
-          <h1 className="kg-title"><span>S</span>hifting Kingdom</h1>
+          <h1 className="kg-title"><span>R</span>uneshift</h1>
+          <div className="kg-rune-rule" aria-hidden><i /><span>{[0, 1, 2, 3, 4].map((k) => <svg key={k} viewBox="-5 -8 10 16"><path d={RUNES_ROW[k]} /></svg>)}</span><i /></div>
           <p className="kg-title-sub">Push the maze. Find your treasures. Race home.</p>
           <nav className="kg-menu-list" aria-label="Menu">
-            <button type="button" className="kg-mark kg-mark-gold" onClick={() => go('/kingdom/host')} data-testid="kg-host"><b>Host online</b><small>Invite your party with a link</small></button>
+            <button type="button" className="kg-mark kg-mark-gold" onClick={() => go('/kingdom/host')} data-testid="kg-host" data-rune="0"><b>Host online</b><small>Invite your party with a link</small></button>
             {joining ? (
-              <form className="kg-mark kg-join" onSubmit={(e) => { e.preventDefault(); join(); }}>
+              <form className="kg-mark kg-join" data-rune="1" onSubmit={(e) => { e.preventDefault(); join(); }}>
                 <input autoFocus value={code} onChange={(e) => setCode(e.target.value)} placeholder="Paste the invite link" aria-label="Invite link" data-testid="kg-join-input" />
                 <button type="submit" className="kg-btn kg-btn-sm">Join</button>
               </form>
-            ) : <button type="button" className="kg-mark" onClick={() => setJoining(true)} data-testid="kg-join"><b>Join a friend</b><small>Use their invite link</small></button>}
-            <button type="button" className="kg-mark" onClick={() => go('/kingdom/bot')} data-testid="kg-vs-bot"><b>Play vs computer</b><small>Page, Squire or Sage</small></button>
-            <button type="button" className="kg-mark" onClick={() => go('/kingdom/local')} data-testid="kg-pass"><b>Pass and play</b><small>One screen, a book between turns</small></button>
+            ) : <button type="button" className="kg-mark" onClick={() => setJoining(true)} data-testid="kg-join" data-rune="1"><b>Join a friend</b><small>Use their invite link</small></button>}
+            <button type="button" className="kg-mark" onClick={() => go('/kingdom/bot')} data-testid="kg-vs-bot" data-rune="2"><b>Play vs computer</b><small>Page, Squire or Sage</small></button>
+            <button type="button" className="kg-mark" onClick={() => go('/kingdom/local')} data-testid="kg-pass" data-rune="3"><b>Pass and play</b><small>One screen, a book between turns</small></button>
             <div className="kg-menu-row">
               <button type="button" className="kg-btn" onClick={() => setHowto(true)} data-testid="kg-howto">How to play</button>
               <button type="button" className="kg-btn" onClick={() => setSettings((s) => !s)} aria-expanded={settings} data-testid="kg-settings">Settings</button>

@@ -1,4 +1,4 @@
-/* Shifting Kingdom art: background scene, cards, hero walk cycle, gallery. */
+/* Runeshift art: background scene, cards, hero walk cycle, gallery. */
 
 /* ---------- the painted scene ---------- */
 .kg-scene { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; --px: 0; --py: 0; background: #cfe9f6; }
@@ -34,6 +34,33 @@
 @keyframes kg-birds { 0% { transform: translate(-300px, 220px); } 45% { transform: translate(1900px, 120px); } 100% { transform: translate(1900px, 120px); } }
 .kg-firefly { animation: kg-firefly 5s calc(var(--i) * -.7s) ease-in-out infinite; }
 @keyframes kg-firefly { 0%, 100% { opacity: .1; transform: translate(0, 0); } 40% { opacity: 1; transform: translate(14px, -18px); } 70% { opacity: .4; transform: translate(-8px, -6px); } }
+/* scene extras: sun rays, mist, motes, windmill, sailboat, the waking standing stones */
+.kg-rays { opacity: .5; animation: kg-rays 90s linear infinite; }
+@keyframes kg-rays { to { transform: rotate(360deg); } }
+.kg-scene-sunset .kg-rays { opacity: .28; }
+.kg-scene-night .kg-rays { opacity: 0; }
+.kg-rays { transition: opacity 3s; }
+.kg-mist ellipse { opacity: .3; animation: kg-mist 60s ease-in-out infinite alternate; }
+.kg-mist ellipse:nth-child(2) { animation-duration: 80s; animation-delay: -20s; } .kg-mist ellipse:nth-child(3) { animation-duration: 70s; animation-delay: -40s; }
+@keyframes kg-mist { from { transform: translateX(-120px); } to { transform: translateX(120px); } }
+.kg-scene-afternoon .kg-mist, .kg-scene-sunset .kg-mist { opacity: .5; }
+.kg-scene-night .kg-mist { opacity: .6; }
+.kg-mote { opacity: 0; animation: kg-mote 14s calc(var(--i) * -.8s) ease-in-out infinite; }
+@keyframes kg-mote { 0% { opacity: 0; transform: translate(0, 0); } 20% { opacity: .85; } 100% { opacity: 0; transform: translate(40px, -220px); } }
+.kg-scene-night .kg-motes { opacity: 0; }
+.kg-blades { animation: kg-blades 14s linear infinite; }
+@keyframes kg-blades { to { transform: translate(0, -60px) rotate(360deg); } }
+.kg-blades { transform: translate(0, -60px); }
+.kg-boat { animation: kg-boat 5s ease-in-out infinite alternate; }
+@keyframes kg-boat { from { transform: translate(1262px, 742px) rotate(-3deg); } to { transform: translate(1262px, 746px) rotate(3deg); } }
+.kg-sway { transform-box: fill-box; transform-origin: 50% 100%; animation: kg-sway 3.6s calc(var(--i) * -.3s) ease-in-out infinite alternate; }
+@keyframes kg-sway { from { transform: translateX(-2px) rotate(-6deg); } to { transform: translateX(2px) rotate(6deg); } }
+.kg-menhir-rune { opacity: .28; transition: opacity 3s; }
+.kg-menhir-beam { opacity: 0; transition: opacity 3s; }
+.kg-scene-sunset .kg-menhir-rune { opacity: .8; animation: kg-menhir 3.4s calc(var(--i) * -.5s) ease-in-out infinite; }
+.kg-scene-night .kg-menhir-rune { opacity: 1; animation: kg-menhir 3.4s calc(var(--i) * -.5s) ease-in-out infinite; }
+.kg-scene-sunset .kg-menhir-beam { opacity: .25; } .kg-scene-night .kg-menhir-beam { opacity: .6; }
+@keyframes kg-menhir { 50% { opacity: .55; stroke: #d8fff3; } }
 .kg-par-1 { transform: translate(calc(var(--px) * -14px), calc(var(--py) * -6px)); transition: transform .6s ease-out; }
 .kg-par-2 { transform: translate(calc(var(--px) * -26px), calc(var(--py) * -10px)); transition: transform .6s ease-out; }
 .kg-par-3 { transform: translate(calc(var(--px) * -40px), calc(var(--py) * -14px)); transition: transform .6s ease-out; }
@@ -46,7 +73,7 @@
 .kg-grain { position: absolute; inset: 0; opacity: .16; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .35  0 0 0 0 .22  0 0 0 0 .1  0 0 0 .9 0'/></filter><rect width='220' height='220' filter='url(%23n)'/></svg>"); }
 .kg-scene[data-paused] *, .kg-scene[data-paused] { animation-play-state: paused !important; }
 @media (prefers-reduced-motion: reduce) {
-  .kg-birds, .kg-butterfly, .kg-wings, .kg-firefly, .kg-flag, .kg-smoke circle { animation: none; }
+  .kg-birds, .kg-butterfly, .kg-wings, .kg-firefly, .kg-flag, .kg-smoke circle, .kg-rays, .kg-mist ellipse, .kg-mote, .kg-blades, .kg-boat, .kg-sway, .kg-menhir-rune { animation: none; }
   .kg-cloud { animation-duration: 600s; }
   .kg-par-1, .kg-par-2, .kg-par-3 { transform: none; }
 }
