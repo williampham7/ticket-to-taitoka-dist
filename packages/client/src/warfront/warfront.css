@@ -19,7 +19,7 @@
 }
 .warfront[data-fx="fast"] { --wf-k: .45; }
 .warfront[data-fx="off"] *, .warfront[data-fx="off"] *::before, .warfront[data-fx="off"] *::after { animation: none !important; transition: none !important; }
-.warfront button { font: inherit; color: inherit; cursor: pointer; }
+:where(.warfront) button { font: inherit; color: inherit; cursor: pointer; }
 .warfront button:disabled { cursor: default; }
 .warfront :focus-visible { outline: 3px solid var(--wf-amber); outline-offset: 2px; }
 
@@ -127,7 +127,7 @@
 .wf-lifted path { stroke: #f6dc93; stroke-width: 2; }
 .wf-tgt .wf-acetate { fill-opacity: .7; }
 .wf-wash { transform-box: fill-box; transform-origin: center; opacity: 0; animation: wf-wash calc(var(--wf-k) * 1.1s) ease-out forwards; }
-.wf-label { font: 700 8.4px "Sora", sans-serif; letter-spacing: .07em; text-transform: uppercase; fill: #241a0e; paint-order: stroke; stroke: rgba(250, 243, 222, .92); stroke-width: 2.6px; stroke-linejoin: round; pointer-events: none; }
+/* old */ .wf-label-old { font: 700 8.4px "Sora", sans-serif; letter-spacing: .07em; text-transform: uppercase; fill: #241a0e; paint-order: stroke; stroke: rgba(250, 243, 222, .92); stroke-width: 2.6px; stroke-linejoin: round; pointer-events: none; }
 .wf-unit { cursor: pointer; }
 .wf-count { font: 800 8.6px "Sora", sans-serif; fill: #241a0e; pointer-events: none; }
 .wf-draft rect { fill: #1e7a3c; stroke: #fff; stroke-width: 1.2; }
@@ -168,15 +168,6 @@
 .wf-die-lost { opacity: .35; filter: grayscale(.8) drop-shadow(0 2px 1px rgba(0, 0, 0, .4)); transition: opacity .3s calc(var(--wf-k) * .8s); }
 
 /* turn banner and stamp */
-.wf-banner {
-  position: absolute; left: 50%; top: 18px; display: flex; flex-direction: column; align-items: center; min-width: 300px; padding: 10px 28px 12px;
-  background: linear-gradient(#f6dc93, #c99a3c 60%, #8f6a24); color: #2b1a05; border: 2px solid #5a3e12; border-radius: 6px;
-  box-shadow: inset 0 0 0 4px rgba(255, 244, 200, .45), 0 0 0 4px var(--fc), 0 16px 30px rgba(0, 0, 0, .5);
-  animation: wf-banner calc(var(--wf-k) * 1.6s) ease-in-out both; pointer-events: none;
-}
-.wf-banner small { font: 700 11px "Manrope"; letter-spacing: .2em; text-transform: uppercase; }
-.wf-banner b { font: 400 26px "Saira Stencil One"; letter-spacing: .05em; }
-.wf-banner span { font: 700 12px "Sora"; color: #4d3510; }
 .wf-stamp {
   position: absolute; left: 50%; top: 42%; display: flex; flex-direction: column; align-items: center; padding: 10px 26px; color: #c62f2f; border: 6px double #c62f2f; border-radius: 10px;
   background: rgba(251, 244, 223, .35); transform: translate(-50%, -50%) rotate(-12deg); animation: wf-stamp calc(var(--wf-k) * 1.9s) ease-out both; pointer-events: none; mix-blend-mode: multiply;
@@ -439,6 +430,188 @@ button.wf-card:hover { transform: translateY(-3px) rotate(-1deg); }
 @keyframes wf-steam { 0% { opacity: 0; transform: translateY(6px); } 40% { opacity: .9; } 100% { opacity: 0; transform: translateY(-18px); } }
 @keyframes wf-tick { to { transform: rotate(360deg); } }
 
+
+/* ---------- game v2: territories, tokens, action cues ---------- */
+.wf-inner { fill: none; stroke-width: 11; stroke-opacity: .62; stroke-linejoin: round; pointer-events: none; }
+.wf-acetate { fill-opacity: .4; }
+.wf-hatch { opacity: .2; }
+.wf-terr:hover .wf-acetate { fill-opacity: .66; }
+.wf-terr:hover .wf-inner { stroke-opacity: .9; }
+.wf-spot .wf-acetate { fill-opacity: .5; }
+.wf-spot .wf-inner { stroke-opacity: .85; animation: wf-breathe calc(var(--wf-k) * 2.4s) ease-in-out infinite alternate; }
+.wf-dimming .wf-terr:not(.wf-valid):not(.wf-sel):not(.wf-tgt) .wf-inner { stroke-opacity: .25; }
+.wf-borders path { stroke: #1f1a14; stroke-width: 1.3; stroke-opacity: .78; }
+.wf-glow-source { stroke: #fff1b8; stroke-width: 2.6; filter: drop-shadow(0 0 4px rgba(255, 225, 120, .95)); animation: wf-march calc(var(--wf-k) * 1.2s) linear infinite, wf-breathe calc(var(--wf-k) * 1s) ease-in-out infinite alternate; }
+.wf-valid-source .wf-acetate { fill-opacity: .6; }
+.wf-glow-attack { stroke-width: 3.6; }
+.wf-label { font: 800 9.6px "Sora", sans-serif; letter-spacing: .06em; text-transform: uppercase; fill: #1d150c; paint-order: stroke; stroke: rgba(250, 243, 222, .94); stroke-width: 3px; stroke-linejoin: round; pointer-events: none; }
+.wf-count { font: 800 12.5px "Sora", sans-serif; fill: #1d150c; pointer-events: none; }
+.wf-unit use { transition: transform .2s; }
+.wf-unit:hover > g:not(.wf-count-plate) { filter: brightness(1.12); }
+.wf-draft rect { fill: #1e7a3c; stroke: #fff; stroke-width: 1.4; }
+.wf-draft text { font: 800 10.5px "Sora"; fill: #fff; }
+.wf-plaque-name { font-size: 9px; }
+.wf-plaque-bonus { font: 800 6.6px "Manrope"; letter-spacing: .08em; }
+.wf-lane line { stroke: #f3ead0; stroke-width: 1.5; stroke-dasharray: 4 4; opacity: .8; }
+.wf-lane circle { fill: #f3ead0; stroke: #0f3445; stroke-width: .8; }
+
+/* trails: anyone's attack or march */
+.wf-trail path { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.wf-trail-shadow { stroke: rgba(15, 8, 2, .55); stroke-width: 9; transform: translate(1.5px, 2.5px); }
+.wf-trail-line { stroke-width: 5.5; stroke-dasharray: 100; animation: wf-draw calc(var(--wf-k) * .45s) ease-out both, wf-trail-out calc(var(--wf-k) * .5s) ease-in 2.1s forwards; }
+.wf-trail-flow { stroke: rgba(255, 250, 230, .85); stroke-width: 1.8; stroke-dasharray: 3 7; animation: wf-flow calc(var(--wf-k) * .6s) linear infinite, wf-trail-out .5s ease-in 2.1s forwards; }
+.wf-trail-attack .wf-trail-line { stroke-width: 6.5; filter: drop-shadow(0 0 4px var(--tc)); }
+.wf-trail-fortify .wf-trail-line { stroke-dasharray: 9 5; animation: wf-flow calc(var(--wf-k) * .8s) linear infinite, wf-trail-out .5s ease-in 2.1s forwards; }
+.wf-tracer { fill: #fff6cf; offset-rotate: auto; filter: drop-shadow(0 0 3px #ffb23f); animation: wf-tracer calc(var(--wf-k) * .7s) ease-in 3 both; }
+.wf-trail-n text { font: 800 11px "Sora"; fill: #fff; }
+.wf-trail-n { animation: wf-pop .3s ease-out both, wf-trail-out .5s ease-in 2.1s forwards; }
+
+/* number pops on territories */
+.wf-pulse-ring { stroke-width: 3; opacity: 0; transform-box: fill-box; transform-origin: center; animation: wf-ring calc(var(--wf-k) * .9s) ease-out var(--d) both; }
+.wf-pulse-n { font: 800 17px "Sora"; paint-order: stroke; stroke: #1a1209; stroke-width: 3.6px; stroke-linejoin: round; opacity: 0; animation: wf-rise calc(var(--wf-k) * 1.4s) ease-out var(--d) forwards; }
+.wf-pulse-loss .wf-pulse-n { font-size: 19px; }
+
+/* battle blast */
+.wf-shock { fill: none; stroke: #fff2c2; stroke-width: 3; transform-box: fill-box; transform-origin: center; animation: wf-shock calc(var(--wf-k) * .7s) ease-out both; }
+.wf-spark { stroke: #ffd27a; stroke-width: 2.2; stroke-linecap: round; animation: wf-spark calc(var(--wf-k) * .55s) ease-out both; }
+.wf-smoke-3 { animation-delay: .36s; }
+.wf-captured { font: 400 17px "Saira Stencil One"; letter-spacing: .12em; fill: #fff6d8; paint-order: stroke; stroke: #7d1a22; stroke-width: 4px; animation: wf-capt calc(var(--wf-k) * 1.8s) ease-out both; animation-delay: calc(var(--wf-k) * .8s); }
+.wf-quake { animation: wf-quake .45s cubic-bezier(.36, .07, .19, .97) both; }
+
+/* map hover card */
+.wf-tip { position: absolute; z-index: 6; pointer-events: none; transform: translate(16px, 14px); }
+.wf-tip[data-flip] { transform: translate(calc(-100% - 16px), 14px); }
+.wf-tip-card {
+  display: flex; flex-direction: column; gap: 2px; min-width: 190px; max-width: 250px; padding: 8px 11px 9px; color: var(--wf-ink);
+  background: linear-gradient(#fffaf0, #efe3c0); border-top: 5px solid var(--fc); border-radius: 3px; box-shadow: 0 10px 24px rgba(0, 0, 0, .45);
+  animation: wf-fade .12s both;
+}
+.wf-tip-card small { font: 800 9.5px "Manrope"; letter-spacing: .1em; text-transform: uppercase; color: var(--wf-ink-2); }
+.wf-tip-card > b { font: 800 15px "Sora"; }
+.wf-tip-card span { font: 600 12.5px "Manrope"; }
+.wf-tip-card span b { font: 800 14px "Sora"; }
+.wf-tip-n { color: var(--wf-ink-2); font-size: 11.5px !important; }
+.wf-tip-card em { margin-top: 4px; padding: 3px 7px; font: 800 11.5px "Sora"; font-style: normal; color: #fff; background: #3b2414; border-radius: 3px; }
+.wf-dot { display: inline-block; width: 9px; height: 9px; margin-right: 5px; border-radius: 50%; background: var(--fc); box-shadow: 0 0 0 1.5px #fff, 0 0 0 2.5px rgba(0, 0, 0, .3); vertical-align: 0; }
+
+/* dispatch caption: who did what */
+.wf-dispatch {
+  position: absolute; left: 50%; top: 14px; z-index: 5; display: flex; align-items: center; gap: 10px; max-width: min(620px, 88%); padding: 7px 18px 7px 8px; pointer-events: none;
+  background: linear-gradient(90deg, rgba(20, 13, 6, .92), rgba(43, 28, 14, .9)); color: #fbf0d4; border: 1.5px solid rgba(246, 220, 147, .55); border-left: 6px solid var(--fc); border-radius: 4px;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, .5); transform: translateX(-50%); animation: wf-dispatch calc(var(--wf-k) * .35s) cubic-bezier(.2, .9, .3, 1.2) both;
+}
+.wf-dispatch .wf-emblem { width: 30px; height: 30px; flex: none; background: var(--fc); border-radius: 50%; display: grid; place-items: center; box-shadow: 0 0 0 2px #fff8e2, 0 0 12px var(--fc); }
+.wf-dispatch .wf-emblem svg { width: 16px; height: 16px; }
+.wf-dispatch-text { display: flex; flex-direction: column; min-width: 0; }
+.wf-dispatch-text b { font: 800 15px/1.2 "Sora"; letter-spacing: .01em; }
+.wf-dispatch-text small { font: 600 12px/1.3 "Manrope"; color: #e5d2a6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.wf-dispatch-win { border-color: #f6dc93; box-shadow: 0 0 0 2px var(--fc), 0 0 26px color-mix(in srgb, var(--fc) 70%, transparent), 0 10px 26px rgba(0, 0, 0, .5); }
+.wf-dispatch-attack b::before { content: "⚔ "; color: #ff8a73; }
+
+/* turn banner: a faction band sweeps across the table */
+.wf-banner { position: absolute; left: 0; right: 0; top: 34%; z-index: 7; display: flex; align-items: center; justify-content: center; gap: 18px; padding: 16px 24px; pointer-events: none; animation: wf-band-life calc(var(--wf-k) * 1.6s) ease-in-out both; }
+.wf-banner-band {
+  position: absolute; inset: 0; transform-origin: left;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--fd) 92%, #000) 14%, var(--fc) 50%, color-mix(in srgb, var(--fd) 92%, #000) 86%, transparent);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, .5); animation: wf-band calc(var(--wf-k) * .5s) cubic-bezier(.2, .9, .3, 1) both;
+}
+.wf-banner-band::before, .wf-banner-band::after { content: ""; position: absolute; left: 8%; right: 8%; height: 2px; background: linear-gradient(90deg, transparent, #f6dc93, transparent); }
+.wf-banner-band::before { top: 5px; } .wf-banner-band::after { bottom: 5px; }
+.wf-banner-emblem { position: relative; display: grid; place-items: center; width: 62px; height: 62px; border-radius: 50%; background: var(--fc); box-shadow: 0 0 0 3px #fff8e2, 0 0 0 6px var(--fd), 0 0 30px rgba(255, 240, 200, .6); animation: wf-pop calc(var(--wf-k) * .4s) .15s cubic-bezier(.3, 1.6, .5, 1) both; }
+.wf-banner-emblem svg { width: 32px; height: 32px; }
+.wf-banner-text { position: relative; display: flex; flex-direction: column; color: #fff; text-shadow: 0 2px 0 rgba(0, 0, 0, .35); animation: wf-slide calc(var(--wf-k) * .5s) .1s cubic-bezier(.2, .9, .3, 1) both; }
+.wf-banner-text small { font: 800 11px "Manrope"; letter-spacing: .24em; text-transform: uppercase; color: #ffeec4; }
+.wf-banner-text b { font: 400 34px/1.05 "Saira Stencil One"; letter-spacing: .05em; }
+.wf-banner-text span { font: 800 13px "Sora"; color: #fff3d0; }
+
+/* dice tray v2 */
+.wf-tray { z-index: 4; grid-template-rows: auto auto; padding: 10px 20px 8px; min-width: 380px; }
+.wf-tray-side { padding: 4px 8px 6px; border-radius: 8px; background: rgba(0, 0, 0, .18); border-top: 4px solid var(--fc); }
+.wf-tray-who { display: flex; align-items: center; gap: 5px; font: 800 12.5px "Sora"; }
+.wf-tray-who i { width: 9px; height: 9px; border-radius: 50%; background: var(--fc); box-shadow: 0 0 0 1.5px #fff; }
+.wf-tray-where { font: 600 10.5px "Manrope"; color: #cfe3c8; white-space: nowrap; }
+.wf-tray-loss { font: 800 14px "Sora"; color: #ffb4a8; animation: wf-fade .3s calc(var(--wf-k) * .75s) both; }
+.wf-tray-vs b { font: 400 22px "Saira Stencil One"; color: #f6dc93; }
+.wf-tray-result { justify-content: center; }
+.wf-tray-result em { font-size: 15px; animation: wf-fade .3s calc(var(--wf-k) * .8s) both; }
+.wf-tray-won { box-shadow: 0 0 0 2px #2a1a0c, 0 0 0 5px #f6dc93, inset 0 4px 14px rgba(0, 0, 0, .55), 0 14px 30px rgba(0, 0, 0, .55); }
+.wf-die { width: 42px; height: 42px; }
+
+/* top bar v2 */
+.wf-placecards { align-items: stretch; }
+.wf-placecard { grid-template-columns: auto 1fr auto; min-width: 188px; padding-right: 8px; }
+.wf-placecard .wf-emblem { grid-row: 1 / 3; }
+.wf-pc-stats { display: flex; gap: 9px; font: 800 12px "Sora"; color: var(--wf-ink); }
+.wf-pc-stats > span { display: inline-flex; align-items: center; gap: 2px; }
+.wf-ico { width: 13px; height: 14px; fill: none; stroke: var(--wf-ink-2); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.wf-pc-income { grid-column: 3; grid-row: 1 / 3; align-self: center; padding: 3px 6px; border-radius: 3px; background: rgba(30, 122, 60, .14); color: #165d2d; font: 800 11px "Sora"; white-space: nowrap; }
+.wf-pc-conts { right: 8px; top: auto; bottom: -7px; }
+.wf-pc-now { position: absolute; left: 50%; bottom: -9px; transform: translateX(-50%); padding: 1px 8px; border-radius: 9px; background: var(--fc); color: #fff; font: 800 9px "Sora"; letter-spacing: .14em; text-transform: uppercase; box-shadow: 0 2px 4px rgba(0, 0, 0, .35); animation: wf-lamp 1s ease-in-out infinite alternate; }
+.wf-placecard.wf-me .wf-pc-name { text-decoration: underline 2px var(--fc); text-underline-offset: 3px; }
+
+/* side column v2 */
+.wf-command {
+  position: relative; padding: 10px 12px 10px; color: var(--wf-ink); border-radius: 4px; overflow: hidden;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--fc) 16%, #fbf4df), #efe3c0 70%); border-top: 6px solid var(--fc); box-shadow: 0 2px 0 rgba(0, 0, 0, .2), 0 6px 14px rgba(0, 0, 0, .28);
+}
+.wf-command header { display: flex; align-items: center; gap: 10px; }
+.wf-command header .wf-emblem-lg { background: var(--fc); box-shadow: 0 0 0 3px #fff8e2, 0 0 0 4.5px var(--fd); }
+.wf-command header div { display: flex; flex-direction: column; min-width: 0; }
+.wf-command header small { font: 800 9.5px "Manrope"; letter-spacing: .18em; text-transform: uppercase; color: var(--wf-ink-2); }
+.wf-command header b { font: 800 17px/1.1 "Sora"; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.wf-command header span { font: 600 11.5px "Manrope"; color: var(--wf-ink-2); }
+.wf-cmd-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 9px 0 6px; }
+.wf-cmd-stats div { display: flex; flex-direction: column; align-items: center; padding: 4px 2px 5px; background: rgba(255, 255, 255, .6); border-radius: 4px; box-shadow: inset 0 0 0 1px rgba(91, 74, 51, .2); }
+.wf-cmd-stats dt { font: 800 9px "Manrope"; letter-spacing: .12em; text-transform: uppercase; color: var(--wf-ink-2); }
+.wf-cmd-stats dd { margin: 0; font: 800 22px/1.1 "Sora"; }
+.wf-cmd-stats dd small { font-size: 11px; color: var(--wf-ink-2); }
+.wf-cmd-hot { background: linear-gradient(#f6dc93, #d9b161) !important; box-shadow: inset 0 0 0 1.5px #8f6a24 !important; }
+.wf-cmd-line, .wf-cmd-near { margin: 0; font: 600 12px/1.45 "Manrope"; color: var(--wf-ink-2); }
+.wf-cmd-line b { color: #165d2d; font: 800 13px "Sora"; }
+.wf-cmd-near { margin-top: 3px; color: #7d1a22; font-weight: 700; }
+.wf-phases i { font-style: normal; opacity: .7; margin-right: 2px; }
+.wf-steps { margin: 0; padding: 0; list-style: none; display: grid; gap: 4px; counter-reset: s; }
+.wf-steps li { display: flex; align-items: flex-start; gap: 8px; font: 600 12.5px/1.35 "Manrope"; color: #8a7a5f; }
+.wf-steps li i { flex: none; display: grid; place-items: center; width: 19px; height: 19px; border-radius: 50%; border: 1.5px solid #b9a476; font: 800 10.5px "Sora"; font-style: normal; }
+.wf-step-on { color: var(--wf-ink) !important; font-weight: 800 !important; }
+.wf-step-on i { background: var(--cur); border-color: var(--cur) !important; color: #fff; box-shadow: 0 0 0 3px color-mix(in srgb, var(--cur) 30%, transparent); }
+.wf-step-done { text-decoration: line-through; text-decoration-color: rgba(91, 74, 51, .45); }
+.wf-step-done i { background: #b9a476; color: #fff; }
+.wf-meter { height: 8px; border-radius: 4px; background: rgba(91, 74, 51, .18); overflow: hidden; }
+.wf-meter i { display: block; height: 100%; background: linear-gradient(90deg, var(--cur), color-mix(in srgb, var(--cur) 60%, #fff)); transition: width .3s; }
+.wf-breakdown { display: flex; flex-wrap: wrap; gap: 4px 6px; margin: 0; font: 600 11.5px "Manrope"; color: var(--wf-ink-2); }
+.wf-breakdown span { padding: 2px 6px; border-radius: 3px; background: rgba(255, 255, 255, .6); box-shadow: inset 0 0 0 1px rgba(91, 74, 51, .2); }
+.wf-breakdown b { color: #165d2d; font-weight: 800; }
+.wf-breakdown-total { background: #1e7a3c !important; color: #fff; }
+.wf-breakdown-total b { color: #fff; }
+.wf-odds { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 8px; font: 700 12px "Manrope"; color: var(--wf-ink-2); }
+.wf-odds-bar { height: 10px; border-radius: 5px; background: rgba(198, 47, 47, .2); overflow: hidden; }
+.wf-odds-bar i { display: block; height: 100%; background: linear-gradient(90deg, #c62f2f, #e8a33d); }
+.wf-odds b { font: 800 16px "Sora"; color: var(--wf-ink); }
+.wf-dice-pick span { flex: 1; }
+.wf-waiting { align-items: flex-start; border-left: 5px solid var(--fc); }
+.wf-waiting .wf-emblem-lg { background: var(--fc); }
+.wf-waiting .wf-hint { margin-top: 4px; }
+.wf-theatre > b small, .wf-tape > b small { font: 600 10px "Manrope"; letter-spacing: .02em; text-transform: none; color: var(--wf-ink-2); margin-left: 6px; }
+.wf-theatre-row { grid-template-columns: 118px 1fr auto; }
+.wf-theatre-row em { font: 800 11px "Sora"; font-style: normal; color: var(--wf-ink-2); min-width: 26px; text-align: right; }
+.wf-orders { overflow: hidden; }
+.wf-orders-body { padding-bottom: 6px; }
+
+@keyframes wf-breathe { from { opacity: .7; } to { opacity: 1; } }
+@keyframes wf-flow { to { stroke-dashoffset: -20; } }
+@keyframes wf-trail-out { to { opacity: 0; } }
+@keyframes wf-tracer { from { offset-distance: 0%; opacity: 1; } 90% { opacity: 1; } to { offset-distance: 100%; opacity: 0; } }
+@keyframes wf-ring { 0% { opacity: .95; transform: scale(.3); } 100% { opacity: 0; transform: scale(2.6); } }
+@keyframes wf-shock { 0% { opacity: 1; transform: scale(.4); } 100% { opacity: 0; transform: scale(6); } }
+@keyframes wf-spark { 0% { opacity: 1; transform: scale(.4); } 100% { opacity: 0; transform: scale(2.2); } }
+@keyframes wf-capt { 0% { opacity: 0; transform: translateY(8px) scale(.6); } 15%, 75% { opacity: 1; transform: none; } 100% { opacity: 0; transform: translateY(-10px); } }
+@keyframes wf-quake { 10%, 90% { transform: translate(-1px, 0); } 20%, 80% { transform: translate(3px, 1px); } 30%, 50%, 70% { transform: translate(-5px, -1px); } 40%, 60% { transform: translate(5px, 1px); } }
+@keyframes wf-dispatch { from { opacity: 0; transform: translate(-50%, -14px) scale(.96); } to { opacity: 1; transform: translate(-50%, 0); } }
+@keyframes wf-band { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes wf-band-life { 0%, 80% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes wf-slide { from { opacity: 0; transform: translateX(-40px); } to { opacity: 1; transform: none; } }
+
 /* ---------- responsive ---------- */
 @media (max-width: 1099px) {
   .wf-game { height: auto; min-height: 100dvh; overflow: visible; }
@@ -469,8 +642,13 @@ button.wf-card:hover { transform: translateY(-3px) rotate(-1deg); }
   .wf-table-edge { border-width: 6px; aspect-ratio: 1.02; }
   .wf-tray { bottom: 6px; padding: 6px 10px; gap: 2px 8px; }
   .wf-die { width: 28px; height: 28px; }
-  .wf-banner { min-width: 0; width: 86%; padding: 6px 12px; }
-  .wf-banner b { font-size: 19px; }
+  .wf-banner { padding: 8px 10px; gap: 10px; }
+  .wf-banner-text b { font-size: 21px; }
+  .wf-banner-emblem { width: 42px; height: 42px; }
+  .wf-tray { min-width: 0; width: 94%; }
+  .wf-dispatch { top: 6px; }
+  .wf-dispatch-text b { font-size: 13px; }
+  .wf-placecard { min-width: 168px; }
   .wf-stamp b { font-size: 34px; }
   .wf-paper { padding: 14px; }
   .wf-paper-cols { grid-template-columns: 1fr; }

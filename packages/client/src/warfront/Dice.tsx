@@ -1,4 +1,5 @@
-import type { Battle } from '@boboland/shared/src/warfront';
+import { TERR, type Battle } from '@boboland/shared/src/warfront';
+import { factionOf } from './factions';
 
 const PIPS: Record<number, [number, number][]> = {
   1: [[0, 0]], 2: [[-1, -1], [1, 1]], 3: [[-1, -1], [0, 0], [1, 1]], 4: [[-1, -1], [1, -1], [-1, 1], [1, 1]],
@@ -16,26 +17,27 @@ export function Die({ v, metal, i, lost }: { v: number; metal: 'brass' | 'steel'
   );
 }
 
-/** The dice tray: brass for the attacker, steel for the defender; pairs line up and the losing die dims. */
-export function DiceTray({ b, names }: { b: Battle; names: Record<string, string> }) {
+/** The dice tray: brass for the attacker, steel for the defender, each side in its faction colour; pairs line up and the losing die dims. */
+export function DiceTray({ b, names, factions }: { b: Battle; names: Record<string, string>; factions: number[] }) {
   const last = b.rolls[b.rolls.length - 1];
   const pairs = Math.min(last.att.length, last.def.length);
+  const fa = factionOf(factions, b.p), fd = factionOf(factions, b.d);
   return (
-    <div className="wf-tray" key={b.seq} role="status" aria-live="polite">
-      <div className="wf-tray-side">
-        <span className="wf-tray-who">{names[b.p] ?? 'Attacker'}</span>
+    <div className={`wf-tray${b.conquered ? ' wf-tray-won' : ''}`} key={b.seq} role="status" aria-live="polite">
+      <div className="wf-tray-side" style={{ ['--fc' as string]: fa.color }}>
+        <span className="wf-tray-who"><i />{names[b.p] ?? 'Attacker'}</span>
+        <small className="wf-tray-where">attacks from {TERR[b.from].name}</small>
         <div className="wf-tray-dice">{last.att.map((v, i) => <Die key={i} v={v} metal="brass" i={i} lost={i < pairs && v <= last.def[i]} />)}</div>
+        <span className="wf-tray-loss">{b.attLoss ? `−${b.attLoss}` : 'no losses'}</span>
       </div>
-      <div className="wf-tray-vs">{b.blitz ? <><b>BLITZ</b><small>{b.rolls.length} roll{b.rolls.length > 1 ? 's' : ''}</small></> : 'VS'}</div>
-      <div className="wf-tray-side">
-        <span className="wf-tray-who">{b.d === 'N' ? 'Neutral' : names[b.d] ?? 'Defender'}</span>
+      <div className="wf-tray-vs">{b.blitz ? <><b>BLITZ</b><small>{b.rolls.length} roll{b.rolls.length > 1 ? 's' : ''}</small></> : <b>VS</b>}</div>
+      <div className="wf-tray-side" style={{ ['--fc' as string]: fd.color }}>
+        <span className="wf-tray-who"><i />{b.d === 'N' ? 'Neutral' : names[b.d] ?? 'Defender'}</span>
+        <small className="wf-tray-where">holds {TERR[b.to].name}</small>
         <div className="wf-tray-dice">{last.def.map((v, i) => <Die key={i} v={v} metal="steel" i={i + 3} lost={i < pairs && last.att[i] > v} />)}</div>
+        <span className="wf-tray-loss">{b.defLoss ? `−${b.defLoss}` : 'no losses'}</span>
       </div>
-      <div className="wf-tray-result">
-        <span>−{b.attLoss}</span>
-        <em>{b.conquered ? 'SECTOR SECURED' : 'casualties'}</em>
-        <span>−{b.defLoss}</span>
-      </div>
+      <div className="wf-tray-result"><em>{b.conquered ? `${TERR[b.to].name.toUpperCase()} CAPTURED` : b.defLoss > b.attLoss ? 'DEFENCES CRACKING' : b.attLoss > b.defLoss ? 'ATTACK REPELLED' : 'EVEN EXCHANGE'}</em></div>
     </div>
   );
 }

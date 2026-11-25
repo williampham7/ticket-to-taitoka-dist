@@ -1,0 +1,176 @@
+/* Warfront desk menu and muster sheet (overrides the older desk rules in warfront.css). */
+.wf-desk-page {
+  background:
+    radial-gradient(48vw 40vw at 14% 18%, rgba(255, 214, 140, .3), transparent 70%),
+    radial-gradient(140% 90% at 50% 120%, rgba(0, 0, 0, .55), transparent 60%),
+    repeating-linear-gradient(91deg, rgba(0, 0, 0, .09) 0 2px, transparent 2px 7px, rgba(255, 220, 170, .03) 7px 8px, transparent 8px 15px),
+    repeating-linear-gradient(89.4deg, rgba(0, 0, 0, .06) 0 1px, transparent 1px 41px),
+    linear-gradient(180deg, #5f3b21, #3b2414 50%, #21130a);
+}
+
+/* header: brass plaques and the nameplate */
+.wf-desk-page .wf-menu-head { padding-top: 4px; }
+.wf-desk-page .wf-menu-tools { gap: 10px; }
+.wf-desk-page .wf-plq {
+  position: relative; display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 12px;
+  background: linear-gradient(#f8e2a0, #d4a84a 45%, #a37a2c 55%, #e3c072); color: #3b2606 !important;
+  border: 1.5px solid #4d3510; border-radius: 4px; font: 800 13px "Sora", sans-serif; letter-spacing: .06em; text-transform: uppercase;
+  box-shadow: inset 0 0 0 2px rgba(255, 243, 201, .45), inset 0 0 0 3px rgba(77, 53, 16, .35), 0 3px 0 #3b2606, 0 6px 12px rgba(0, 0, 0, .45);
+  text-shadow: 0 1px 0 rgba(255, 244, 210, .6); transition: transform .12s, box-shadow .12s, filter .2s;
+}
+.wf-desk-page .wf-plq:hover { filter: brightness(1.08); transform: translateY(-1px); }
+.wf-desk-page .wf-plq:active { transform: translateY(2px); box-shadow: inset 0 0 0 2px rgba(255, 243, 201, .45), 0 1px 0 #3b2606, 0 2px 4px rgba(0, 0, 0, .4); }
+.wf-plq-screw { display: block; width: 8px; height: 8px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #fff2c2, #b88a34 60%, #5d4214); box-shadow: 0 1px 1px rgba(0, 0, 0, .5); position: relative; }
+.wf-plq-screw::after { content: ""; position: absolute; left: 1px; right: 1px; top: 3.4px; height: 1.2px; background: #4d3510; transform: rotate(-30deg); }
+.wf-desk-page .wf-plq-icon { width: 44px; height: 40px; padding: 0; justify-content: center; display: grid; place-items: center; }
+.wf-desk-page .wf-plq-icon.opacity-60 { opacity: 1; filter: saturate(.4) brightness(.85); }
+.wf-nameplate {
+  position: relative; padding: 10px 46px 12px; border-radius: 6px;
+  background: linear-gradient(180deg, #4a2c17, #2a170b); border: 2px solid #c99a3c;
+  box-shadow: inset 0 0 0 3px #24150b, inset 0 0 0 4px rgba(246, 220, 147, .4), 0 4px 0 #1a0f06, 0 14px 26px rgba(0, 0, 0, .55);
+}
+.wf-nameplate::before, .wf-nameplate::after {
+  content: ""; position: absolute; top: 50%; width: 12px; height: 12px; margin-top: -6px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #fff2c2, #c99a3c 55%, #6d4c14); box-shadow: 0 1px 2px rgba(0, 0, 0, .7);
+}
+.wf-nameplate::before { left: 16px; } .wf-nameplate::after { right: 16px; }
+.wf-desk-page .wf-title h1 {
+  font-size: clamp(34px, 6vw, 60px); letter-spacing: .16em; padding-left: .16em;
+  background: linear-gradient(#fff4cc, #e7c26a 46%, #9c7029 52%, #f2d58e); -webkit-background-clip: text; background-clip: text;
+  filter: drop-shadow(0 2px 0 rgba(0, 0, 0, .8));
+}
+.wf-desk-page .wf-title p { margin-top: 2px; font: 700 11.5px "Sora", sans-serif; letter-spacing: .22em; text-transform: uppercase; color: #d9be80; }
+.wf-desk-page .wf-title p span { color: #c99a3c; font-size: 9px; vertical-align: 1px; }
+
+/* the desk */
+.wf-desk-page .wf-desk { margin-top: 10px; filter: drop-shadow(0 0 1px rgba(0, 0, 0, .2)); }
+.wf-desk-page .wf-obj { transition: transform .28s cubic-bezier(.3, 1.4, .5, 1), filter .28s; }
+.wf-desk-page .wf-obj:hover, .wf-desk-page .wf-obj:focus-visible { transform: translateY(-9px); filter: drop-shadow(0 16px 12px rgba(0, 0, 0, .5)) brightness(1.05); }
+.wf-desk-page .wf-obj:focus-visible .wf-tag > rect:nth-of-type(2) { stroke: #fff6d8; stroke-width: 3; }
+.wf-tag-text { font: 400 16px "Saira Stencil One", "Sora", sans-serif; fill: #2b1a05; letter-spacing: .05em; text-transform: uppercase; }
+.wf-tag-sub { font: 700 10.5px "Manrope", sans-serif; fill: #5a3e12; letter-spacing: .04em; }
+.wf-tag-go { transition: transform .25s; }
+.wf-obj:hover .wf-tag-go, .wf-obj:focus-visible .wf-tag-go { transform: translateX(4px); }
+.wf-obj:hover .wf-tag-icon, .wf-obj:focus-visible .wf-tag-icon { animation: wf-mn-wiggle .5s ease-in-out; }
+.wf-desk-cap { font: 400 13px "Saira Stencil One"; fill: #6d5a33; letter-spacing: .3em; }
+.wf-desk-stencil { font: 400 20px "Saira Stencil One"; fill: #26361f; letter-spacing: .1em; }
+.wf-mn-cart { font: 400 11px "Saira Stencil One"; fill: #3b2a14; letter-spacing: .2em; }
+.wf-mn-cart-sub { font: 600 6.5px "Manrope"; fill: #5a4526; letter-spacing: .06em; }
+.wf-mn-stamp { font: 400 15px "Saira Stencil One"; fill: #c62f2f; letter-spacing: .16em; opacity: .8; }
+.wf-mn-telegram { font: 800 9px "Sora"; fill: #3b2a14; letter-spacing: .2em; }
+.wf-mn-dial { font: 800 5px "Sora"; fill: #1b1d18; }
+.wf-mn-plate { font: 800 6.5px "Sora"; fill: #3b2606; letter-spacing: .1em; }
+.wf-mn-plate-dim { fill: #c9c2ad; }
+.wf-mn-fm { font: 800 6.6px "Sora"; fill: #26361f; letter-spacing: .08em; }
+.wf-mn-fm-light { fill: #c9b98a; }
+.wf-mn-clock { font: 800 6px "Sora"; fill: #7d5a1c; letter-spacing: .2em; }
+.wf-mn-head { animation: wf-mn-fadein .4s 2s both; }
+.wf-mn-cone { mix-blend-mode: screen; animation: wf-mn-flicker 7s ease-in-out infinite; }
+.wf-obj-phone .wf-handset { transition: transform .3s cubic-bezier(.3, 1.4, .5, 1); }
+.wf-obj-phone:hover .wf-handset, .wf-obj-phone:focus-visible .wf-handset { transform: translateY(-12px) rotate(-4deg); }
+.wf-obj-phone:hover .wf-phone-lamp { animation-duration: .35s; }
+.wf-obj-map:hover .wf-menu-arrow { animation: wf-draw-long 1.4s ease-out both; }
+@keyframes wf-mn-fadein { from { opacity: 0; } to { opacity: 1; } }
+@keyframes wf-mn-wiggle { 0%, 100% { transform: translate(-98px, 2px) rotate(0); } 30% { transform: translate(-98px, 2px) rotate(-12deg); } 65% { transform: translate(-98px, 2px) rotate(9deg); } }
+@keyframes wf-mn-flicker { 0%, 100% { opacity: 1; } 46% { opacity: .92; } 48% { opacity: 1; } 70% { opacity: .96; } }
+
+/* ---------- muster sheet: an operation-order dossier ---------- */
+.wf-mu-modal { align-items: start; }
+.wf-desk-page .wf-mu, .wf-mu {
+  width: min(900px, 100%); margin: 18px auto; padding: 24px 28px 26px; overflow: visible; max-height: none;
+  background:
+    radial-gradient(circle at 18% 12%, rgba(255, 255, 255, .55), transparent 45%),
+    radial-gradient(120% 120% at 50% 50%, transparent 62%, rgba(138, 106, 50, .28)),
+    repeating-linear-gradient(0deg, rgba(91, 74, 51, .05) 0 1px, transparent 1px 26px),
+    linear-gradient(#fbf6e6, #efe3c0);
+  box-shadow: 0 0 0 1px #b9a476, 8px 8px 0 -2px #e6d6ac, 8px 8px 0 -1px #b9a476, 0 30px 60px rgba(0, 0, 0, .6);
+}
+.wf-mu::after { display: none; }
+.wf-mu-clip { position: absolute; top: -14px; left: 40px; width: 16px; height: 48px; border: 3px solid #9aa1a8; border-radius: 8px; box-shadow: 1px 2px 2px rgba(0, 0, 0, .35); }
+.wf-mu-head { position: relative; display: flex; align-items: flex-start; gap: 16px; padding-bottom: 12px; margin-bottom: 6px; border-bottom: 3px double var(--wf-ink); }
+.wf-mu-head > div { flex: 1; min-width: 0; }
+.wf-mu-no { font: 700 11px "Manrope"; letter-spacing: .24em; text-transform: uppercase; color: var(--wf-ink-2); }
+.wf-mu-head h2 { margin: 2px 0 4px; font-size: 32px; font-weight: 400; color: var(--wf-ink); }
+.wf-mu-head p { margin: 0; font: 500 14px/1.45 "Manrope"; color: var(--wf-ink-2); max-width: 520px; }
+.wf-mu-stamp {
+  align-self: center; padding: 4px 12px; border: 3px solid rgba(198, 47, 47, .75); border-radius: 4px; color: rgba(198, 47, 47, .8);
+  font: 400 18px "Saira Stencil One"; letter-spacing: .18em; text-transform: uppercase; transform: rotate(-8deg); mix-blend-mode: multiply;
+  box-shadow: inset 0 0 0 2px rgba(198, 47, 47, .25);
+}
+.wf-mu-sec { padding: 14px 0 6px; border-bottom: 1px dashed rgba(91, 74, 51, .4); }
+.wf-mu-sec h3 { display: flex; align-items: center; gap: 10px; margin: 0 0 10px; font: 800 14px "Sora"; letter-spacing: .16em; text-transform: uppercase; color: var(--wf-ink); }
+.wf-mu-sec h3 > b { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--wf-ink); color: #f5ecd2; font: 800 12px "Sora"; letter-spacing: 0; }
+.wf-mu-sec h3 small { margin-left: auto; font: 600 12px "Manrope"; letter-spacing: .04em; text-transform: none; color: var(--wf-ink-2); }
+.wf-mu-roster { gap: 8px; }
+.wf-mu .wf-mu-row {
+  display: grid; grid-template-columns: 52px minmax(120px, 1fr) auto auto 32px; gap: 10px; align-items: center; padding: 6px 10px 6px 0;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--fc) 12%, #fffdf5), #fffdf5 40%); border: 1px solid rgba(91, 74, 51, .25); border-radius: 4px;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, .1);
+}
+.wf-mu-flag {
+  position: relative; align-self: stretch; display: grid; place-items: center; min-height: 54px;
+  background: linear-gradient(160deg, var(--fc), var(--fd)); border-radius: 3px 0 0 3px; clip-path: polygon(0 0, 100% 0, 82% 50%, 100% 100%, 0 100%);
+}
+.wf-mu-flag svg { width: 22px; height: 22px; margin-right: 8px; filter: drop-shadow(0 1px 1px rgba(0, 0, 0, .5)); }
+.wf-mu-who { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.wf-mu .wf-mu-who small { flex: none; font: 700 10px "Manrope"; letter-spacing: .14em; text-transform: uppercase; color: var(--wf-ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.wf-mu .wf-mu-row input { flex: none; width: 100%; min-height: 34px; border: none; border-bottom: 2px solid #8a6f42; border-radius: 0; background: transparent; font: 700 16px "Sora"; padding: 2px 2px; }
+.wf-mu .wf-mu-row input:focus { outline: none; border-bottom-color: var(--fc); background: rgba(255, 255, 255, .6); }
+.wf-mu-kind { display: flex; align-items: center; gap: 6px; }
+.wf-mu .wf-mu-row select { min-height: 34px; font: 700 13px "Sora"; background: #fffdf5; border: 1.5px solid #8a6f42; border-radius: 4px; padding: 2px 6px; }
+.wf-ins { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 4px; color: #f6dc93; background: linear-gradient(#3b4233, #1f241b); box-shadow: inset 0 0 0 1px #c99a3c, 0 1px 2px rgba(0, 0, 0, .4); }
+.wf-ins-human { color: #fbf4df; background: linear-gradient(160deg, var(--fc), var(--fd)); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .5); }
+.wf-ins svg { width: 20px; height: 20px; }
+.wf-mu-swatches { gap: 4px; }
+.wf-mu .wf-mu-swatches button { display: grid; place-items: center; width: 26px; height: 26px; border: 2px solid #fffdf5; transition: transform .15s; }
+.wf-mu .wf-mu-swatches button svg { width: 13px; height: 13px; opacity: .85; }
+.wf-mu .wf-mu-swatches button[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--wf-ink), 0 2px 6px rgba(0, 0, 0, .4); transform: scale(1.12); }
+.wf-mu .wf-mu-swatches button:disabled { opacity: .18; }
+.wf-mu-add { margin-top: 10px; border-style: dashed; background: rgba(255, 255, 255, .45); box-shadow: none; }
+.wf-mu-note { margin: 10px 0 4px; font: 500 13px/1.5 "Manrope"; color: var(--wf-ink-2); }
+.wf-mu-note b { color: var(--wf-ink); }
+.wf-mu-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.wf-mu-opt {
+  display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; cursor: pointer; border-radius: 4px;
+  background: rgba(255, 255, 255, .5); border: 1.5px solid rgba(91, 74, 51, .3); transition: border-color .2s, box-shadow .2s, background .2s;
+}
+.wf-mu-opt input { flex: none; margin-top: 3px; width: 18px; height: 18px; accent-color: #8f6a24; }
+.wf-mu-opt span { display: flex; flex-direction: column; gap: 2px; }
+.wf-mu-opt b { font: 800 15px "Sora"; color: var(--wf-ink); }
+.wf-mu-opt small { font: 500 13px/1.4 "Manrope"; color: var(--wf-ink-2); }
+.wf-mu-opt.wf-on { border-color: #8f6a24; background: linear-gradient(#fffaf0, #f7ecd0); box-shadow: inset 4px 0 0 #c99a3c, 0 2px 8px rgba(0, 0, 0, .12); }
+.wf-mu-opt.wf-off { opacity: .55; cursor: default; }
+.wf-mu-check { margin-top: 2px; }
+.wf-mu .wf-mu-launch { margin-top: 16px; min-height: 58px; font-size: 18px; }
+
+/* phones: the desk is too small to read, so its three objects are repeated as brass plaques below it */
+.wf-desk-quick { display: none; }
+@media (max-width: 640px) {
+  .wf-desk-quick { display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 420px; margin-top: 18px; }
+  .wf-desk-page .wf-desk-quick .wf-plq { height: auto; min-height: 60px; padding: 8px 14px; justify-content: space-between; text-transform: none; }
+  .wf-desk-quick .wf-plq span { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+  .wf-desk-quick .wf-plq b { font: 400 20px "Saira Stencil One", sans-serif; letter-spacing: .08em; text-transform: uppercase; }
+  .wf-desk-quick .wf-plq small { font: 700 11px "Manrope", sans-serif; letter-spacing: .04em; color: #5a3e12; }
+}
+@media (max-width: 760px) {
+  .wf-mu .wf-mu-row { grid-template-columns: 44px minmax(0, 1fr) 32px; grid-template-areas: "flag who x" "flag kind kind" "flag sw sw"; row-gap: 6px; }
+  .wf-mu-flag { grid-area: flag; }
+  .wf-mu-who { grid-area: who; }
+  .wf-mu-kind { grid-area: kind; }
+  .wf-mu-swatches { grid-area: sw; }
+  .wf-mu-row > .wf-x { grid-area: x; }
+  .wf-mu-opts { grid-template-columns: 1fr; }
+  .wf-mu-stamp { display: none; }
+}
+@media (max-width: 640px) {
+  .wf-mu { padding: 18px 14px 18px; }
+  .wf-mu-head h2 { font-size: 24px; }
+  .wf-nameplate { padding: 6px 30px 8px; }
+  .wf-nameplate::before { left: 9px; } .wf-nameplate::after { right: 9px; }
+  .wf-desk-page .wf-title p { font-size: 9px; letter-spacing: .12em; }
+  .wf-desk-page .wf-plq { height: 36px; font-size: 11px; padding: 0 8px; }
+  .wf-desk-page .wf-plq-icon { width: 38px; height: 36px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wf-mn-cone, .wf-obj:hover .wf-tag-icon, .wf-obj-map:hover .wf-menu-arrow { animation: none; }
+}

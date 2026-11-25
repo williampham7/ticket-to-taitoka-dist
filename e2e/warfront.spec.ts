@@ -26,6 +26,7 @@ async function playPassively(page: Page, max = 400) {
     if (await page.getByTestId('wf-result').isVisible()) return;
     if (await page.getByTestId('wf-open-case').isVisible()) { await page.getByTestId('wf-open-case').click(); continue; }
     if (await page.getByTestId('wf-autoplace').isVisible()) { await page.getByTestId('wf-autoplace').click(); continue; }
+    if (await page.getByTestId('wf-movein').isVisible()) { await page.getByTestId('wf-movein').click(); continue; }
     const neutral = page.locator('.wf-terr.wf-valid-friendly');
     if (await page.getByTestId('wf-trade').isVisible() && await page.getByTestId('wf-trade').isDisabled()) {
       await page.getByRole('button', { name: 'Best set' }).click();

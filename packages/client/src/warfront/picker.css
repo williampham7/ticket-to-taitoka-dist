@@ -1,13 +1,68 @@
-/* Warfront's card on the / picker */
-.wf-ep { background: radial-gradient(120% 90% at 20% 0%, #5a3820 0%, #3b2414 55%, #24150b 100%); color: #f4e7c8; border: 2px solid #8a6630; border-radius: 6px; box-shadow: inset 0 0 0 1px rgba(246, 220, 147, .25); }
-.wf-ep-art svg { display: block; width: 100%; height: auto; }
-.wf-ep-to { font-family: "Manrope", system-ui, sans-serif; font-size: 12px; font-weight: 700; letter-spacing: .04em; color: #d8bd7e; }
-.wf-ep-name { font-family: "Saira Stencil One", "Sora", sans-serif; font-size: 42px; line-height: 1.05; letter-spacing: .08em; text-transform: uppercase; background: linear-gradient(#fbe7a6, #c99a3c 60%, #8a6226); -webkit-background-clip: text; background-clip: text; color: transparent; }
-.wf-ep-line { margin: 6px 0 14px; font-family: "Manrope", system-ui, sans-serif; font-size: 14px; line-height: 1.45; color: #e3d2ac; }
-.wf-ep-label { align-self: flex-start; padding: 3px 10px; border-radius: 3px; background: linear-gradient(#f6dc93, #c99a3c); color: #3b2606; font: 800 11px "Sora", sans-serif; letter-spacing: .14em; text-transform: uppercase; }
-.wf-ep-arrow { stroke-dasharray: 160; stroke-dashoffset: 0; transition: stroke-dashoffset .6s; }
+/* Warfront's card on the / picker: a corner of the war table, walnut and brass. */
+.wf-ep {
+  position: relative; color: #f4e7c8; border: 2px solid #8a6630; border-radius: 6px;
+  background:
+    radial-gradient(120% 80% at 18% 0%, rgba(255, 214, 140, .18), transparent 60%),
+    repeating-linear-gradient(93deg, rgba(0, 0, 0, .09) 0 2px, transparent 2px 8px),
+    repeating-linear-gradient(87deg, rgba(255, 230, 190, .05) 0 1px, transparent 1px 19px),
+    linear-gradient(180deg, #5a3820, #3b2414 55%, #24150b);
+  box-shadow: inset 0 0 0 1px rgba(246, 220, 147, .28), inset 0 0 0 5px rgba(0, 0, 0, .18), 0 10px 24px rgba(0, 0, 0, .45);
+}
+.wf-ep::after { content: ""; position: absolute; inset: 5px; border: 1px solid rgba(246, 220, 147, .16); border-radius: 3px; pointer-events: none; }
+.wf-ep-art { border-bottom: 2px solid #8a6630; box-shadow: inset 0 -6px 12px rgba(0, 0, 0, .35); }
+.wf-ep-sea-label { font: italic 600 7px "Manrope", sans-serif; letter-spacing: .5em; fill: #cfeeea; opacity: .55; }
+.wf-ep-n { font: 800 7px "Sora", sans-serif; fill: #e9dcb5; }
+.wf-ep-count { font: 800 6.4px "Sora", sans-serif; fill: #241a0e; }
+.wf-ep-text { position: relative; gap: 2px; }
+.wf-ep-to { font: 700 12px "Manrope", system-ui, sans-serif; letter-spacing: .06em; text-transform: uppercase; color: #d8bd7e; }
+.wf-ep-plate {
+  position: relative; display: inline-block; margin: 6px 0 4px; padding: 4px 22px 2px;
+  background: linear-gradient(180deg, #4a2c17, #2a170b); border: 1.5px solid #c99a3c; border-radius: 3px;
+  box-shadow: inset 0 0 0 2px #24150b, inset 0 0 0 3px rgba(246, 220, 147, .35), 0 3px 0 #1a0f06, 0 6px 12px rgba(0, 0, 0, .45);
+}
+.wf-ep-plate::before, .wf-ep-plate::after {
+  content: ""; position: absolute; top: 50%; width: 7px; height: 7px; margin-top: -3.5px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #fff2c2, #c99a3c 55%, #6d4c14); box-shadow: 0 1px 1px rgba(0, 0, 0, .6);
+}
+.wf-ep-plate::before { left: 7px; } .wf-ep-plate::after { right: 7px; }
+.wf-ep-name {
+  display: block; font: 400 38px/1.05 "Saira Stencil One", "Sora", sans-serif; letter-spacing: .1em; text-transform: uppercase;
+  background: linear-gradient(#fff1c2, #e0b95c 48%, #a0742c 52%, #f3d488); -webkit-background-clip: text; background-clip: text; color: transparent;
+  filter: drop-shadow(0 1px 0 rgba(0, 0, 0, .7));
+}
+.wf-ep-line { margin: 6px 0 14px; font: 500 14px/1.45 "Manrope", system-ui, sans-serif; color: #e3d2ac; }
+.wf-ep-foot { display: flex; align-items: center; gap: 12px; width: 100%; margin-top: auto; }
+.wf-ep-label {
+  padding: 4px 12px; border-radius: 3px; background: linear-gradient(#f6dc93, #c99a3c 60%, #8f6a24); color: #3b2606;
+  font: 800 11px "Sora", sans-serif; letter-spacing: .16em; text-transform: uppercase; border: 1px solid #5a3e12; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .5), 0 2px 0 #3b2606;
+}
+.wf-ep-chips { display: flex; gap: 4px; }
+.wf-ep-chips i { width: 10px; height: 10px; border-radius: 50%; box-shadow: 0 0 0 1.5px #f4e7c8, 0 1px 2px rgba(0, 0, 0, .6); transition: transform .25s cubic-bezier(.3, 1.6, .5, 1); }
+.wf-ep:hover .wf-ep-chips i { transform: translateY(-2px); }
+.wf-ep:hover .wf-ep-chips i:nth-child(2) { transition-delay: .04s; } .wf-ep:hover .wf-ep-chips i:nth-child(3) { transition-delay: .08s; }
+.wf-ep:hover .wf-ep-chips i:nth-child(4) { transition-delay: .12s; } .wf-ep:hover .wf-ep-chips i:nth-child(5) { transition-delay: .16s; }
+.wf-ep:hover .wf-ep-chips i:nth-child(6) { transition-delay: .2s; }
+
+/* hover: the arrow is drawn again, the pin drops in, the dice tumble, the armour edges forward */
+.wf-ep-arrow { stroke-dasharray: 100; stroke-dashoffset: 0; }
 .wf-ep:hover .wf-ep-arrow { animation: wf-ep-draw .9s ease-out; }
-.wf-ep-pin { transition: transform .3s cubic-bezier(.3, 1.6, .5, 1); }
-.wf-ep:hover .wf-ep-pin { transform: translate(240px, 64px); }
-@keyframes wf-ep-draw { from { stroke-dashoffset: 160; } to { stroke-dashoffset: 0; } }
-@media (prefers-reduced-motion: reduce) { .wf-ep:hover .wf-ep-arrow { animation: none; } .wf-ep-pin { transition: none; } }
+.wf-ep:hover .wf-ep-head { animation: wf-ep-fade .9s ease-out; }
+.wf-ep:hover .wf-ep-pin { animation: wf-ep-pin .6s .55s cubic-bezier(.3, 1.6, .5, 1) both; }
+.wf-ep-die { transform-box: fill-box; transform-origin: center; }
+.wf-ep:hover .wf-ep-die-a { animation: wf-ep-roll .7s cubic-bezier(.2, .8, .3, 1); }
+.wf-ep:hover .wf-ep-die-b { animation: wf-ep-roll .8s .08s cubic-bezier(.2, .8, .3, 1); }
+.wf-ep-token-move > use { transition: transform .5s ease-out; }
+.wf-ep:hover .wf-ep-token-move > use { transform: translateX(3px); }
+@keyframes wf-ep-draw { from { stroke-dashoffset: 100; } to { stroke-dashoffset: 0; } }
+@keyframes wf-ep-fade { 0%, 70% { opacity: 0; } 100% { opacity: 1; } }
+@keyframes wf-ep-pin { from { opacity: 0; translate: 0 -22px; scale: 1.3; } to { opacity: 1; translate: 0 0; scale: 1; } }
+@keyframes wf-ep-roll { 0% { rotate: -300deg; translate: -18px -14px; } 70% { rotate: 14deg; translate: 1px 1px; } 100% { rotate: 0deg; translate: 0 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .wf-ep:hover .wf-ep-arrow, .wf-ep:hover .wf-ep-head, .wf-ep:hover .wf-ep-pin, .wf-ep:hover .wf-ep-die-a, .wf-ep:hover .wf-ep-die-b { animation: none; }
+  .wf-ep-token-move > use, .wf-ep-chips i { transition: none; }
+}
+@media (max-width: 719px) {
+  .wf-ep-name { font-size: 28px; }
+  .wf-ep-plate { padding: 3px 18px 1px; }
+  .wf-ep-line { margin-bottom: 10px; font-size: 13px; }
+}

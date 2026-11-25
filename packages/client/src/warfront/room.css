@@ -1,0 +1,216 @@
+/* Warfront war room (online waiting room) and the field-radio loading screens. Prefix wf-rm- / wf-radio-. */
+
+.wf-rm-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
+
+/* ---------- the room ---------- */
+.warfront.wf-roompage {
+  align-items: stretch; padding: 10px 20px 28px;
+  background:
+    radial-gradient(60vw 40vw at 50% -6%, rgba(255, 222, 150, .30), transparent 70%),
+    radial-gradient(120% 90% at 50% 120%, rgba(0, 0, 0, .55), transparent 60%),
+    repeating-linear-gradient(91deg, rgba(0, 0, 0, .08) 0 2px, transparent 2px 11px),
+    repeating-linear-gradient(89deg, rgba(255, 230, 190, .035) 0 1px, transparent 1px 29px),
+    linear-gradient(180deg, #5f3b21, #3b2414 45%, #1f1209);
+}
+.wf-rm-head, .wf-rm-grid { width: 100%; max-width: 1240px; margin: 0 auto; }
+
+.wf-rm-head { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 14px; padding: 2px 150px 0 0; }
+.wf-rm-leave { justify-self: start; }
+.wf-rm-plate {
+  position: relative; display: flex; flex-direction: column; align-items: center; padding: 8px 46px 10px; border-radius: 6px;
+  background: linear-gradient(#f9e3a0, #d4a64a 45%, #9a7029 80%, #c79a3f);
+  border: 2px solid #4d3510; box-shadow: inset 0 0 0 3px rgba(255, 245, 205, .45), inset 0 -4px 8px rgba(80, 50, 10, .35), 0 4px 0 #3b2606, 0 16px 28px rgba(0, 0, 0, .55);
+}
+.wf-rm-plate::before { content: ""; position: absolute; inset: 6px 10px; border: 1px solid rgba(70, 45, 10, .45); border-radius: 3px; pointer-events: none; }
+.wf-rm-rivet { position: absolute; top: 50%; width: 9px; height: 9px; margin-top: -4.5px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff4c8, #a57a2c 60%, #4d3510); box-shadow: 0 1px 1px rgba(0, 0, 0, .5); }
+.wf-rm-rivet:first-child { left: 16px; } .wf-rm-rivet:nth-child(2) { right: 16px; }
+.wf-rm-plate h1 { margin: 0; font: 400 clamp(26px, 4vw, 40px)/1 "Saira Stencil One", sans-serif; letter-spacing: .14em; text-transform: uppercase; color: #3b2606; text-shadow: 0 1px 0 rgba(255, 244, 200, .7); }
+.wf-rm-plate small { margin-top: 2px; font: 800 11px "Sora", sans-serif; letter-spacing: .22em; text-transform: uppercase; color: #5a3e12; }
+.wf-rm-count { justify-self: end; display: flex; flex-direction: column; align-items: flex-end; gap: 5px; font: 600 12px "Manrope", sans-serif; color: #e3cf9f; letter-spacing: .05em; }
+.wf-rm-count b { font: 800 18px "Sora"; color: #fbe7a6; }
+.wf-rm-lamps { display: flex; gap: 6px; padding: 5px 8px; border-radius: 12px; background: linear-gradient(#2a2d26, #15170f); box-shadow: inset 0 2px 4px rgba(0, 0, 0, .7), 0 1px 0 rgba(255, 230, 180, .15); }
+.wf-rm-lamps i { width: 12px; height: 12px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #6b665a, #2b2a24); box-shadow: inset 0 0 0 1px #000; }
+.wf-rm-lamps i.wf-on { --fc: #f2c14e; background: radial-gradient(circle at 35% 30%, #fff, var(--fc) 55%, color-mix(in srgb, var(--fc) 60%, #000)); box-shadow: 0 0 8px 1px var(--fc), inset 0 0 0 1px rgba(0, 0, 0, .4); animation: wf-rm-glow 1.8s ease-in-out infinite alternate; }
+
+.wf-rm-grid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(320px, 1fr); gap: 22px; margin-top: 14px; align-items: start; }
+.wf-rm-h { display: flex; align-items: baseline; gap: 10px; margin: 0 0 10px; font: 400 17px "Saira Stencil One", sans-serif; letter-spacing: .2em; text-transform: uppercase; color: #f6dc93; text-shadow: 0 2px 0 rgba(0, 0, 0, .5); }
+.wf-rm-h small { font: 700 10px "Manrope"; letter-spacing: .12em; color: #cdb37a; text-shadow: none; }
+
+/* order of battle: a clipboard of dossiers */
+.wf-rm-roster {
+  position: relative; padding: 16px 16px 14px; border-radius: 8px;
+  background: linear-gradient(#7a5530, #5b3a1e); border: 2px solid #2a170a;
+  box-shadow: inset 0 0 0 4px rgba(255, 220, 160, .08), inset 0 10px 30px rgba(0, 0, 0, .35), 0 20px 40px rgba(0, 0, 0, .5);
+}
+.wf-rm-roster::before { content: ""; position: absolute; top: -10px; left: 50%; width: 130px; height: 22px; margin-left: -65px; border-radius: 6px 6px 3px 3px; background: linear-gradient(#e7eaec, #9aa1a8 60%, #5c646e); border: 1.5px solid #3e444b; box-shadow: 0 3px 6px rgba(0, 0, 0, .5); }
+.wf-rm-list { gap: 9px; margin: 0; }
+.wf-roster-row.wf-rm-seat {
+  position: relative; display: flex; flex-wrap: nowrap; align-items: stretch; gap: 0; padding: 0; min-height: 76px; border-radius: 3px;
+  background: linear-gradient(100deg, #fbf6e6, #efe3c0); box-shadow: 0 1px 0 rgba(0, 0, 0, .25), 0 6px 12px rgba(0, 0, 0, .3);
+  animation: wf-rm-in .45s cubic-bezier(.2, .9, .3, 1.15) both; animation-delay: calc(var(--i) * 60ms);
+}
+.wf-roster-row.wf-rm-seat::after { content: ""; position: absolute; right: 0; top: 0; width: 22px; height: 22px; background: linear-gradient(225deg, #3b2414 50%, #d8c79a 50%); border-bottom-left-radius: 3px; opacity: .55; }
+.wf-rm-seat.wf-rm-mine { box-shadow: 0 0 0 2px var(--fc), 0 0 18px color-mix(in srgb, var(--fc) 55%, transparent), 0 6px 12px rgba(0, 0, 0, .3); }
+.wf-rm-flag.wf-roster-flag {
+  position: relative; display: grid; place-items: center; width: 64px; flex: none; border-radius: 3px 0 0 3px;
+  background: repeating-linear-gradient(135deg, rgba(255, 255, 255, .1) 0 6px, transparent 6px 12px), linear-gradient(var(--fc), var(--fd));
+  box-shadow: inset -3px 0 0 rgba(0, 0, 0, .25);
+}
+.wf-rm-emblem { filter: drop-shadow(0 2px 2px rgba(0, 0, 0, .45)); }
+.wf-rm-no { font: 400 26px "Saira Stencil One"; color: rgba(255, 255, 255, .7); }
+.wf-rm-body { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; gap: 4px; padding: 9px 30px 9px 12px; }
+.wf-rm-line { display: flex; align-items: center; gap: 9px; min-width: 0; }
+.wf-rm-line b { font: 800 17px "Sora"; color: var(--wf-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.wf-rm-line input { flex: 1 1 120px; min-width: 0; min-height: 34px; padding: 3px 9px; border: 1.5px solid #8a6f42; border-radius: 3px; background: #fffdf5 repeating-linear-gradient(transparent 0 26px, rgba(90, 70, 40, .2) 26px 27px); color: var(--wf-ink); font: 800 16px "Sora"; }
+.wf-rm-insignia { width: 26px; height: 26px; flex: none; filter: drop-shadow(0 1px 1px rgba(0, 0, 0, .35)); }
+.wf-roster-row small.wf-rm-role { flex: none; font: 700 11.5px "Manrope"; letter-spacing: .06em; text-transform: uppercase; color: var(--wf-ink-2); }
+.wf-rm-stamp { margin-left: auto; flex: none; padding: 1px 8px; border: 2px solid #1e7a3c; border-radius: 3px; color: #1e7a3c; font: 400 12px "Saira Stencil One"; letter-spacing: .14em; text-transform: uppercase; transform: rotate(-4deg); opacity: .85; }
+.wf-rm-stamp-bot { border-color: #8f6a24; color: #8f6a24; }
+.wf-rm-swatches { flex-wrap: wrap; margin-top: 2px; }
+.wf-rm-swatches button { display: grid; place-items: center; width: 28px; height: 28px; padding: 0; transition: transform .15s; }
+.wf-rm-swatches button svg { width: 14px; height: 14px; }
+.wf-rm-swatches button:hover:not(:disabled) { transform: translateY(-2px); }
+.wf-rm-seat .wf-x { align-self: center; width: 28px; height: 28px; font-size: 16px; }
+
+.wf-roster-row.wf-rm-seat.wf-open { background: repeating-linear-gradient(135deg, rgba(251, 246, 230, .16) 0 10px, rgba(251, 246, 230, .07) 10px 20px); box-shadow: inset 0 0 0 2px rgba(246, 220, 147, .35); }
+.wf-rm-seat.wf-open::after { display: none; }
+.wf-rm-seat.wf-open .wf-rm-flag { background: rgba(0, 0, 0, .2); box-shadow: inset -2px 0 0 rgba(246, 220, 147, .25); }
+.wf-rm-empty { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 10px; color: #e9d7ab; }
+.wf-rm-chair { width: 34px; height: 34px; flex: none; color: rgba(246, 220, 147, .55); }
+.wf-rm-empty-text { display: flex; flex-direction: column; flex: 1 1 140px; }
+.wf-rm-empty-text b { font: 800 15px "Sora"; color: #f6dc93; }
+.wf-roster-row .wf-rm-empty-text small { flex: none; font: 600 12px "Manrope"; color: #d8c08a; }
+.wf-rm-bots { flex: 0 1 auto; gap: 6px; }
+.wf-rm-bots > * { flex: none; }
+.wf-rm-bot { gap: 5px; padding-left: 5px; }
+.wf-rm-bot .wf-rm-insignia { width: 20px; height: 20px; }
+
+/* buttons here use Sora, not the inherited body face */
+.warfront.wf-roompage button.wf-btn { font: 700 13.5px "Sora", sans-serif; }
+.warfront.wf-roompage button.wf-btn-sm { font-size: 12px; }
+.warfront.wf-roompage button.wf-rm-start { font: 400 24px "Saira Stencil One", sans-serif; letter-spacing: .18em; }
+.warfront.wf-shellpage button.wf-btn { font: 700 14px "Sora", sans-serif; }
+
+/* side column */
+.wf-rm-side { display: flex; flex-direction: column; gap: 13px; }
+.wf-rm-theatre { position: relative; margin: 0; padding: 8px 8px 0; border-radius: 4px; background: linear-gradient(#f5ecd2, #e3d3a9); box-shadow: 0 0 0 1px #8a6f42, 0 14px 28px rgba(0, 0, 0, .5); transform: rotate(.6deg); }
+.wf-rm-theatre::before, .wf-rm-theatre::after { content: ""; position: absolute; top: -6px; width: 56px; height: 18px; background: rgba(240, 228, 190, .7); box-shadow: 0 1px 2px rgba(0, 0, 0, .25); }
+.wf-rm-theatre::before { left: 18px; transform: rotate(-8deg); } .wf-rm-theatre::after { right: 18px; transform: rotate(7deg); }
+.wf-rm-theatre svg { display: block; width: 100%; height: 178px; border: 1px solid #5b4a2a; }
+.wf-rm-theatre figcaption { display: flex; justify-content: space-between; align-items: baseline; padding: 4px 2px 5px; color: var(--wf-ink); }
+.wf-rm-theatre figcaption b { font: 400 13px "Saira Stencil One"; letter-spacing: .16em; text-transform: uppercase; }
+.wf-rm-theatre figcaption span { font: 700 11px "Manrope"; color: var(--wf-ink-2); }
+.wf-rm-pin { animation: wf-rm-drop .6s cubic-bezier(.3, 1.6, .5, 1) both; animation-delay: calc(var(--i) * 90ms + .2s); }
+.wf-rm-ping { transform-box: fill-box; transform-origin: center; animation: wf-rm-ping 2.2s ease-out infinite; animation-delay: calc(var(--i) * .35s); }
+
+.wf-rm-telegram {
+  position: relative; padding: 0 0 10px; color: #2b2116; transform: rotate(-.5deg);
+  background: linear-gradient(#fbf2d4, #f0e1b3);
+  -webkit-mask: radial-gradient(circle 4px at 7px 50%, transparent 98%, #000) -7px 0 / 14px 12px repeat-y, linear-gradient(#000, #000) 7px 0 / calc(100% - 14px) 100% no-repeat, radial-gradient(circle 4px at 7px 50%, transparent 98%, #000) calc(100% + 7px) 0 / 14px 12px repeat-y;
+  mask: radial-gradient(circle 4px at 7px 50%, transparent 98%, #000) -7px 0 / 14px 12px repeat-y, linear-gradient(#000, #000) 7px 0 / calc(100% - 14px) 100% no-repeat, radial-gradient(circle 4px at 7px 50%, transparent 98%, #000) calc(100% + 7px) 0 / 14px 12px repeat-y;
+  filter: drop-shadow(0 12px 16px rgba(0, 0, 0, .45));
+}
+.wf-rm-tg-head { display: flex; justify-content: space-between; align-items: baseline; padding: 5px 18px 4px; background: #2b2116; color: #fbe7a6; }
+.wf-rm-tg-head span { font: 400 18px "Saira Stencil One"; letter-spacing: .3em; text-transform: uppercase; }
+.wf-rm-tg-head small { font: 800 10px "Sora"; letter-spacing: .16em; text-transform: uppercase; color: #ff9d8a; }
+.wf-rm-tg-body { display: flex; gap: 14px; align-items: center; padding: 10px 18px 0; }
+.wf-rm-qr { flex: none; padding: 6px; background: #fbf2d4; border: 2px solid #2b2116; box-shadow: 3px 3px 0 rgba(43, 33, 22, .25); }
+.wf-rm-qr svg { display: block; }
+.wf-rm-tg-text { min-width: 0; display: flex; flex-direction: column; gap: 7px; }
+.wf-rm-tg-text p { margin: 0; font: 600 12px/1.5 "Courier New", ui-monospace, monospace; letter-spacing: .04em; }
+.wf-rm-tg-text p i { font-style: normal; font-weight: 800; color: #a92626; }
+.wf-rm-tg-text code { font: 700 11px "Manrope"; word-break: break-all; padding: 4px 6px; background: rgba(43, 33, 22, .07); border-left: 3px solid #a92626; }
+.wf-rm-copy { align-self: flex-start; min-width: 104px; }
+.wf-rm-copied { background: linear-gradient(#bfe6c6, #7fbf8c) !important; border-color: #1e7a3c !important; }
+
+.wf-rm-rules { padding: 10px 10px 2px; border-radius: 6px; background: rgba(0, 0, 0, .22); box-shadow: inset 0 0 0 1px rgba(246, 220, 147, .18); }
+.wf-rm-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+.wf-rm-opt {
+  position: relative; display: flex; gap: 8px; align-items: flex-start; padding: 7px 9px; border-radius: 4px; cursor: pointer;
+  background: linear-gradient(#f6eed6, #e6d7ad); color: var(--wf-ink); border: 2px solid transparent; box-shadow: 0 2px 0 rgba(0, 0, 0, .3);
+  transition: transform .15s, box-shadow .15s, border-color .15s;
+}
+.wf-rm-opt input { position: absolute; opacity: 0; pointer-events: none; }
+.wf-rm-opt:hover:not(.wf-rm-opt-locked) { transform: translateY(-2px); }
+.wf-rm-opt:focus-within { outline: 3px solid var(--wf-amber); outline-offset: 2px; }
+.wf-rm-opt-on { border-color: #5a3e12; background: linear-gradient(#fbe7a6, #e0b95c); box-shadow: 0 0 0 1px #f6dc93, 0 0 16px rgba(246, 220, 147, .45), 0 2px 0 rgba(0, 0, 0, .3); }
+.wf-rm-opt-on::after { content: "✓"; position: absolute; top: 5px; right: 7px; display: grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; background: #1e7a3c; color: #fff; font: 800 11px/1 "Sora"; }
+.wf-rm-opt-locked { cursor: default; }
+.wf-rm-opt-locked:not(.wf-rm-opt-on) { opacity: .62; }
+.wf-rm-opt-icon { flex: none; width: 30px; height: 30px; display: grid; place-items: center; border-radius: 50%; background: rgba(43, 33, 22, .1); color: #3b2606; }
+.wf-rm-opt-icon svg { width: 22px; height: 22px; }
+.wf-rm-opt-text { display: flex; flex-direction: column; gap: 2px; padding-right: 16px; }
+.wf-rm-opt-text b { font: 800 13.5px "Sora"; }
+.wf-rm-opt-text small { font: 600 11px/1.3 "Manrope"; color: var(--wf-ink-2); }
+.wf-rm-opt-text em { font: 800 10.5px "Sora"; font-style: normal; color: #a92626; letter-spacing: .04em; }
+
+.wf-rm-launch { display: flex; flex-direction: column; gap: 7px; }
+.wf-key.wf-rm-start { min-height: 58px; font-size: 20px; letter-spacing: .14em; }
+.wf-key.wf-rm-start:not(:disabled) { animation: wf-rm-ready 2s ease-in-out infinite; }
+.wf-rm-why { margin: 0; text-align: center; font: 600 12.5px "Manrope"; color: #e3cf9f; }
+.wf-rm-await { display: flex; align-items: center; gap: 14px; padding: 14px 16px; border-radius: 6px; background: linear-gradient(#2a2d26, #15170f); color: #e9e3cf; box-shadow: inset 0 0 0 1px rgba(246, 220, 147, .25), 0 10px 20px rgba(0, 0, 0, .45); }
+.wf-rm-await > span:last-child { display: flex; flex-direction: column; }
+.wf-rm-await b { font: 400 18px "Saira Stencil One"; letter-spacing: .14em; color: #f2c14e; text-transform: uppercase; }
+.wf-rm-await small { font: 600 12px "Manrope"; color: #cfc8b0; }
+.wf-rm-eq { display: flex; align-items: flex-end; gap: 3px; height: 28px; }
+.wf-rm-eq i { width: 5px; height: 100%; border-radius: 1px; background: #9cf07a; box-shadow: 0 0 6px rgba(156, 240, 122, .7); transform-origin: bottom; animation: wf-rm-eq .9s ease-in-out infinite alternate; animation-delay: calc(var(--i) * -.17s); }
+
+/* ---------- field radio loading screens ---------- */
+.warfront.wf-shellpage { justify-content: center; min-height: 100dvh; }
+.wf-radio {
+  display: flex; flex-direction: column; align-items: center; gap: 6px; width: min(440px, 100%); padding: 22px 22px 24px; text-align: center; color: var(--wf-ink);
+  background: linear-gradient(#fbf6e6, #efe3c0); border-radius: 4px; box-shadow: 0 0 0 8px #8f6a24, 0 0 0 10px #3b2606, 0 24px 50px rgba(0, 0, 0, .55);
+  animation: wf-rm-in .5s cubic-bezier(.2, .9, .3, 1.15) both;
+}
+.wf-radio-set { width: 100%; max-width: 320px; margin-bottom: 4px; filter: drop-shadow(0 8px 10px rgba(0, 0, 0, .35)); }
+.wf-stencil-sm { font: 400 12px "Saira Stencil One"; letter-spacing: .26em; text-transform: uppercase; color: #8f6a24; }
+.wf-radio h1 { margin: 0; font: 800 24px "Sora"; }
+.wf-radio p { margin: 0 0 10px; font: 600 14px "Manrope"; color: var(--wf-ink-2); }
+.wf-radio .wf-err { color: #a92626; }
+.wf-radio-scope { animation: wf-rm-scope 1.1s linear infinite; }
+.wf-radio-bar { transform-box: fill-box; transform-origin: bottom; animation: wf-rm-bar 1.2s ease-in-out infinite; animation-delay: calc(var(--i) * .12s); }
+.wf-radio-needle { animation: wf-rm-needle 3.2s ease-in-out infinite alternate; }
+.wf-radio-knob { animation: wf-rm-knob 3.2s ease-in-out infinite alternate; }
+.wf-radio-knob2 { animation-duration: 2.1s; animation-direction: alternate-reverse; }
+.wf-radio-lamp { animation: wf-lamp .7s ease-in-out infinite alternate; }
+.wf-radio-err .wf-radio-scope, .wf-radio-err .wf-radio-bar, .wf-radio-err .wf-radio-needle, .wf-radio-err .wf-radio-knob { animation: none; }
+.wf-radio-err .wf-radio-bar { opacity: .25; }
+
+@keyframes wf-rm-in { from { opacity: 0; transform: translateY(14px) scale(.98); } to { opacity: 1; transform: none; } }
+@keyframes wf-rm-glow { from { opacity: .75; } to { opacity: 1; } }
+@keyframes wf-rm-drop { from { opacity: 0; transform: translateY(-120px); } }
+@keyframes wf-rm-ping { 0% { opacity: .9; transform: scale(.4); } 100% { opacity: 0; transform: scale(2.6); } }
+@keyframes wf-rm-ready { 0%, 100% { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .6), 0 3px 0 #4f0c0c, 0 8px 18px rgba(0, 0, 0, .35); } 50% { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .6), 0 3px 0 #4f0c0c, 0 0 26px 4px rgba(255, 90, 70, .55); } }
+@keyframes wf-rm-eq { from { transform: scaleY(.2); } to { transform: scaleY(1); } }
+@keyframes wf-rm-scope { from { transform: translateX(0); } to { transform: translateX(-28px); } }
+@keyframes wf-rm-bar { 0%, 100% { opacity: .25; } 50% { opacity: 1; } }
+@keyframes wf-rm-needle { from { transform: translateX(-40px); } to { transform: translateX(40px); } }
+@keyframes wf-rm-knob { from { transform: rotate(-120deg); } to { transform: rotate(120deg); } }
+
+@media (max-width: 1099px) {
+  .wf-rm-grid { grid-template-columns: minmax(0, 1fr); }
+  .wf-rm-head { padding-right: 130px; }
+}
+@media (max-width: 640px) {
+  .warfront.wf-roompage { padding: 10px 10px 24px; }
+  .wf-rm-head { grid-template-columns: 1fr; padding-right: 112px; row-gap: 10px; }
+  .wf-rm-plate { grid-row: 2; padding: 6px 30px 8px; margin-right: -112px; }
+  .wf-rm-plate small { letter-spacing: .12em; text-align: center; }
+  .wf-rm-count { grid-row: 3; justify-self: center; align-items: center; margin-right: -112px; }
+  .wf-rm-h { font-size: 15px; letter-spacing: .14em; flex-wrap: wrap; }
+  .wf-rm-count > span:last-child { font-size: 11px; }
+  .wf-rm-roster { padding: 14px 8px 10px; }
+  .wf-rm-flag.wf-roster-flag { width: 44px; }
+  .wf-rm-emblem { width: 28px; height: 28px; }
+  .wf-rm-body { padding: 8px 24px 8px 9px; }
+  .wf-rm-line { flex-wrap: wrap; }
+  .wf-rm-stamp { display: none; }
+  .wf-rm-bots { width: 100%; }
+  .wf-rm-bots > * { flex: 1 1 auto; }
+  .wf-rm-opts { grid-template-columns: 1fr; }
+  .wf-rm-tg-body { flex-direction: column; align-items: stretch; }
+  .wf-rm-qr { align-self: center; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wf-rm-pin, .wf-rm-ping, .wf-rm-seat, .wf-radio { animation: none !important; }
+}

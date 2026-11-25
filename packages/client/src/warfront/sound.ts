@@ -52,5 +52,7 @@ export const wfSfx = {
   paper() { const a = audio(); if (!a) return; const t = a.currentTime; for (let i = 0; i < 5; i++) burst(t + i * 0.04, 4000 + i * 300, 1, 0.09, 0.18, 'highpass'); },
   boom() { const a = audio(); if (!a) return; const t = a.currentTime; burst(t, 120, 0.7, 1.1, 0.9, 'lowpass'); tone(t, 70, 0.9, 0.35, 'sine', 30); },
   turn() { const a = audio(); if (!a) return; const t = a.currentTime; [523, 659, 784].forEach((f, i) => tone(t + i * 0.11, f, 0.35, 0.12, 'triangle')); },
+  /** boots and tracks: a short rumbling column on the move */
+  march() { const a = audio(); if (!a) return; const t = a.currentTime; for (let i = 0; i < 6; i++) burst(t + i * 0.09, 260 + (i % 2) * 90, 1.4, 0.07, 0.32); tone(t, 55, 0.5, 0.12, 'sine', 48); },
   card() { const a = audio(); if (!a) return; burst(a.currentTime, 3000, 1.2, 0.12, 0.3, 'highpass'); },
 };
