@@ -1,0 +1,22 @@
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Nunito+Sans:wght@600;800&display=swap');
+/* Blocky's card on the / picker: a floating toy isle, cloud-white card with a sky band. */
+.bly-ep { position: relative; color: #2b3550; border: 2px solid #2b3550; border-radius: 16px; background: linear-gradient(#ffffff, #eef5fb); box-shadow: 0 5px 0 #cfe0ee, 0 12px 26px rgba(43, 53, 80, .25); transition: transform .25s cubic-bezier(.34, 1.56, .64, 1), box-shadow .25s; }
+.bly-ep-art { border-bottom: 2px solid #2b3550; border-radius: 14px 14px 0 0; overflow: hidden; }
+.bly-ep-text { gap: 3px; background: radial-gradient(circle at 20% 30%, rgba(140,126,102,.14) 1px, transparent 1.6px) 0 0 / 19px 15px, linear-gradient(170deg, #f6efe0, #e4d8bf); box-shadow: inset 0 3px 0 rgba(255,255,255,.8), inset 0 -4px 0 rgba(140,126,102,.35); border-radius: 0 0 14px 14px; }
+.bly-ep-to { font: 800 12px 'Nunito Sans', system-ui, sans-serif; color: #5b6782; }
+.bly-ep-name { display: block; font: 800 36px/1 'Baloo 2', system-ui, sans-serif; color: #2b3550; margin-bottom: 6px; letter-spacing: .5px; text-shadow: 0 3px 0 #cfe0ee; }
+.bly-ep-line { font: 600 15px/1.3 'Nunito Sans', system-ui, sans-serif; }
+.bly-ep-label { justify-self: start; font: 800 12px 'Nunito Sans', sans-serif; padding: 3px 12px; border-radius: 6px; color: #3d2c0e; background: radial-gradient(circle at 6px 50%, #fff6d0 1.4px, #6f5320 2.2px, transparent 2.6px), radial-gradient(circle at calc(100% - 6px) 50%, #fff6d0 1.4px, #6f5320 2.2px, transparent 2.6px), linear-gradient(160deg, #f6e09a, #dcb459 55%, #b08732); border: 1.5px solid #6f5320; box-shadow: 0 2px 0 #6f5320; }
+.bly-ep:hover { transform: translateY(-5px) rotate(.6deg); box-shadow: 0 7px 0 #cfe0ee, 0 20px 34px rgba(43, 53, 80, .3); }
+.bly-ep:focus-visible { outline: 3px solid #ffd25e; outline-offset: 3px; }
+.bly-ep-isle { animation: bly-ep-bob 6s cubic-bezier(.37, 0, .63, 1) infinite; }
+@keyframes bly-ep-bob { 50% { transform: translateY(-6px); } }
+.bly-ep-clouds g:first-child { animation: bly-ep-drift 14s cubic-bezier(.37, 0, .63, 1) infinite alternate; }
+.bly-ep-clouds g:last-child { animation: bly-ep-drift 17s cubic-bezier(.37, 0, .63, 1) infinite alternate-reverse; }
+.bly-ep-clouds-far { animation: bly-ep-drift 30s linear infinite alternate; }
+@keyframes bly-ep-drift { to { transform: translateX(22px); } }
+.bly-ep-fallwater path { animation: bly-ep-fall 1s linear infinite; }
+@keyframes bly-ep-fall { to { stroke-dashoffset: -18; } }
+.bly-ep-flag { transform-box: fill-box; transform-origin: 0 50%; animation: bly-ep-wave 1.8s ease-in-out infinite; }
+@keyframes bly-ep-wave { 50% { transform: skewY(8deg) scaleX(.85); } }
+@media (prefers-reduced-motion: reduce) { .bly-ep-isle, .bly-ep-clouds g, .bly-ep-clouds-far, .bly-ep-fallwater path, .bly-ep-flag { animation: none; } .bly-ep:hover { transform: none; } }

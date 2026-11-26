@@ -1,0 +1,24 @@
+/* /blocky: the title builds itself from falling toy blocks onto a floating isle */
+.bly-menu { position: relative; min-height: 100vh; min-height: 100dvh; display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(320px, .8fr); align-items: center; gap: 24px 48px; padding: 32px 6vw; overflow: hidden; }
+.bly-menu-back { position: absolute; left: 18px; top: 16px; }
+.bly-title { display: grid; justify-items: center; gap: 0; }
+.bly-title-blocks { display: flex; gap: 6px; position: relative; z-index: 1; margin-bottom: calc(clamp(64px, 8.4vw, 118px) * -.34); }
+.bly-title-block { position: relative; width: clamp(64px, 8.4vw, 118px); height: clamp(64px, 8.4vw, 118px); display: grid; place-items: center; border-radius: 22%;
+  background: radial-gradient(circle at 26% 22%, rgba(255, 255, 255, .55), transparent 45%), var(--top); border: 3px solid var(--ink);
+  box-shadow: inset -7px -9px 0 var(--south), inset 5px 5px 0 rgba(255, 255, 255, .4), 0 10px 0 rgba(43, 53, 80, .18);
+  animation: bly-title-drop .75s var(--out-back) both; animation-delay: calc(.25s + var(--i) * .16s); }
+.bly-title-block b { font-family: var(--display); font-weight: 800; font-size: clamp(40px, 5.6vw, 78px); line-height: 1; color: #fff; text-shadow: 0 4px 0 var(--south), 0 -1px 0 var(--light); transform: translate(-3px, -4px); }
+.bly-title-block::after { content: ''; position: absolute; left: 14%; top: 10%; width: 26%; height: 9%; border-radius: 99px; background: rgba(255, 255, 255, .8); }
+@keyframes bly-title-drop { 0% { transform: translateY(-110vh) rotate(-8deg); } 70% { transform: translateY(0) scale(1.1, .86); } 85% { transform: translateY(-6px) scale(.97, 1.04); } 100% { transform: none; } }
+.bly-title-isle { width: calc(clamp(64px, 8.4vw, 118px) * 6 + 150px); max-width: 100%; filter: drop-shadow(0 18px 16px rgba(43, 53, 80, .18)); animation: bly-bob 7s var(--in-out-sine) infinite; }
+.bly-title-fall rect { animation: bly-pulse 1.4s var(--in-out-sine) infinite; }
+.bly-tagline { margin: 10px 0 0; max-width: 520px; text-align: center; font-family: var(--display); font-weight: 600; font-size: var(--t3); color: var(--ink); text-shadow: 0 1px 0 rgba(255, 255, 255, .8); animation: bly-card-pop .6s var(--out-back) 1.4s both; }
+.bly-menu-keys { display: grid; gap: 12px; padding: 26px 34px 28px; margin-top: 20px; animation: bly-card-pop .6s var(--out-back) 1.2s both; }
+.bly-menu-keys > .bly-key-big { justify-content: flex-start; gap: 14px; }
+.bly-menu-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.bly-join { display: flex; gap: 8px; padding: 10px; }
+.bly-join input { flex: 1; min-height: 44px; border-radius: 10px; border: 2px solid var(--stone-3); background: #fffdf7; padding: 0 12px; font-weight: 600; }
+@media (max-aspect-ratio: 1/1) { .bly-menu { grid-template-columns: 1fr; align-content: center; } .bly-menu-keys { width: min(520px, 100%); justify-self: center; } }
+@media (prefers-reduced-motion: reduce) { .bly-title-block { animation-duration: .3s; } }
+.bly-title-block::before { content: ''; position: absolute; left: -30%; right: -30%; bottom: -14%; height: 34%; border-radius: 50%; background: radial-gradient(ellipse, rgba(255,255,255,.95), rgba(255,255,255,0) 70%); opacity: 0; animation: bly-title-dust .7s var(--out-quint) both; animation-delay: calc(.75s + var(--i) * .16s); z-index: -1; }
+@keyframes bly-title-dust { 0% { opacity: 0; transform: scale(.4); } 30% { opacity: 1; } 100% { opacity: 0; transform: scale(1.4, 1); } }

@@ -9,6 +9,7 @@ import './EditionPicker.css';
 import './series.css';
 import { WarfrontCard } from '../warfront/PickerCard'; // Warfront
 import { KingdomCard } from '../kingdom/PickerCard'; // Kingdom
+import { BlockyCard } from '../blocky/PickerCard'; // Blocky
 
 /**
  * The first screen. The route-building games sit behind one flagship card, the Ticket to Taitoka series; opening it
@@ -78,6 +79,7 @@ export function EditionPicker() {
         </button>
         <WarfrontCard follower={follower} /> {/* Warfront */}
         <KingdomCard follower={follower} /> {/* Kingdom */}
+        <BlockyCard follower={follower} /> {/* Blocky */}
       </div>
     </main>
     {maps !== 'closed' && <MapChooser closing={maps === 'closing'} onClose={closeMaps} onPick={pick} />}

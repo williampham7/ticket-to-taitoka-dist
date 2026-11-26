@@ -1,0 +1,291 @@
+/* Blocky game screen: sky behind, banners left, the plateau centre, status + shelf right (portrait: stacked). */
+.bly-game {
+  position: relative; height: 100vh; height: 100dvh; overflow: hidden; display: grid; gap: 10px 14px; padding: 12px 16px 10px;
+  grid-template-columns: minmax(214px, 20vw) minmax(0, 1fr) minmax(248px, 23vw);
+  grid-template-rows: auto minmax(0, 1fr); grid-template-areas: 'bar stage side' 'left stage side';
+}
+.bly-bar { grid-area: bar; display: flex; align-items: center; gap: 8px; }
+.bly-left { grid-area: left; position: relative; z-index: 2; display: flex; flex-direction: column; gap: 10px; min-height: 0; }
+.bly-stage { grid-area: stage; position: relative; min-height: 0; min-width: 0; display: grid; place-items: start center; }
+.bly-side { grid-area: side; display: flex; flex-direction: column; gap: 12px; min-height: 0; padding-top: 52px; }
+
+/* brand plate and the icon keys */
+.bly-brand { display: inline-flex; align-items: center; gap: 6px; height: 44px; padding: 0 12px 0 8px; font-family: var(--display); font-weight: 800; font-size: var(--t4); letter-spacing: .5px; }
+.bly-brand-mark { width: 26px; height: 26px; }
+.bly-bar .bly-key { min-width: 44px; padding: 0 10px; }
+
+/* ---------- banners ---------- */
+.bly-banners { display: flex; flex-direction: column; gap: 10px; }
+.bly-banner { position: relative; padding: 19px 10px 20px; isolation: isolate; filter: drop-shadow(0 3px 0 rgba(43, 53, 80, .18)) drop-shadow(0 8px 10px rgba(43, 53, 80, .12)); transition: transform .3s var(--out-back), filter .3s; }
+.bly-cloth { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -1; }
+.bly-cloth-fill { fill: var(--cloth); }
+.bly-banner-rod { position: absolute; left: -6px; right: -6px; top: -5px; height: 9px; border-radius: 5px; background: linear-gradient(180deg, var(--wood-1), var(--wood-3)); box-shadow: inset 0 1px 0 rgba(255, 230, 190, .7), 0 1px 0 var(--wood-4); }
+.bly-banner-rod::before, .bly-banner-rod::after { content: ''; position: absolute; top: -2px; width: 13px; height: 13px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, var(--brass-1), var(--brass-3)); border: 1px solid var(--brass-4); }
+.bly-banner-rod::before { left: -4px; } .bly-banner-rod::after { right: -4px; }
+.bly-banner-top { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 8px; }
+.bly-banner-face { position: relative; display: block; line-height: 0; }
+.bly-banner-id { min-width: 0; display: grid; gap: 3px; }
+.bly-banner-name { font-family: var(--display); font-weight: 700; font-size: var(--t3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.1; }
+.bly-banner-guilds { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; font-size: var(--t1); font-weight: 700; }
+.bly-guildtag { display: inline-flex; align-items: center; gap: 2px; padding: 0 6px 0 1px; border-radius: 99px; background: var(--g-rim); color: var(--g-ink); }
+.bly-you { padding: 1px 7px; border-radius: 99px; background: var(--ink); color: #fff; font-family: var(--display); font-weight: 700; font-size: var(--t1); letter-spacing: .3px; }
+.bly-banner-num { text-align: center; display: grid; justify-items: center; line-height: 1.05; padding: 6px 12px 7px; min-width: 76px; border-radius: 8px; }
+.bly-banner-num .bly-placed { color: #3d2c0e; text-shadow: 0 1px 0 rgba(255, 246, 210, .9), 0 -1px 0 rgba(111, 83, 32, .5); }
+.bly-banner-num small { color: #5a4214 !important; }
+.bly-placed { font-family: var(--display); font-weight: 800; font-size: var(--t4); font-variant-numeric: tabular-nums; color: var(--g-ink); }
+.bly-banner-num small { font-size: var(--t1); color: var(--ink-soft); font-weight: 700; }
+.bly-rank { position: absolute; top: -8px; right: -8px; width: 32px; height: 32px; display: grid; place-items: center; border-radius: 50%;
+  font-family: var(--display); font-weight: 800; font-size: var(--t1); color: #3d2c0e; background: radial-gradient(circle at 35% 30%, var(--brass-1), var(--brass-2) 60%, var(--brass-3));
+  border: 1.5px solid var(--brass-4); box-shadow: 0 2px 0 var(--brass-4); }
+.bly-rank-1, .bly-rank-2, .bly-rank-3 { filter: saturate(.35) brightness(1.08); }
+.bly-banner-on { transform: translateY(-4px) rotate(-.6deg); filter: drop-shadow(0 0 3px var(--g-top)) drop-shadow(0 0 12px var(--g-top)) drop-shadow(0 6px 8px rgba(43, 53, 80, .2)); }
+.bly-banner-out { opacity: .6; filter: saturate(.4); }
+.bly-banner-shelf { display: grid; gap: 4px; width: 100%; margin-top: 6px; padding: 4px 6px; border: none; border-radius: 8px; background: rgba(140, 126, 102, .12); cursor: pointer; }
+.bly-mini { display: flex; flex-wrap: wrap; gap: 2px 3px; align-items: end; }
+.bly-mini span { line-height: 0; }
+.bly-mini-used { opacity: .14; filter: grayscale(1); }
+.bly-mini .bly-mini-count { flex-basis: 100%; height: 14px; line-height: 14px; font-size: var(--t1); font-weight: 800; color: var(--ink-soft); }
+.bly-mini-open { gap: 5px 6px; }
+.bly-mini-open .bly-glyph { transform: scale(1.1); transform-origin: bottom left; margin: 0 1px 1px 0; }
+.bly-danger { display: inline-block; margin-top: 6px; padding: 2px 8px; border-radius: 99px; background: #fff1d2; color: #7a4b00; border: 1.5px solid var(--warn); font-weight: 800; font-size: var(--t1); }
+.bly-stamp { position: absolute; right: 10px; bottom: 12px; padding: 2px 10px; border: 3px double #9a5a4c; color: #9a5a4c; border-radius: 6px; transform: rotate(-9deg);
+  font-family: var(--display); font-weight: 800; letter-spacing: 1px; background: rgba(251, 246, 236, .85); font-size: var(--t2); }
+.bly-stamp-big { right: 50%; bottom: 40%; transform: translate(50%, 0) rotate(-9deg); font-size: var(--t4); }
+.bly-offline { position: absolute; right: -4px; bottom: -2px; padding: 0 4px; border-radius: 6px; background: var(--ink); color: #fff; font-size: 10px; font-weight: 800; }
+
+/* ---------- log ---------- */
+.bly-log { padding: 10px 12px; min-height: 0; flex: 1 1 auto; overflow: hidden; display: flex; flex-direction: column; }
+.bly-log h3 { font-size: var(--t2); color: var(--ink-soft); margin-bottom: 4px; text-shadow: 0 1px 0 #fff; }
+.bly-log ol { list-style: none; margin: 0; padding: 0 4px 0 0; display: grid; align-content: start; gap: 3px; overflow: hidden; min-height: 0; -webkit-mask-image: linear-gradient(180deg, #000 calc(100% - 18px), transparent); mask-image: linear-gradient(180deg, #000 calc(100% - 18px), transparent); }
+.bly-log li { display: grid; grid-template-columns: 18px minmax(0, 1fr); gap: 6px; align-items: center; font-size: var(--t1); line-height: 1.3; }
+.bly-log li > :last-child { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; padding: 1px 4px; border-radius: 6px; }
+.bly-log-dot { width: 10px; height: 10px; margin: 4px; border-radius: 50%; background: var(--stone-3); }
+.bly-log li:first-child { font-weight: 800; }
+.bly-log button { all: unset; cursor: pointer; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; padding: 1px 4px; border-radius: 6px; }
+.bly-log button:hover { background: var(--g-rim, #efe7d5); }
+.bly-log button:focus-visible { outline: 3px solid var(--honey); }
+
+/* ---------- status line ---------- */
+.bly-status { position: relative; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 10px 12px 10px 10px; border-left: 8px solid var(--g-top); }
+.bly-status-text { display: grid; gap: 2px; min-width: 0; }
+.bly-status-text b { font-family: var(--display); font-weight: 700; font-size: var(--t3); line-height: 1.1; }
+.bly-status-text small { font-size: var(--t2); color: var(--ink-soft); font-weight: 600; }
+.bly-steps { grid-column: 1 / -1; display: flex; gap: 0; list-style: none; margin: 4px 0 0; padding: 0; counter-reset: step; }
+.bly-steps li { flex: 1; text-align: center; font-family: var(--display); font-size: var(--t2); font-weight: 700; padding: 3px 0 2px 8px; color: var(--ink-soft);
+  background: #e3d7bd; box-shadow: inset 0 2px 2px rgba(111, 100, 83, .35), inset 0 -1px 0 rgba(255, 255, 255, .7);
+  clip-path: polygon(0 0, calc(100% - 9px) 0, 100% 50%, calc(100% - 9px) 100%, 0 100%, 9px 50%); counter-increment: step; }
+.bly-steps li:first-child { clip-path: polygon(0 0, calc(100% - 9px) 0, 100% 50%, calc(100% - 9px) 100%, 0 100%); border-radius: 8px 0 0 8px; padding-left: 0; }
+.bly-steps li::before { content: counter(step) '  '; opacity: .7; }
+.bly-steps li.done { background: var(--g-rim); color: var(--g-ink); box-shadow: inset 0 1px 2px rgba(43, 53, 80, .2); }
+.bly-steps li.now { background: linear-gradient(180deg, #fff, var(--g-light)); color: var(--ink); box-shadow: inset 0 1px 0 #fff, inset 0 -2px 0 var(--g-top); }
+.bly-steps li.now::before { content: '●  '; color: var(--g-south); opacity: 1; }
+
+/* ---------- shelf ---------- */
+.bly-shelfwrap { position: relative; display: grid; gap: 10px; min-height: 0; }
+.bly-shelf { padding: 10px 22px 12px; margin-top: 18px; }
+.bly-shelf-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
+.bly-shelf-tab { white-space: nowrap; font-family: var(--display); font-weight: 700; font-size: var(--t3); padding: 0 10px; border-radius: 8px 8px 0 0; background: var(--g-top); color: #fff; box-shadow: inset 0 -3px 0 var(--g-south); text-shadow: 0 1px 0 var(--g-ink); }
+.bly-shelf-head small { color: #fff1d8; font-weight: 700; font-size: var(--t1); white-space: nowrap; }
+.bly-shelf-rows { display: grid; gap: 6px; }
+.bly-shelf-row { display: flex; flex-wrap: wrap; gap: 4px 6px; align-items: end; padding-bottom: 6px; border-bottom: 3px solid rgba(94, 59, 31, .35); box-shadow: 0 1px 0 rgba(255, 226, 180, .3); }
+.bly-slot { position: relative; min-width: 44px; min-height: 44px; display: grid; place-items: center; padding: 2px; border: none; border-radius: 10px; background: rgba(255, 240, 215, .12); cursor: grab; touch-action: none;
+  transition: transform .18s var(--out-back), background .18s; }
+.bly-slot:hover { background: rgba(255, 240, 215, .3); transform: translateY(-2px); }
+.bly-slot-held { background: rgba(255, 246, 220, .55); transform: translateY(-7px) rotate(-3deg); box-shadow: 0 10px 14px rgba(43, 53, 80, .3); animation: bly-wobble .5s var(--out-back); }
+@keyframes bly-wobble { 0% { transform: translateY(0) rotate(0); } 40% { transform: translateY(-9px) rotate(-6deg); } 70% { transform: translateY(-6px) rotate(1deg); } 100% { transform: translateY(-7px) rotate(-3deg); } }
+.bly-slot-dead { opacity: .5; filter: saturate(.25); }
+.bly-slot-empty { width: 0; }
+.bly-noroom { position: absolute; left: 50%; bottom: 1px; transform: translateX(-50%); white-space: nowrap; padding: 0 4px; border-radius: 5px; background: rgba(43, 53, 80, .72); color: #fff; font-size: 9px; font-weight: 800; line-height: 13px; pointer-events: none; }
+.bly-slot-dead { padding-bottom: 12px; }
+.bly-shelf-grounded .bly-shelf { filter: saturate(.3) brightness(.95); }
+.bly-shelf-idle { padding: 6px 22px 8px; transform: translateY(6px) scale(.96); opacity: .9; }
+.bly-shelf-idle .bly-shelf-tab { font-size: var(--t2); }
+.bly-idle-pieces { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 4px; }
+.bly-tools { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }
+.bly-tools .bly-key-done { grid-column: 1 / -1; justify-self: end; min-height: 40px; padding: 0 14px; flex-direction: row; gap: 6px; font-size: var(--t2); }
+.bly-log-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+.bly-log-head h3 { margin: 0; }
+.bly-log-head .bly-key { width: 40px; min-width: 40px; min-height: 36px; }
+.bly-tools .bly-key { flex-direction: column; gap: 0; min-height: 60px; min-width: 0; padding: 4px 0; font-size: var(--t1); }
+.bly-tools .bly-key .bly-icon { width: 24px; height: 24px; }
+.bly-kbd { font-size: 10px; opacity: .6; font-family: var(--ui); }
+
+/* ---------- board ---------- */
+.bly-board { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; user-select: none; -webkit-user-select: none; }
+.bly-anchor-gem { fill: var(--g-light); stroke: var(--g-ink); stroke-width: .05; transform-box: fill-box; transform-origin: center; animation: bly-gem 1.6s var(--in-out-sine) infinite; }
+.bly-anchor-glow { fill: var(--g-light); opacity: .3; }
+.bly-anchor-0 .bly-anchor-glow { opacity: .22; }
+.bly-anchor-1 .bly-anchor-gem { fill: var(--g-top); }
+.bly-anchor-2 .bly-anchor-gem { fill: #fff; stroke: var(--g-top); stroke-width: .08; }
+.bly-anchor-2 .bly-anchor-glow { opacity: .65; animation: bly-pulse 1.2s var(--in-out-sine) infinite; }
+.bly-anchors-idle .bly-anchor-gem { animation: none; opacity: .7; }
+@keyframes bly-gem { 0%, 100% { transform: scale(.85); } 50% { transform: scale(1.12); } }
+.bly-lastline { fill: none; stroke: var(--g-top); stroke-width: .13; stroke-opacity: .7; stroke-linejoin: round; }
+.bly-lastline.bly-newest { stroke: var(--g-light); stroke-opacity: 1; stroke-width: .16; }
+.bly-newring { fill: none; stroke: var(--g-light); stroke-width: .16; stroke-linejoin: round; opacity: .85; animation: bly-pulse 1.8s var(--in-out-sine) infinite; }
+.bly-flashline { fill: none; stroke: #fff; stroke-width: .24; animation: bly-flashout 1.4s var(--out-quint) forwards; }
+@keyframes bly-flashout { 0%, 40% { stroke-opacity: 1; } 100% { stroke-opacity: 0; } }
+.bly-ghost { opacity: .58; }
+.bly-ghost-shadow { fill: var(--ink); opacity: .45; }
+.bly-ghost-ants { opacity: 1; }
+.bly-tether { stroke: var(--ink); stroke-width: .07; stroke-linecap: round; opacity: .55; }
+.bly-ghost-ants { fill: none; stroke: #fff; stroke-width: .12; stroke-dasharray: .3 .18; stroke-linecap: round; animation: bly-ants 1s linear infinite; filter: drop-shadow(0 0 .12px rgba(43,53,80,.6)); }
+.bly-ghost-bad .bly-ghost-ants { stroke: var(--err); }
+@keyframes bly-ants { to { stroke-dashoffset: -.96; } }
+.bly-ghost-lift { transform: translate(-.08px, -.22px); }
+.bly-ghost-pending .bly-ghost-lift { transform: translate(-.04px, -.1px); }
+.bly-ghost-bad { opacity: .78; }
+.bly-badcell { fill: rgba(217, 69, 91, .2); stroke: var(--err); stroke-width: .09; animation: bly-bad .5s steps(2) 3; }
+@keyframes bly-bad { 50% { stroke-opacity: .2; fill: rgba(217, 69, 91, 0); } }
+.bly-inspect-lead { fill: none; stroke: var(--ink); stroke-width: .07; stroke-dasharray: .16 .1; opacity: .7; }
+.bly-inspect-dot { fill: #fff; stroke: var(--ink); stroke-width: .06; }
+.bly-inspect-card { fill: #fbf6ec; stroke: #2b3550; stroke-opacity: .6; stroke-width: .05; }
+.bly-inspect-name { font-family: var(--display); font-weight: 700; font-size: .62px; fill: var(--ink); }
+.bly-inspect-sub { font-family: var(--ui); font-weight: 700; font-size: .4px; fill: var(--ink-soft); }
+@keyframes bly-foam { to { transform: translateY(1.1px); } }
+.bly-foam { animation: bly-foam 1.1s linear infinite; }
+.bly-sigil-glow { animation: bly-pulse 2.4s var(--in-out-sine) infinite; }
+.bly-clean-board ~ * .bly-details, .bly-clean-board .bly-details { display: none; }
+
+/* pending ✓ ✕ beside the ghost (HTML over the SVG) */
+.bly-pendkeys { position: absolute; display: flex; gap: 8px; transform: translate(-50%, -50%); z-index: 3; }
+.bly-pendkeys .bly-key { width: 52px; min-height: 52px; padding: 0; border-radius: 50%; }
+.bly-pendkeys .bly-key-go { color: #1f5a33; }
+.bly-reason { position: absolute; left: 50%; transform: translateX(-50%); z-index: 4; padding: 8px 18px 8px 14px; display: flex; align-items: center; gap: 8px; font-weight: 800; color: #7d1d2c; }
+.bly-reason::after { display: none; }
+.bly-hint { position: absolute; z-index: 4; max-width: 230px; padding: 10px 14px; font-weight: 700; font-size: var(--t2); }
+.bly-bubble { position: absolute; left: calc(100% + 10px); top: 10px; z-index: 5; padding: 8px 12px; font-size: 28px; line-height: 1; }
+.bly-bubble::after { content: ''; position: absolute; left: -9px; bottom: 6px; width: 12px; height: 12px; border-radius: 50%; background: #fff; box-shadow: 0 3px 0 #d7e6f2; }
+.bly-lastbuilder { position: absolute; left: 50%; top: 8px; transform: translateX(-50%); z-index: 4; padding: 6px 20px; font-family: var(--display); font-weight: 800; font-size: var(--t3); white-space: nowrap; }
+.bly-plus { font-family: var(--display); font-weight: 800; font-size: .9px; fill: #fff; stroke: var(--ink); stroke-width: .08; paint-order: stroke; }
+.bly-coach { position: absolute; z-index: 6; max-width: 250px; padding: 12px 16px; display: grid; gap: 4px; justify-items: start; animation: bly-bob 4s var(--in-out-sine) infinite; }
+.bly-coach b { font-family: var(--display); font-size: var(--t3); line-height: 1.1; }
+.bly-coach small { font-size: var(--t2); color: var(--ink-soft); font-weight: 600; }
+.bly-coach .bly-key { margin-top: 4px; }
+.bly-skyfront { position: absolute; left: -6%; right: -6%; bottom: -12px; height: 22%; width: 112%; pointer-events: none; z-index: 1; }
+.bly-side { position: relative; }
+.bly-coach-dock { position: relative !important; max-width: none !important; margin-top: 18px; padding: 14px 16px 12px 18px !important; z-index: 1; grid-template-columns: minmax(0, 1fr) auto; align-items: center; padding: 10px 14px !important; }
+.bly-coach-dock b { font-size: var(--t2); grid-column: 1; }
+.bly-coach-dock small { grid-column: 1; font-size: var(--t1); }
+.bly-coach-dock .bly-key { grid-column: 2; grid-row: 1 / span 2; margin: 0; }
+.bly-coach-arrow { position: absolute; left: -18px; top: 50%; transform: translateY(-50%); width: 0; height: 0; border: 10px solid transparent; border-right: 12px solid #fff; z-index: 2; }
+.bly-cloud > * { position: relative; z-index: 1; }
+@media (max-width: 1399px) { .bly-brand-word { display: none; } .bly-brand { padding: 0 8px; } }
+.bly-tools .bly-key-done { font-family: var(--display); }
+
+/* status line: a stitched cloth pennant hung from the shelf's ropes */
+.bly-status { background: radial-gradient(circle, rgba(201, 184, 154, .16) .6px, transparent 1px) 0 0 / 4px 4px, var(--cloth) !important; border: none !important; border-radius: 6px !important;
+  outline: 1.5px dashed #b9a684; outline-offset: -6px; box-shadow: inset 8px 0 0 var(--g-top), 0 3px 0 rgba(43, 53, 80, .16), 0 10px 18px rgba(43, 53, 80, .14) !important; padding-left: 18px !important; border-left: none !important; margin-top: 16px; }
+.bly-status::before, .bly-status::after { content: ''; position: absolute; top: -18px; width: 3px; height: 20px; background: repeating-linear-gradient(45deg, #c9a46e 0 3px, #8a6a3e 3px 5px); border-radius: 2px; }
+.bly-status::before { left: 22%; } .bly-status::after { right: 22%; }
+/* the log: a carved stone slab with an engraved title */
+.bly-log { border-width: 3px !important; border-style: double !important; }
+.bly-log h3 { font-family: var(--display); color: #7d6f58 !important; text-shadow: 0 1px 0 #fff, 0 -1px 0 rgba(94, 84, 70, .35) !important; letter-spacing: .3px; }
+.bly-log-head { border-bottom: 2px groove rgba(205, 191, 159, .9); padding-bottom: 4px; }
+/* clouds: scalloped top and bottom, blue underside */
+.bly-placed-row { display: inline-flex; align-items: center; gap: 4px; }
+.bly-placed-glyph { width: 12px; height: 12px; }
+.bly-banner-num small { font-size: var(--t1) !important; white-space: nowrap; }
+
+/* ---------- dialogs, settings, chat, notices ---------- */
+.bly-modal { position: fixed; inset: 0; z-index: 40; display: grid; place-items: center; background: rgba(27, 42, 92, .35); }
+.bly-modal-card { width: min(440px, 92vw); padding: 22px 24px; display: grid; gap: 12px; }
+.bly-modal-card h2 { font-size: var(--t4); display: flex; align-items: center; gap: 8px; }
+.bly-modal-card p { margin: 0; font-size: var(--t2); line-height: 1.45; color: var(--ink-soft); font-weight: 600; }
+.bly-modal-keys { display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap; }
+.bly-key-danger { background: linear-gradient(180deg, #f7c4c9, #e9939d); border-color: #8e2c3b; color: #4a0f19; box-shadow: inset 0 2px 0 #fde3e6, 0 4px 0 #8e2c3b, 0 8px 14px rgba(43, 53, 80, .2); }
+.bly-settings header { display: flex; justify-content: space-between; align-items: center; }
+.bly-set-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-weight: 700; }
+.bly-set-row small { display: block; font-weight: 600; color: var(--ink-soft); font-size: var(--t1); }
+.bly-set-row input[type='checkbox'] { width: 22px; height: 22px; accent-color: var(--wood-3); }
+.bly-set-row input[type='range'] { accent-color: var(--wood-3); width: 150px; }
+.bly-seg { display: inline-flex; gap: 0; border: 2px solid var(--stone-4); border-radius: 12px; overflow: hidden; background: #e3d7bd; box-shadow: inset 0 2px 3px rgba(111, 100, 83, .3); }
+.bly-seg button { border: none; background: transparent; padding: 8px 12px; min-height: 44px; display: grid; gap: 1px; cursor: pointer; font-family: var(--display); font-weight: 700; font-size: var(--t2); color: var(--ink-soft); }
+.bly-seg button small { font-family: var(--ui); font-weight: 600; font-size: var(--t1); }
+.bly-seg button[aria-checked='true'] { background: linear-gradient(180deg, var(--brass-1), var(--brass-2)); color: #3d2c0e; box-shadow: inset 0 -2px 0 var(--brass-3), 0 0 0 1.5px var(--brass-4); }
+.bly-seg button:disabled { opacity: .45; cursor: not-allowed; }
+.bly-seg-sm button { min-height: 38px; padding: 4px 10px; }
+.bly-chat { position: fixed; left: 22vw; bottom: 16px; z-index: 30; width: min(360px, 80vw); padding: 14px 16px; display: grid; gap: 8px; }
+.bly-chat header { display: flex; justify-content: space-between; align-items: center; font-family: var(--display); font-size: var(--t3); }
+.bly-chat-lines { list-style: none; margin: 0; padding: 0; max-height: 200px; overflow-y: auto; display: grid; gap: 3px; font-size: var(--t2); }
+.bly-emote { font-size: 20px; }
+.bly-emotes { display: flex; flex-wrap: wrap; gap: 4px; }
+.bly-emotes button { width: 40px; height: 40px; font-size: 20px; border-radius: 12px; border: 1.5px solid #cfe0ee; background: #f4f9fd; cursor: pointer; }
+.bly-chat form { display: flex; gap: 6px; }
+.bly-chat input { flex: 1; min-height: 40px; border-radius: 10px; border: 2px solid #cfe0ee; padding: 0 10px; }
+.bly-bubble-text { font-size: var(--t2); max-width: 180px; white-space: normal; font-weight: 700; }
+.bly-away { padding: 10px 14px; display: grid; gap: 6px; font-weight: 700; font-size: var(--t2); }
+.bly-hint-dock { position: relative; margin: 4px 0 0; padding: 12px 14px; font-weight: 700; font-size: var(--t2); color: #7a4b00; }
+.bly-muted-slash { position: absolute; width: 30px; height: 3px; background: var(--err); transform: rotate(-40deg); border-radius: 2px; }
+.bly-key-icon { position: relative; }
+
+/* ---------- result ---------- */
+.bly-result { position: fixed; inset: 0; z-index: 35; display: grid; place-items: center; overflow: auto; padding: 24px; }
+.bly-result-card { position: relative; width: min(760px, 94vw); display: grid; gap: 14px; justify-items: center; color: #fff; }
+.bly-result-card h1 { font-size: var(--t5); text-shadow: 0 3px 0 #1b2a5c, 0 0 24px rgba(255, 214, 120, .6); text-align: center; }
+.bly-podium { position: relative; display: grid; justify-items: center; }
+.bly-podium-face { display: inline-block; margin: 0 -6px -18px; position: relative; z-index: 1; filter: drop-shadow(0 6px 10px rgba(0, 0, 0, .35)); }
+.bly-podium-isle { width: 220px; }
+.bly-tally { list-style: none; margin: 0; padding: 0; width: 100%; display: grid; gap: 10px; }
+.bly-tally-row { display: grid; grid-template-columns: 44px 44px minmax(0, 1fr) auto; grid-template-areas: 'rank face name total' 'rank face lines total'; align-items: center; gap: 2px 12px; padding: 12px 16px; color: var(--ink); }
+.bly-tally-rank { grid-area: rank; font-family: var(--display); font-weight: 800; font-size: var(--t3); }
+.bly-tally-row .bly-avatar { grid-area: face; }
+.bly-tally-name { grid-area: name; font-family: var(--display); font-size: var(--t3); }
+.bly-tally-lines { grid-area: lines; display: grid; gap: 2px; }
+.bly-tally-guild { display: inline-flex; align-items: center; gap: 4px; font-size: var(--t2); font-weight: 700; color: var(--g-ink); }
+.bly-tally-total { grid-area: total; font-family: var(--display); font-size: var(--t4); font-variant-numeric: tabular-nums; }
+.bly-tally-win { box-shadow: 0 0 0 3px var(--brass-2), 0 0 26px rgba(255, 214, 120, .6), var(--bly-shadow); }
+.bly-tally-shared { margin: 0; font-weight: 700; color: #e8eefc; }
+.bly-result-keys { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+
+/* portrait (iPad upright): banners in a row, the board (its underside runs behind the shelf), then status over shelf */
+@media (max-aspect-ratio: 1/1) {
+  .bly-game { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto minmax(0, 1fr) auto; grid-template-areas: 'bar' 'left' 'stage' 'side'; gap: 8px; }
+  .bly-left { flex-direction: row; }
+  .bly-left .bly-log { display: none; }
+  .bly-banners { flex-direction: row; flex: 1; gap: 12px; padding-top: 6px; }
+  .bly-banners .bly-banner { flex: 1 1 0; min-width: 0; padding: 18px 8px 16px; }
+  .bly-banner-top { grid-template-columns: auto minmax(0, 1fr); }
+  .bly-banner-num { grid-column: 1 / -1; display: flex; gap: 8px; align-items: baseline; justify-content: center; padding: 4px 8px; }
+  .bly-banner-shelf { display: none; }
+  .bly-stage { z-index: 0; }
+  /* the grid and rim fill the stage; the underside (≈ 0.395 of that height, same for Duo and Classic) runs behind the shelf */
+  .bly-board { bottom: auto; height: 139.5%; }
+  .bly-side { position: relative; z-index: 1; padding-top: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; }
+  .bly-side > .bly-status { margin-top: 14px; }
+  .bly-shelf { margin-top: 12px; }
+  .bly-shelf-rows { grid-template-columns: repeat(3, auto); justify-content: space-between; }
+  .bly-shelf-row { border-bottom: none; box-shadow: none; }
+}
+
+/* short and narrow landscape (iPad 1024x768): compact banners, a right gutter */
+@media (min-aspect-ratio: 1/1) and (max-height: 860px) { .bly-banner { padding: 15px 8px 16px; } .bly-banner-face .bly-avatar { width: 40px; height: 40px; } .bly-banner-shelf { margin-top: 3px; padding: 3px 5px; } .bly-banners { gap: 6px; } }
+@media (min-aspect-ratio: 1/1) and (max-width: 1100px) { .bly-game { padding-right: 22px; } .bly-tools { gap: 4px; } }
+@media (max-aspect-ratio: 1/1) { .bly-skyfront { height: 34%; bottom: -4px; } }
+
+/* very large screens: the HUD grows with the board */
+@media (min-width: 2200px) and (min-height: 1300px) { .bly-left, .bly-side, .bly-bar { zoom: 1.5; } .bly-game { grid-template-columns: minmax(214px, 20vw) minmax(0, 1fr) minmax(248px, 24vw); } }
+@media (min-width: 1650px) and (max-width: 2199px) and (min-height: 1000px) { .bly-left, .bly-side, .bly-bar { zoom: 1.12; } }
+.bly-side, .bly-shelfwrap, .bly-shelf { min-width: 0; }
+.bly-shelf-head { flex-wrap: wrap; row-gap: 2px; }
+
+/* Gate E: legal ghost = solid guild colour with a glowing solid edge; illegal = grey with red ants */
+.bly-ghost { opacity: .82; }
+.bly-ghost .bly-ghost-ants { stroke: var(--g-light, #fff); stroke-dasharray: none; stroke-width: .16; filter: drop-shadow(0 0 .2px #fff); animation: bly-pulse 1.2s var(--in-out-sine) infinite; }
+.bly-ghost-bad { opacity: .7; }
+.bly-ghost-bad .bly-ghost-ants { stroke: var(--err); stroke-dasharray: .3 .18; animation: bly-ants 1s linear infinite; }
+.bly-ghost-pending .bly-ghost-ants { stroke: #fff; stroke-width: .14; }
+.bly-alert { color: var(--err) !important; font-weight: 800 !important; }
+.bly-lastbuilder { display: inline-flex; align-items: center; gap: 8px; top: 2px !important; padding: 4px 18px 4px 8px !important; color: #3d2c0e; font-size: var(--t3); box-shadow: 0 0 0 3px var(--g-top), var(--bly-shadow); }
+.bly-anchor-gem { stroke-width: .07; }
+.bly-anchor-0 .bly-anchor-gem { fill: var(--g-top); stroke: var(--g-ink); }
+.bly-anchors-idle .bly-anchor-gem { opacity: .55; }
+.bly-banner .bly-stamp { left: auto; right: 8px; top: auto; bottom: 16px; font-size: var(--t1); padding: 0 6px; }
+
+/* anchors: two clear tiers while a piece is held: hollow = fits some way, bright filled + ring = fits as turned */
+.bly-anchor-gem { stroke: var(--g-ink); stroke-width: .08; }
+.bly-anchor-1 .bly-anchor-gem { fill: #fff; fill-opacity: .25; stroke: var(--g-ink); stroke-width: .1; }
+.bly-anchor-2 .bly-anchor-gem { fill: var(--g-top); stroke: #fff; stroke-width: .1; }
+.bly-anchor-2 .bly-anchor-glow { fill: var(--g-light); opacity: .75; stroke: var(--g-top); stroke-width: .06; }
+/* the illegal ghost lets the blocks it collides with show through */
+.bly-ghost-bad { opacity: .45; }

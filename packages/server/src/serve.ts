@@ -8,6 +8,8 @@ import { WarfrontGame } from '@boboland/shared'; // Warfront
 import { installWarfrontBots } from './warfrontBots'; // Warfront
 import { KingdomGame } from '@boboland/shared'; // Kingdom
 import { installKingdomBots } from './kingdomBots'; // Kingdom
+import { BlockyGame } from '@boboland/shared'; // Blocky
+import { installBlockyBots } from './blockyBots'; // Blocky
 import { lanAddresses } from './lanInfo';
 import { SERVER_TITLE } from './title';
 import { openBrowser } from './openBrowser';
@@ -33,7 +35,9 @@ const egyptian = process.env.SEED ? { ...EgyptianGame, seed: process.env.SEED } 
 const warfront = process.env.SEED ? { ...WarfrontGame, seed: process.env.SEED } : WarfrontGame;
 // Kingdom (2-4 players, shifting maze), under the game name `kingdom`.
 const kingdom = process.env.SEED ? { ...KingdomGame, seed: process.env.SEED } : KingdomGame;
-const server = Server({ games: [game, frontline, fleet, egyptian, warfront, kingdom], origins: [/.*/] });
+// Blocky (2-4 players, corner-touch polyominoes), under the game name `blocky`.
+const blocky = process.env.SEED ? { ...BlockyGame, seed: process.env.SEED } : BlockyGame;
+const server = Server({ games: [game, frontline, fleet, egyptian, warfront, kingdom, blocky], origins: [/.*/] });
 
 // PUBLIC_URL is set by `npm run play:online` once the Cloudflare tunnel is up.
 const PUBLIC_URL = process.env.PUBLIC_URL || null;
@@ -46,6 +50,7 @@ installBots(server, { port: PORT });
 installParty(server);
 installWarfrontBots(server, { port: PORT }); // Warfront
 installKingdomBots(server, { port: PORT }); // Kingdom
+installBlockyBots(server, { port: PORT }); // Blocky
 
 if (fs.existsSync(indexHtml)) {
   server.app.use(serve(clientDist));

@@ -11,6 +11,7 @@ import { savedSeat as savedFleetSeat } from '../fleet/lobby';
 import { savedSeat as savedEgyptianSeat } from '../egyptian/lobby';
 import { savedSeat as savedWarfrontSeat } from '../warfront/lobby'; // Warfront
 import { savedSeat as savedKingdomSeat } from '../kingdom/lobby'; // Kingdom
+import { savedSeat as savedBlockySeat } from '../blocky/lobby'; // Blocky
 
 /**
  * The party on this browser: who I am (kept in localStorage), my name, and my party as the server last told it.
@@ -79,7 +80,7 @@ function report() {
   const p = state.party, me = state.me;
   if (!p || !me || !isHost()) return;
   const path = window.location.pathname;
-  const at = { path, ...(path === '/' || path.startsWith('/frontline') || path.startsWith('/fleet') || path.startsWith('/warfront') || path.startsWith('/kingdom') /* Kingdom */ ? {} : { edition: EDITION.id }) };
+  const at = { path, ...(path === '/' || path.startsWith('/frontline') || path.startsWith('/fleet') || path.startsWith('/warfront') || path.startsWith('/kingdom') /* Kingdom */ || path.startsWith('/blocky') /* Blocky */ ? {} : { edition: EDITION.id }) };
   if (p.at.path === at.path && p.at.edition === at.edition) return;
   void call<PartyView>('goto', { ...me, at }).then((v) => v && set({ party: v })).catch(() => {});
 }
@@ -91,7 +92,7 @@ function follow() {
   const others = p.members.filter((m) => m.id !== p.host);
   const t = followTarget({
     at: p.at, atAge: p.atAge, here: window.location.pathname, edition: EDITION.id,
-    hasSeat: (id) => !!savedSeat(id), hasFrontlineSeat: (id) => !!savedFrontlineSeat(id), hasFleetSeat: (id) => !!savedFleetSeat(id), hasEgyptianSeat: (id) => !!savedEgyptianSeat(id), hasWarfrontSeat: (id) => !!savedWarfrontSeat(id), hasKingdomSeat: (id) => !!savedKingdomSeat(id) /* Kingdom */, firstMember: others[0]?.id === me.id,
+    hasSeat: (id) => !!savedSeat(id), hasFrontlineSeat: (id) => !!savedFrontlineSeat(id), hasFleetSeat: (id) => !!savedFleetSeat(id), hasEgyptianSeat: (id) => !!savedEgyptianSeat(id), hasWarfrontSeat: (id) => !!savedWarfrontSeat(id), hasKingdomSeat: (id) => !!savedKingdomSeat(id) /* Kingdom */, hasBlockySeat: (id) => !!savedBlockySeat(id) /* Blocky */, firstMember: others[0]?.id === me.id,
   });
   if (!t) return;
   if (t.edition) setEdition(t.edition as EditionId, { path: t.path });

@@ -7,6 +7,7 @@ import { FleetApp } from './fleet/FleetApp';
 import { EgyptianApp } from './egyptian/EgyptianApp';
 import { WarfrontApp } from './warfront/WarfrontApp'; // Warfront
 import { KingdomApp } from './kingdom/KingdomApp'; // Kingdom
+import { BlockyApp } from './blocky/BlockyApp'; // Blocky
 import { NamePrompt, PartyButton, PartyHold } from './components/Party';
 import { LanGame, LanHost, LanJoin, LanWaiting } from './screens/Lan';
 
@@ -29,6 +30,7 @@ function Screen() {
     case 'egyptian': return <EgyptianApp />;
     case 'warfront': return <WarfrontApp />; // Warfront
     case 'kingdom': return <KingdomApp />; // Kingdom
+    case 'blocky': return <BlockyApp />; // Blocky
     case 'party': return <PartyHold />;
     case 'menu': return <Home />;
     case 'local': return <LocalScreen />;

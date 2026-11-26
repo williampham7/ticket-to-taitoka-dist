@@ -23,6 +23,8 @@ export interface FollowInput {
   hasWarfrontSeat?: (matchID: string) => boolean;
   /** Kingdom: I hold a seat in this waiting room or game */
   hasKingdomSeat?: (matchID: string) => boolean;
+  /** Blocky: I hold a seat in this waiting room or game */
+  hasBlockySeat?: (matchID: string) => boolean;
   /** I am the first member after the host (Frontline and Fleet seat one opponent; the rest watch) */
   firstMember: boolean;
 }
@@ -31,7 +33,7 @@ export function followTarget(i: FollowInput): { path: string; edition?: string }
   if (i.atAge < SETTLE_MS) return null;
   const path = targetPath(i);
   if (!path) return null;
-  const ttr = path !== '/' && path !== HOLD && !NO_EDITION.some((g) => path.startsWith(`/${g}`)) && !path.startsWith('/warfront') && !path.startsWith('/kingdom'); // Kingdom: no edition
+  const ttr = path !== '/' && path !== HOLD && !NO_EDITION.some((g) => path.startsWith(`/${g}`)) && !path.startsWith('/warfront') && !path.startsWith('/kingdom') && !path.startsWith('/blocky'); // Kingdom, Blocky: no edition
   if (ttr && i.at.edition && i.at.edition !== i.edition) return { path, edition: i.at.edition };
   return path === i.here ? null : { path };
 }
@@ -83,7 +85,17 @@ function kingdom(b: string | undefined, c: string | undefined, here: string, sea
   return null;
 }
 
-function targetPath({ at, here, hasSeat, hasFrontlineSeat, hasFleetSeat, hasEgyptianSeat, hasWarfrontSeat, hasKingdomSeat, firstMember }: FollowInput): string | null {
+// Blocky (2-4 players): Kingdom's pattern; members take free seats, the rest watch.
+function blocky(b: string | undefined, c: string | undefined, here: string, seated: boolean): string | null {
+  if (!b) return '/blocky';
+  if (b === 'local' || b === 'bot' || b === 'gallery' || b === 'scenes' || b === 'mock') return HOLD;
+  if (b === 'wait' && c) return seated ? `/blocky/wait/${c}` : here.startsWith('/blocky/play/') ? null : `/blocky/join/${c}`;
+  if (b === 'play' && c) return seated ? `/blocky/play/${c}` : here.startsWith('/blocky/wait/') || here.startsWith('/blocky/join/') ? null : `/blocky/watch/${c}`;
+  if (b === 'watch' && c) return `/blocky/watch/${c}`;
+  return null;
+}
+
+function targetPath({ at, here, hasSeat, hasFrontlineSeat, hasFleetSeat, hasEgyptianSeat, hasWarfrontSeat, hasKingdomSeat, hasBlockySeat, firstMember }: FollowInput): string | null {
   const [, a, b, c] = at.path.split('/');
   const inGame = here.startsWith('/play/');
   const inRoom = here.startsWith('/wait/') || here.startsWith('/join/');
@@ -98,6 +110,7 @@ function targetPath({ at, here, hasSeat, hasFrontlineSeat, hasFleetSeat, hasEgyp
     case 'egyptian': return egyptian(b, c, here, !!c && hasEgyptianSeat(c));
     case 'warfront': return warfront(b, c, here, !!c && !!hasWarfrontSeat?.(c)); // Warfront
     case 'kingdom': return kingdom(b, c, here, !!c && !!hasKingdomSeat?.(c)); // Kingdom
+    case 'blocky': return blocky(b, c, here, !!c && !!hasBlockySeat?.(c)); // Blocky
     default: return null;
   }
 }

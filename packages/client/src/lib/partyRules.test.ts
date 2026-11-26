@@ -108,3 +108,19 @@ describe('followTarget: Kingdom', () => {
     expect(kg({ at: { path: '/kingdom/wait/r1', edition: 'china' }, edition: 'usa' })).toEqual({ path: '/kingdom/join/r1' });
   });
 });
+
+// Blocky
+describe('followTarget: Blocky', () => {
+  const bl = (o: Partial<FollowInput>) => go({ hasBlockySeat: () => false, ...o });
+  it('blocky: members take free seats, rest watch', () => {
+    expect(bl({ at: { path: '/blocky' } })).toEqual({ path: '/blocky' });
+    expect(bl({ at: { path: '/blocky/wait/r1' } })).toEqual({ path: '/blocky/join/r1' });
+    expect(bl({ at: { path: '/blocky/wait/r1' }, hasBlockySeat: (id) => id === 'r1' })).toEqual({ path: '/blocky/wait/r1' });
+    expect(bl({ at: { path: '/blocky/play/g1' }, hasBlockySeat: (id) => id === 'g1' })).toEqual({ path: '/blocky/play/g1' });
+    expect(bl({ at: { path: '/blocky/play/g1' } })).toEqual({ path: '/blocky/watch/g1' });
+    expect(bl({ at: { path: '/blocky/play/g1' }, here: '/blocky/wait/r1' })).toBeNull();
+    expect(bl({ at: { path: '/blocky/bot' } })).toEqual({ path: HOLD });
+    expect(bl({ at: { path: '/blocky/local' } })).toEqual({ path: HOLD });
+    expect(bl({ at: { path: '/blocky/wait/r1', edition: 'china' }, edition: 'usa' })).toEqual({ path: '/blocky/join/r1' });
+  });
+});

@@ -1,0 +1,128 @@
+/* Blocky animations. Every effect element has .bly-fxa and its start in --d, length in --t (ms from the event's
+   start). The scenes gallery freezes any frame: .bly-scrub pauses everything and --scrub shifts the clock. */
+.bly-fxa { animation-delay: calc(var(--d, 0ms) - var(--scrub, 0ms)); animation-duration: var(--t, 600ms); animation-fill-mode: both; animation-timing-function: var(--out-quint); }
+.bly-scrub .bly-fxa, .bly-scrub .bly-fxa * { animation-play-state: paused !important; }
+
+/* place: anticipation */
+.bly-fx-glow rect { fill: var(--g-light, #fff); stroke: #fff; stroke-width: .06; }
+.bly-fx-glow { animation-name: bly-fx-glow; animation-timing-function: var(--in-out-sine); }
+@keyframes bly-fx-glow { 0% { opacity: 0; } 30% { opacity: .75; } 70% { opacity: .55; } 100% { opacity: 0; } }
+/* place: travel from the banner (the piece arrives above its spot) */
+.bly-fx-travel { animation-name: bly-fx-travel, bly-fx-gone; animation-duration: var(--t), 1ms; animation-delay: calc(var(--d) - var(--scrub, 0ms)), calc(var(--pre) - var(--scrub, 0ms)); animation-fill-mode: both, forwards; }
+@keyframes bly-fx-travel { 0% { transform: translate(var(--fx), var(--fy)) scale(.45); opacity: 0; } 15% { opacity: 1; } 100% { transform: translate(0, 0) scale(1); opacity: 1; } }
+/* place: action, each block falls with a squash, then hides when the merged piece appears */
+.bly-fx-block { animation-name: bly-fx-drop, bly-fx-gone; animation-duration: var(--t), 1ms; animation-delay: calc(var(--d) - var(--scrub, 0ms)), calc(var(--land) - var(--scrub, 0ms)); animation-timing-function: var(--in-quad, ease-in), linear; animation-fill-mode: both, forwards; transform-box: fill-box; transform-origin: 50% 100%; }
+@keyframes bly-fx-drop { 0% { transform: translateY(var(--h)); opacity: 0; } 10% { opacity: 1; } 68% { transform: translateY(0) scale(1, 1); } 80% { transform: translateY(0) scale(1.12, .78); } 92% { transform: translateY(-.05px) scale(.96, 1.05); } 100% { transform: translateY(0) scale(1, 1); opacity: 1; } }
+@keyframes bly-fx-gone { to { opacity: 0; visibility: hidden; } }
+/* place: impact */
+.bly-fx-dust { fill: #fff; stroke: rgba(140, 126, 102, .5); stroke-width: .02; animation-name: bly-fx-puff; transform-box: fill-box; transform-origin: center; }
+@keyframes bly-fx-puff { 0% { transform: translate(0, 0) scale(.3); opacity: 0; } 20% { opacity: .95; } 100% { transform: translate(var(--dx), var(--dy)) scale(1.6); opacity: 0; } }
+.bly-fx-ripple { fill: none; stroke: var(--g-light); stroke-width: .22; animation-name: bly-fx-ripple; }
+@keyframes bly-fx-ripple { 0% { transform: scale(1); opacity: 0; } 12% { opacity: .95; } 100% { transform: scale(1.6); opacity: 0; } }
+/* place: settle */
+.bly-fx-joint { fill: #fff; animation-name: bly-fx-joint; transform-box: fill-box; transform-origin: center; }
+@keyframes bly-fx-joint { 0% { transform: scale(.2); opacity: 0; } 35% { transform: scale(1.25); opacity: 1; } 100% { transform: scale(.8); opacity: 0; } }
+/* place: residue */
+.bly-fx-plus { font-family: var(--display); font-weight: 800; font-size: .95px; fill: #fff; stroke: var(--ink); stroke-width: .09; paint-order: stroke; text-anchor: middle; animation-name: bly-fx-plus; }
+@keyframes bly-fx-plus { 0% { transform: translateY(.3px); opacity: 0; } 15% { transform: translateY(0); opacity: 1; } 70% { opacity: 1; } 100% { transform: translateY(-1.4px); opacity: 0; } }
+.bly-fx-splash { fill: none; stroke: #e4fbff; stroke-width: .14; animation-name: bly-fx-ripple; }
+.bly-fx-drop { fill: #d8f7fb; stroke: #2b7286; stroke-width: .03; animation-name: bly-fx-fly; animation-timing-function: var(--out-quint); }
+.bly-fx-rays { fill: #fff0a0; animation-name: bly-fx-rays; }
+.bly-fx-rays path { opacity: 1; stroke: #e8a42c; stroke-width: .03; }
+@keyframes bly-fx-rays { 0% { transform: scale(.3) rotate(0); opacity: 0; } 25% { opacity: .9; } 100% { transform: scale(1.15) rotate(40deg); opacity: 0; } }
+.bly-fx-spark { fill: #ffe08a; stroke: #e2572f; stroke-width: .03; animation-name: bly-fx-fly; }
+.bly-fx-spark-halo { fill: #ffb347; opacity: .35; animation-name: bly-fx-fly; }
+.bly-fx-leaf { fill: #a6d27f; stroke: #3a6a28; stroke-width: .02; animation-name: bly-fx-leaf; transform-box: fill-box; }
+@keyframes bly-fx-fly { 0% { transform: translate(0, 0); opacity: 0; } 15% { opacity: 1; } 100% { transform: translate(var(--dx), var(--dy)); opacity: 0; } }
+@keyframes bly-fx-leaf { 0% { transform: translate(0, 0) rotate(0); opacity: 0; } 15% { opacity: 1; } 100% { transform: translate(var(--dx), var(--dy)) rotate(var(--rot)); opacity: 0; } }
+.bly-fx-sprout { animation-name: bly-fx-sprout; animation-timing-function: var(--out-back); }
+@keyframes bly-fx-sprout { 0% { transform: scale(0); opacity: 0; } 30% { transform: scale(1.2); opacity: 1; } 80% { transform: scale(1); opacity: 1; } 100% { transform: scale(1); opacity: 0; } }
+.bly-fx-star { fill: #fff8d8; stroke: #e8b84a; stroke-width: .02; animation-name: bly-fx-star; }
+@keyframes bly-fx-star { 0% { opacity: 0; } 20% { opacity: 1; } 100% { transform: translate(var(--dx), var(--dy)) rotate(180deg); opacity: 0; } }
+.bly-fx-confetti { animation-name: bly-fx-confetti; animation-timing-function: var(--out-quint); transform-box: fill-box; transform-origin: center; }
+@keyframes bly-fx-confetti { 0% { transform: translate(0, 0) rotate(0); opacity: 0; } 4% { opacity: 1; } 100% { transform: translate(var(--dx), var(--dy)) rotate(var(--rot)); opacity: 0; } }
+.bly-fx-flag { animation-name: bly-fx-flag; animation-timing-function: var(--out-back); }
+@keyframes bly-fx-flag { 0% { transform: scale(1, 0); opacity: 0; } 40% { transform: scale(1, 1.15); opacity: 1; } 60%, 100% { transform: scale(1, 1); opacity: 1; } }
+.bly-fx-flagcloth { transform-box: fill-box; transform-origin: 0 50%; animation: bly-fx-wave 1s var(--in-out-sine) infinite; }
+@keyframes bly-fx-wave { 50% { transform: skewY(8deg) scaleX(.85); } }
+.bly-fx-sprite { animation-name: bly-fx-sprite; animation-timing-function: var(--in-out-sine); }
+@keyframes bly-fx-sprite {
+  0% { transform: translateY(-1.2px) scale(.4); opacity: 0; animation-timing-function: cubic-bezier(.55, .085, .68, .53); } 12% { transform: translateY(.06px) scale(1.12, .86); opacity: 1; animation-timing-function: cubic-bezier(.34, 1.56, .64, 1); } 20% { transform: translateY(0) scale(1); }
+  68% { transform: translateY(0) scale(1); opacity: 1; } 72% { transform: translateY(.04px) scale(1.08, .9); animation-timing-function: cubic-bezier(.22, 1, .36, 1); } 84% { transform: translate(.6px, -.8px) scale(.95, 1.05); animation-timing-function: cubic-bezier(.55, .085, .68, .53); } 100% { transform: translate(1.2px, .2px) scale(.6); opacity: 0; } }
+.bly-fx-wave { transform-box: fill-box; transform-origin: 0 100%; animation: bly-fx-arm .35s var(--in-out-sine) 4 alternate; animation-delay: calc(var(--d) + 500ms - var(--scrub, 0ms)); }
+@keyframes bly-fx-arm { to { transform: rotate(-40deg); } }
+.bly-fx-pennant { transform-box: fill-box; transform-origin: 50% 100%; animation: bly-fx-plant .3s var(--out-back) both; animation-delay: calc(var(--d) + 250ms - var(--scrub, 0ms)); }
+@keyframes bly-fx-plant { from { transform: translateY(-.4px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+/* growth: details pop in when a piece reaches a new stage */
+.bly-details > g, .bly-details > use { transform-box: fill-box; transform-origin: 50% 90%; animation: bly-grow .42s var(--out-back) both; }
+@keyframes bly-grow { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+/* stuck / done: the stamp lands with a puff */
+.bly-stamp { animation: bly-stamp-in .5s var(--out-back) both; }
+@keyframes bly-stamp-in { 0% { transform: rotate(-9deg) scale(2.2); opacity: 0; } 60% { transform: rotate(-9deg) scale(.92); opacity: 1; } 100% { transform: rotate(-9deg) scale(1); } }
+.bly-stamp::before { content: ''; position: absolute; inset: -14px -18px; border-radius: 50%; background: radial-gradient(circle at 30% 50%, #fff 30%, transparent 32%), radial-gradient(circle at 60% 40%, #fff 34%, transparent 36%), radial-gradient(circle at 75% 65%, #fff 28%, transparent 30%); z-index: -1; animation: bly-puff-out .9s var(--out-quint) both; }
+@keyframes bly-puff-out { 0% { transform: scale(.4); opacity: 0; } 30% { transform: scale(1.1); opacity: .95; } 100% { transform: scale(1.4); opacity: 0; } }
+
+/* your turn: the shelf rises, the anchors pulse once */
+.bly-rise .bly-shelf { animation: bly-rise .6s var(--out-back); }
+@keyframes bly-rise { 0% { transform: translateY(26px); } 100% { transform: translateY(0); } }
+.bly-rise-board .bly-anchor-glow { animation: bly-hello .9s var(--out-quint) 1; }
+@keyframes bly-hello { 0% { transform: scale(.4); opacity: 0; } 40% { transform: scale(1.8); opacity: .9; } 100% { transform: scale(1); opacity: .3; } }
+.bly-anchor-glow { transform-box: fill-box; transform-origin: center; }
+
+/* moments */
+.bly-moments { position: absolute; inset: 0; pointer-events: none; z-index: 5; }
+.bly-ribbon { position: absolute; left: 50%; top: auto; bottom: 7%; display: flex; align-items: center; gap: 12px; padding: 14px 30px 14px 18px; transform: translateX(-50%); animation-name: bly-ribbon; white-space: nowrap; }
+.bly-ribbon b { font-family: var(--display); font-size: var(--t4); color: var(--ink); }
+.bly-ribbon small { font-weight: 800; color: var(--g-ink); }
+.bly-ribbon-cloud { position: absolute; inset: 0; z-index: -1; border-radius: 40px; background: #fff; box-shadow: 0 6px 0 #d7e6f2, 0 14px 30px rgba(43, 53, 80, .2), inset 0 -6px 0 var(--g-rim); }
+.bly-ribbon-cloud::before, .bly-ribbon-cloud::after { content: ''; position: absolute; top: -18px; width: 48px; height: 48px; border-radius: 50%; background: #fff; }
+.bly-ribbon-cloud::before { left: 22%; } .bly-ribbon-cloud::after { right: 24%; width: 38px; height: 38px; top: -12px; }
+@keyframes bly-ribbon { 0% { clip-path: inset(-30px 50% -30px 50%); opacity: 0; transform: translateX(-50%) scale(.9); } 25% { clip-path: inset(-30px -10px -30px -10px); opacity: 1; transform: translateX(-50%) scale(1.06); } 33% { transform: translateX(-50%) scale(.98); } 40% { transform: translateX(-50%) scale(1); } 75% { clip-path: inset(-30px -10px -30px -10px); opacity: 1; transform: translateX(-50%) translateY(0); } 100% { clip-path: inset(-30px -10px -30px -10px); opacity: 0; transform: translateX(-50%) translateY(-24px); } }
+.bly-reveal { position: absolute; inset: 0; display: grid; place-items: center; animation-name: bly-reveal; background: radial-gradient(circle, rgba(255, 255, 255, .35), transparent 70%); }
+@keyframes bly-reveal { 0% { opacity: 0; } 12% { opacity: 1; } 82% { opacity: 1; } 100% { opacity: 0; } }
+.bly-reveal-card { padding: 22px 28px 18px; display: grid; gap: 14px; justify-items: center; animation: bly-card-pop .5s var(--out-back) both; animation-delay: calc(0ms - var(--scrub, 0ms)); }
+.bly-scrub .bly-reveal-card { animation-play-state: paused; }
+@keyframes bly-card-pop { from { transform: scale(.86); opacity: 0; } to { transform: none; opacity: 1; } }
+.bly-reveal-card h2 { font-size: var(--t4); }
+.bly-reveal-card ul { list-style: none; display: flex; gap: 18px; margin: 0; padding: 0; min-height: 100px; align-items: start; }
+.bly-reveal-guild { display: grid; justify-items: center; gap: 2px; animation-name: bly-crest-in; animation-timing-function: var(--out-back); }
+.bly-reveal-guild b { font-family: var(--display); font-size: var(--t3); color: var(--g-ink); }
+.bly-reveal-guild small { font-weight: 800; }
+@keyframes bly-crest-in { 0% { transform: translateY(30px) scale(.4) rotate(-12deg); opacity: 0; } 70% { transform: translateY(-4px) scale(1.12) rotate(2deg); opacity: 1; } 85% { transform: translateY(1px) scale(.96, 1.04); } 100% { transform: none; opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .bly-fx-sprite, .bly-fx-confetti, .bly-fx-leaf { animation-duration: 1ms !important; } }
+
+.bly-fx-appear { animation-name: bly-fx-appear; animation-duration: 1ms; }
+@keyframes bly-fx-appear { from { opacity: 0; } to { opacity: 1; } }
+.bly-scrub .bly-stamp, .bly-scrub .bly-stamp::before, .bly-scrub .bly-details > * { animation-play-state: paused !important; animation-delay: calc(0ms - var(--scrub, 0ms)) !important; }
+/* scenes gallery */
+.bly-scenes { position: relative; min-height: 100vh; padding: 16px; display: grid; gap: 12px; align-content: start; }
+.bly-scene-nav { display: flex; flex-wrap: wrap; gap: 6px; }
+.bly-scene-nav a { text-decoration: none; }
+.bly-scene-frame { position: relative; width: min(92vw, 720px); height: min(70vh, 600px); justify-self: center; border-radius: 16px; overflow: hidden; border: 2px solid var(--stone-3); background: rgba(255, 255, 255, .25); }
+.bly-scene-board, .bly-scene-moment, .bly-scene-banner { position: absolute; inset: 0; }
+.bly-scene-banner { display: grid; place-items: center; }
+.bly-scene-banner .bly-banner { width: 260px; }
+.bly-scene-t { position: absolute; left: 8px; bottom: 6px; padding: 1px 8px; border-radius: 8px; background: var(--ink); color: #fff; font: 800 12px var(--ui); z-index: 9; }
+.bly-strip-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.bly-strip .bly-scene-frame { width: 100%; height: 300px; }
+.bly-strip .bly-ribbon b { font-size: var(--t3); }
+
+/* own drop: the ghost's dip (a bright outline pulses and settles onto the spot) */
+.bly-fx-dip { fill: none; stroke: #fff; stroke-width: .16; animation-name: bly-fx-dip; animation-timing-function: var(--in-out-sine); }
+@keyframes bly-fx-dip { 0% { transform: translateY(-.25px) scale(1.04); opacity: .95; } 70% { transform: translateY(.06px) scale(.98); opacity: 1; } 100% { transform: none; opacity: 0; } }
+/* growth */
+.bly-fx-growring { fill: none; stroke: #fff6c8; stroke-width: .16; animation-name: bly-fx-ripple; }
+/* last piece bonus */
+.bly-fx-bonus { font-family: var(--display); font-weight: 800; font-size: .9px; fill: #fff6d0; stroke: var(--ink); stroke-width: .1; paint-order: stroke; text-anchor: middle; animation-name: bly-fx-plus; }
+/* the merged piece settles once when it appears */
+@keyframes bly-landed { 0% { transform: scale(1.06, .92); } 100% { transform: none; } }
+/* stuck: the banner dips, the tray greys, the stamp sits clear of the counts */
+.bly-banner:has(.bly-stamp) .bly-banner-shelf { filter: grayscale(1) opacity(.55); transition: filter .4s; }
+.bly-banner:has(.bly-stamp) { animation: bly-dip .3s var(--in-out-sine) 1; }
+@keyframes bly-dip { 0%, 100% { transform: none; } 40% { transform: translateY(4px) rotate(-1deg); } }
+.bly-banner .bly-stamp { right: 10px; bottom: auto; top: 52%; }
+@keyframes bly-stamp-in { 0% { transform: rotate(-9deg) scale(1.6); opacity: 0; } 18% { transform: rotate(-12deg) scale(1.65); opacity: .4; } 62% { transform: rotate(-9deg) scale(.9); opacity: 1; } 100% { transform: rotate(-9deg) scale(1); } }
+/* scenes: no app chrome over the filmstrips */
+body.bly-noparty .fixed.right-3.top-3 { display: none; }

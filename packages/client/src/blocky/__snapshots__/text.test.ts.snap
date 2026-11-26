@@ -1,0 +1,98 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`blocky status line > statusLine covers every state 1`] = `
+{
+  "ended": {
+    "avatar": null,
+    "guild": "tide",
+    "sub": "You win!",
+    "text": "Night falls on the isles",
+    "thinking": false,
+  },
+  "heldMouse": {
+    "avatar": null,
+    "guild": "sun",
+    "step": 1,
+    "sub": "Drag it onto a glowing corner · R turns, F flips",
+    "text": "Your turn · place a Sun piece",
+    "thinking": false,
+  },
+  "heldTouch": {
+    "avatar": null,
+    "guild": "sun",
+    "step": 1,
+    "sub": "Drag it onto a glowing corner, or tap a corner",
+    "text": "Your turn · place a Sun piece",
+    "thinking": false,
+  },
+  "myTurnIdleMouse": {
+    "avatar": null,
+    "guild": "sun",
+    "step": 0,
+    "sub": "Click a piece (big ones first!)",
+    "text": "Your turn · place a Sun piece",
+    "thinking": false,
+  },
+  "myTurnIdleTouch": {
+    "avatar": null,
+    "guild": "sun",
+    "step": 0,
+    "sub": "Tap a piece (big ones first!)",
+    "text": "Your turn · place a Sun piece",
+    "thinking": false,
+  },
+  "offTurn": {
+    "avatar": 5,
+    "guild": "sun",
+    "sub": "Sun to build · Pick a piece to plan your next move",
+    "text": "Moss is thinking…",
+    "thinking": true,
+  },
+  "offTurnHeld": {
+    "avatar": 5,
+    "guild": "sun",
+    "sub": "Sun to build · Plan ahead: turn your piece while you wait",
+    "text": "Moss is thinking…",
+    "thinking": true,
+  },
+  "pendingMouse": {
+    "avatar": null,
+    "guild": "sun",
+    "step": 2,
+    "sub": "Click ✓ or press Enter to build it there, or drag it to adjust",
+    "text": "Your turn · place a Sun piece",
+    "thinking": false,
+  },
+  "pendingTouch": {
+    "avatar": null,
+    "guild": "sun",
+    "step": 2,
+    "sub": "Tap ✓ to build it there, or drag it to adjust",
+    "text": "Your turn · place a Sun piece",
+    "thinking": false,
+  },
+  "sharedMine": {
+    "avatar": null,
+    "guild": "grove",
+    "step": 0,
+    "sub": "Tap a piece (big ones first!)",
+    "text": "Your turn · place a Grove piece for the shared guild",
+    "thinking": false,
+  },
+  "twoPlayerClassic": {
+    "avatar": null,
+    "guild": "tide",
+    "step": 0,
+    "sub": "Tap a piece (big ones first!)",
+    "text": "Your turn · place a Tide piece",
+    "thinking": false,
+  },
+  "watching": {
+    "avatar": 3,
+    "guild": "tide",
+    "sub": "Tide to build",
+    "text": "Bo is building",
+    "thinking": true,
+  },
+}
+`;
